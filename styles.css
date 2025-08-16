@@ -188,8 +188,11 @@ body::before {
     position: absolute;
     top: 0;
     left: 0;
+    right: 0;
+    bottom: 0;
     width: 1280px;
     height: 720px;
+    margin: auto; /* Center within the game-container */
     background: #2a2a2a;
     color: #ffffff;
     display: flex;
