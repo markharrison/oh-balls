@@ -182,3 +182,87 @@ body::before {
 #gameCanvas {
     animation: canvas-glow 4s ease-in-out infinite;
 }
+
+/* Settings HTML Overlay */
+.settings-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1280px;
+    height: 720px;
+    background: #2a2a2a;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    border-radius: 12px;
+    border: 2px solid rgba(100, 181, 246, 0.4);
+    box-shadow: 
+        0 10px 40px rgba(13, 71, 161, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05),
+        0 0 60px rgba(33, 150, 243, 0.2);
+}
+
+.settings-content {
+    text-align: center;
+    width: 100%;
+}
+
+.settings-title {
+    font-size: 48px;
+    font-weight: bold;
+    font-family: Arial, sans-serif;
+    margin-bottom: 40px;
+    margin-top: 0;
+}
+
+.settings-options {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+}
+
+.setting-option {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 400px;
+    height: 60px;
+    padding: 0 20px;
+    background: transparent;
+    border-radius: 5px;
+    transition: background-color 0.2s;
+}
+
+.setting-option.selected {
+    background: #444444;
+}
+
+.option-label {
+    font-size: 32px;
+    font-family: Arial, sans-serif;
+    color: #cccccc;
+}
+
+.setting-option.selected .option-label {
+    color: #00ff00;
+}
+
+.option-value {
+    font-size: 32px;
+    font-family: Arial, sans-serif;
+    color: #cccccc;
+}
+
+.setting-option.selected .option-value {
+    color: #00ff00;
+}
+
+.settings-instructions {
+    margin-top: 60px;
+    font-size: 20px;
+    font-family: Arial, sans-serif;
+    color: #888888;
+}

@@ -25,10 +25,13 @@ export class SceneSettings extends SceneBase {
 
     enter() {
         // Called when the scene becomes active
+        this.showSettingsOverlay();
+        this.updateSelectedOption();
     }
 
     exit() {
         // Called when the scene is deactivated
+        this.hideSettingsOverlay();
     }
 
     update(dt) {
@@ -61,66 +64,10 @@ export class SceneSettings extends SceneBase {
         const ballInfoElement = document.getElementById('currentBallSize');
         ballInfoElement.textContent = 'Harrison Digital - Settings';
 
+        // Clear canvas with dark background - overlay will handle the UI
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
-        // Dark background
         this.ctx.fillStyle = '#2a2a2a';
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-
-        // Title
-        this.ctx.font = 'bold 48px Arial';
-        this.ctx.textAlign = 'center';
-        this.ctx.textBaseline = 'middle';
-        this.ctx.fillStyle = '#ffffff';
-        this.ctx.fillText('SETTINGS', this.canvas.width / 2, 120);
-
-        // Configuration options
-        const startY = 220;
-        const lineHeight = 80;
-
-        this.options.forEach((option, index) => {
-            const y = startY + index * lineHeight;
-            const isSelected = index === this.selectedOption;
-
-            // Highlight selected option
-            if (isSelected) {
-                this.ctx.fillStyle = '#444444';
-                this.ctx.fillRect(this.canvas.width / 2 - 200, y - 30, 400, 60);
-            }
-
-            // Option text
-            this.ctx.font = '32px Arial';
-            this.ctx.fillStyle = isSelected ? '#00ff00' : '#cccccc';
-            this.ctx.textAlign = 'left';
-            this.ctx.fillText(option + ':', this.canvas.width / 2 - 180, y);
-
-            // Value text
-            this.ctx.textAlign = 'right';
-            let value = '';
-            switch (option) {
-                case 'Sound':
-                    value = this.config.soundEnabled ? 'ON' : 'OFF';
-                    break;
-                case 'Difficulty':
-                    value = this.config.difficulty;
-                    break;
-                case 'Graphics':
-                    value = this.config.graphics;
-                    break;
-                case 'Back':
-                    value = '';
-                    break;
-            }
-            if (value) {
-                this.ctx.fillText(value, this.canvas.width / 2 + 180, y);
-            }
-        });
-
-        // Instructions
-        this.ctx.font = '20px Arial';
-        this.ctx.fillStyle = '#888888';
-        this.ctx.textAlign = 'center';
-        this.ctx.fillText('↑ ↓ Navigate • ENTER Select • ESC Back', this.canvas.width / 2, this.canvas.height - 60);
     }
 
     toggleCurrentOption() {
@@ -142,15 +89,61 @@ export class SceneSettings extends SceneBase {
                 // Return to previous scene - handled by SceneManager
                 break;
         }
+        this.updateConfigValues();
+    }
+
+    showSettingsOverlay() {
+        const overlay = document.getElementById('settingsOverlay');
+        if (overlay) {
+            overlay.style.display = 'flex';
+            this.updateConfigValues();
+        }
+    }
+
+    hideSettingsOverlay() {
+        const overlay = document.getElementById('settingsOverlay');
+        if (overlay) {
+            overlay.style.display = 'none';
+        }
+    }
+
+    updateConfigValues() {
+        const soundElement = document.getElementById('soundValue');
+        const difficultyElement = document.getElementById('difficultyValue');
+        const graphicsElement = document.getElementById('graphicsValue');
+
+        if (soundElement) {
+            soundElement.textContent = this.config.soundEnabled ? 'ON' : 'OFF';
+        }
+        if (difficultyElement) {
+            difficultyElement.textContent = this.config.difficulty;
+        }
+        if (graphicsElement) {
+            graphicsElement.textContent = this.config.graphics;
+        }
+    }
+
+    updateSelectedOption() {
+        // Remove previous selection
+        const options = document.querySelectorAll('.setting-option');
+        options.forEach(option => option.classList.remove('selected'));
+
+        // Add selection to current option
+        const selectedOption = document.querySelector(`[data-option="${this.selectedOption}"]`);
+        if (selectedOption) {
+            selectedOption.classList.add('selected');
+        }
     }
 
     inputKeyPressed(code, debug) {
         switch (code) {
             case 'ArrowUp':
                 this.selectedOption = (this.selectedOption - 1 + this.options.length) % this.options.length;
+                this.updateSelectedOption();
                 break;
             case 'ArrowDown':
                 this.selectedOption = (this.selectedOption + 1) % this.options.length;
+                this.updateSelectedOption();
                 break;
             case 'Enter':
                 this.toggleCurrentOption();

@@ -15,6 +15,35 @@
             </div>
         </div>
         <canvas id="gameCanvas" width="1280" height="720"></canvas>
+        
+        <!-- Settings HTML Overlay -->
+        <div id="settingsOverlay" class="settings-overlay" style="display: none;">
+            <div class="settings-content">
+                <h1 class="settings-title">SETTINGS</h1>
+                <div class="settings-options">
+                    <div class="setting-option" data-option="0">
+                        <span class="option-label">Sound:</span>
+                        <span class="option-value" id="soundValue">ON</span>
+                    </div>
+                    <div class="setting-option" data-option="1">
+                        <span class="option-label">Difficulty:</span>
+                        <span class="option-value" id="difficultyValue">Medium</span>
+                    </div>
+                    <div class="setting-option" data-option="2">
+                        <span class="option-label">Graphics:</span>
+                        <span class="option-value" id="graphicsValue">High</span>
+                    </div>
+                    <div class="setting-option" data-option="3">
+                        <span class="option-label">Back:</span>
+                        <span class="option-value"></span>
+                    </div>
+                </div>
+                <div class="settings-instructions">
+                    ↑ ↓ Navigate • ENTER Select • ESC Back
+                </div>
+            </div>
+        </div>
+        
         <div class="ui-footer">
             <div class="ball-info">
                 <span id="currentBallSize">Next Ball: Size ?</span>
