@@ -2,9 +2,7 @@ import { SceneBase } from './scenebase.js';
 
 export class SceneSplash extends SceneBase {
     constructor(canvas, manager) {
-        super(manager);
-        this.canvas = canvas;
-        this.ctx = canvas.getContext('2d');
+        super(canvas, manager);
         this.inputHandler = null;
 
         this.clock = {
@@ -37,7 +35,7 @@ export class SceneSplash extends SceneBase {
         // Check for auto-transition
         if (this.shouldTransition()) {
             this.hasTransitioned = true;
-            return 'menu'; // Return the target scene key
+            return SceneBase.GameScenes.mainmenu;
         }
         return null; // Stay in this scene
     }

@@ -8,13 +8,16 @@
 </head>
 <body>
     <div class="game-container">
-        <div class="ui-header">
+        <div class="ui-header"  >
             <h1>OH BALLS</h1>
-            <div class="controls">
-                <span>← → Move • Space Drop</span>
-            </div>
+
         </div>
-        <canvas id="gameCanvas" width="1280" height="720"></canvas>
+    <canvas id="idCanvas" class="canvas" width="1280" height="720""></canvas>
+
+        <div id="idCanvasOverlay" class="canvas canvas-overlay" style="display: none;">
+                 ** Temporary Canvas Content ** 
+         </div>
+
         <div class="ui-footer">
             <div class="ball-info">
                 <span id="currentBallSize">Next Ball: Size ?</span>
@@ -27,7 +30,7 @@
     <script type="module" src="js/screenmanager.js"></script>
     <script type="module" src="js/physics.js"></script>
     <script type="module" src="js/scenesplash.js"></script>
-    <script type="module" src="js/scenemenu.js"></script>
+    <script type="module" src="js/scenemainmenu.js"></script>
     <script type="module" src="js/scenesettings.js"></script>
     <script type="module" src="js/sceneballsx.js"></script>
     <script type="module" src="js/ball.js"></script>

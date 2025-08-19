@@ -2,10 +2,9 @@ import { SceneBase } from './scenebase.js';
 
 export class SceneSettings extends SceneBase {
     constructor(canvas, manager) {
-        super(manager);
-        this.canvas = canvas;
-        this.ctx = canvas.getContext('2d');
-        this.inputHandler = null;
+        super(canvas, manager);
+
+        this.returnToMenu = false;
 
         this.clock = {
             deltaTime: 0,
@@ -24,11 +23,160 @@ export class SceneSettings extends SceneBase {
     }
 
     enter() {
-        // Called when the scene becomes active
+        this.showSettingsOverlay();
     }
 
     exit() {
-        // Called when the scene is deactivated
+        this.hideSettingsOverlay();
+    }
+
+    insertHTMLOverlayContent() {
+        const overlay = document.getElementById('idCanvasOverlay');
+        if (!overlay) return;
+
+        overlay.innerHTML = `
+            <div class="settings-ui">
+                <div class="settings-title">SETTINGS</div>
+                <div class="settings-row settings-sound">
+                    <span class="settings-label">Sound:</span>
+                    <span class="settings-value">
+                        <select id="soundSelect" class="settings-select">
+                            <option value="true" ${this.config.soundEnabled ? 'selected' : ''}>On</option>
+                            <option value="false" ${!this.config.soundEnabled ? 'selected' : ''}>Off</option>
+                        </select>
+                    </span>
+                </div>
+                <div class="settings-row">
+                    <span class="settings-label">Difficulty:</span>
+                    <span class="settings-value">
+                        <select id="difficultySelect" class="settings-select">
+                            <option value="Easy" ${this.config.difficulty === 'Easy' ? 'selected' : ''}>Easy</option>
+                            <option value="Medium" ${this.config.difficulty === 'Medium' ? 'selected' : ''}>Medium</option>
+                            <option value="Hard" ${this.config.difficulty === 'Hard' ? 'selected' : ''}>Hard</option>
+                        </select>
+                    </span>
+                </div>
+                <div class="settings-row">
+                    <span class="settings-label">Graphics:</span>
+                    <span class="settings-value">
+                        <select id="graphicsSelect" class="settings-select">
+                            <option value="Low" ${this.config.graphics === 'Low' ? 'selected' : ''}>Low</option>
+                            <option value="Medium" ${this.config.graphics === 'Medium' ? 'selected' : ''}>Medium</option>
+                            <option value="High" ${this.config.graphics === 'High' ? 'selected' : ''}>High</option>
+                        </select>
+                    </span>
+                </div>
+<!--
+                <div class="settings-row settings-back">
+                    <span class="settings-label">Back:</span>
+                    <span class="settings-value">
+                        <a id="backLink" class="settings-back-link" href="#">Back</a>
+                    </span>
+                </div>
+                -->
+                <div class="settings-footer">↑ ↓ Navigate • ENTER Select • ESC Back</div>
+            </div>
+        `;
+
+        // Add event listeners for controls
+        // Use single block to avoid redeclaration errors
+        {
+            let soundSelect = document.getElementById('soundSelect');
+            if (soundSelect) {
+                soundSelect.onchange = (e) => {
+                    this.config.soundEnabled = e.target.value === 'true';
+                };
+            }
+            let difficultySelect = document.getElementById('difficultySelect');
+            if (difficultySelect) {
+                difficultySelect.onchange = (e) => {
+                    this.config.difficulty = e.target.value;
+                };
+            }
+            let graphicsSelect = document.getElementById('graphicsSelect');
+            if (graphicsSelect) {
+                graphicsSelect.onchange = (e) => {
+                    this.config.graphics = e.target.value;
+                };
+            }
+            let backLink = document.getElementById('backLink');
+            if (backLink) {
+                backLink.onclick = (e) => {
+                    e.preventDefault();
+                    this.hideSettingsOverlay();
+                    if (this.manager) this.manager.popScene();
+                };
+            }
+        }
+
+        // Add event listeners for controls
+        const soundBtn = document.getElementById('soundToggleBtn');
+        if (soundBtn) {
+            soundBtn.onclick = () => {
+                this.config.soundEnabled = !this.config.soundEnabled;
+                this.insertHTMLOverlayContent();
+            };
+        }
+        const difficultySelect = document.getElementById('difficultySelect');
+        if (difficultySelect) {
+            difficultySelect.onchange = (e) => {
+                this.config.difficulty = e.target.value;
+            };
+        }
+        const graphicsSelect = document.getElementById('graphicsSelect');
+        if (graphicsSelect) {
+            graphicsSelect.onchange = (e) => {
+                this.config.graphics = e.target.value;
+            };
+        }
+        const backBtn = document.getElementById('backBtn');
+        if (backBtn) {
+            backBtn.onclick = () => {
+                this.hideSettingsOverlay();
+                if (this.manager) this.manager.popScene();
+            };
+        }
+    }
+
+    updateCanvasOverlayPosition() {
+        const canvas = document.getElementById('idCanvas');
+        const overlay = document.getElementById('idCanvasOverlay');
+        if (!canvas || !overlay) return;
+        const rect = canvas.getBoundingClientRect();
+        overlay.style.position = 'absolute';
+        overlay.style.left = rect.left + window.scrollX + 'px';
+        overlay.style.top = rect.top + window.scrollY + 'px';
+        overlay.style.width = rect.width + 'px';
+        overlay.style.height = rect.height + 'px';
+        overlay.style.pointerEvents = 'auto';
+        overlay.style.zIndex = '100';
+    }
+
+    showSettingsOverlay() {
+        const overlay = document.getElementById('idCanvasOverlay');
+        if (!overlay) return;
+        this.insertHTMLOverlayContent();
+        this.updateCanvasOverlayPosition();
+        overlay.style.display = 'block';
+        // Add resize listener to keep overlay in sync
+        if (!this._resizeHandler) {
+            this._resizeHandler = () => {
+                if (overlay.style.display === 'block') {
+                    this.updateCanvasOverlayPosition();
+                }
+            };
+            window.addEventListener('resize', this._resizeHandler);
+        }
+    }
+
+    hideSettingsOverlay() {
+        const overlay = document.getElementById('idCanvasOverlay');
+        overlay.style.display = 'none';
+        // Remove resize listener
+        if (this._resizeHandler) {
+            window.removeEventListener('resize', this._resizeHandler);
+            this._resizeHandler = null;
+        }
     }
 
     update(dt) {
@@ -38,125 +186,29 @@ export class SceneSettings extends SceneBase {
         this.clock.currentTime = currentTime;
         this.clock.deltaTime = this.clock.currentTime - lastTime;
 
+        if (this.returnToMenu) {
+            this.hideSettingsOverlay();
+            return SceneBase.GameScenes.mainmenu;
+        }
+
         return null; // No automatic transitions - handled by input
     }
 
-    render(ctx) {
-        this.renderScene();
-    }
+    render(ctx) {}
 
     getSceneStateHtml() {
         const vHtml = `
             <strong>Scene: Settings</strong><br>
-            Sound: ${this.config.soundEnabled ? 'On' : 'Off'}<br>
-            Difficulty: ${this.config.difficulty}<br>
-            Graphics: ${this.config.graphics}
         `;
         return vHtml;
     }
 
     setupEventHandlers() {}
 
-    renderScene() {
-        const ballInfoElement = document.getElementById('currentBallSize');
-        ballInfoElement.textContent = 'Harrison Digital - Settings';
-
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
-        // Dark background
-        this.ctx.fillStyle = '#2a2a2a';
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-
-        // Title
-        this.ctx.font = 'bold 48px Arial';
-        this.ctx.textAlign = 'center';
-        this.ctx.textBaseline = 'middle';
-        this.ctx.fillStyle = '#ffffff';
-        this.ctx.fillText('SETTINGS', this.canvas.width / 2, 120);
-
-        // Configuration options
-        const startY = 220;
-        const lineHeight = 80;
-
-        this.options.forEach((option, index) => {
-            const y = startY + index * lineHeight;
-            const isSelected = index === this.selectedOption;
-
-            // Highlight selected option
-            if (isSelected) {
-                this.ctx.fillStyle = '#444444';
-                this.ctx.fillRect(this.canvas.width / 2 - 200, y - 30, 400, 60);
-            }
-
-            // Option text
-            this.ctx.font = '32px Arial';
-            this.ctx.fillStyle = isSelected ? '#00ff00' : '#cccccc';
-            this.ctx.textAlign = 'left';
-            this.ctx.fillText(option + ':', this.canvas.width / 2 - 180, y);
-
-            // Value text
-            this.ctx.textAlign = 'right';
-            let value = '';
-            switch (option) {
-                case 'Sound':
-                    value = this.config.soundEnabled ? 'ON' : 'OFF';
-                    break;
-                case 'Difficulty':
-                    value = this.config.difficulty;
-                    break;
-                case 'Graphics':
-                    value = this.config.graphics;
-                    break;
-                case 'Back':
-                    value = '';
-                    break;
-            }
-            if (value) {
-                this.ctx.fillText(value, this.canvas.width / 2 + 180, y);
-            }
-        });
-
-        // Instructions
-        this.ctx.font = '20px Arial';
-        this.ctx.fillStyle = '#888888';
-        this.ctx.textAlign = 'center';
-        this.ctx.fillText('↑ ↓ Navigate • ENTER Select • ESC Back', this.canvas.width / 2, this.canvas.height - 60);
-    }
-
-    toggleCurrentOption() {
-        switch (this.selectedOption) {
-            case 0: // Sound
-                this.config.soundEnabled = !this.config.soundEnabled;
-                break;
-            case 1: // Difficulty
-                const difficulties = ['Easy', 'Medium', 'Hard'];
-                const currentIndex = difficulties.indexOf(this.config.difficulty);
-                this.config.difficulty = difficulties[(currentIndex + 1) % difficulties.length];
-                break;
-            case 2: // Graphics
-                const graphics = ['Low', 'Medium', 'High'];
-                const currentGraphicsIndex = graphics.indexOf(this.config.graphics);
-                this.config.graphics = graphics[(currentGraphicsIndex + 1) % graphics.length];
-                break;
-            case 3: // Back
-                // Return to previous scene - handled by SceneManager
-                break;
-        }
-    }
-
-    inputKeyPressed(code, debug) {
+    inputKeyPressed(code) {
         switch (code) {
-            case 'ArrowUp':
-                this.selectedOption = (this.selectedOption - 1 + this.options.length) % this.options.length;
-                break;
-            case 'ArrowDown':
-                this.selectedOption = (this.selectedOption + 1) % this.options.length;
-                break;
-            case 'Enter':
-                this.toggleCurrentOption();
-                break;
             case 'Escape':
-                // Return to previous scene - handled by SceneManager
+                this.returnToMenu = true;
                 break;
             default:
                 break;

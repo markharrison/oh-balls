@@ -3,7 +3,7 @@ import { InputHandler } from './input.js';
 
 class Main {
     constructor() {
-        this.canvas = document.getElementById('gameCanvas');
+        this.canvas = document.getElementById('idCanvas');
         this.running = false;
 
         this.inputHandler = new InputHandler();

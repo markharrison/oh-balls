@@ -6,9 +6,7 @@ import { fixedTimeStep } from './constants.js';
 
 export class SceneBallsX extends SceneBase {
     constructor(canvas, manager) {
-        super(manager);
-        this.canvas = canvas;
-        this.ctx = canvas.getContext('2d');
+        super(canvas, manager);
         this.inputHandler = null;
 
         this.ballManager = new BallManager(this);

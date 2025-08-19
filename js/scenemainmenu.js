@@ -1,10 +1,8 @@
 import { SceneBase } from './scenebase.js';
 
-export class SceneMenu extends SceneBase {
+export class SceneMainmenu extends SceneBase {
     constructor(canvas, manager) {
-        super(manager);
-        this.canvas = canvas;
-        this.ctx = canvas.getContext('2d');
+        super(canvas, manager);
         this.inputHandler = null;
 
         this.clock = {

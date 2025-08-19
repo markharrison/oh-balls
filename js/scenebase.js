@@ -1,5 +1,13 @@
 export class SceneBase {
-    constructor(manager) {
+    static GameScenes = Object.freeze({
+        splash: 'splash',
+        mainmenu: 'mainmenu',
+        ballsX: 'ballsX',
+        settings: 'settings',
+    });
+    constructor(canvas, manager) {
+        this.canvas = canvas;
+        this.ctx = canvas.getContext('2d');
         this.manager = manager; // Optional: reference to SceneManager if needed
     }
 

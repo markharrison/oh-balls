@@ -20,16 +20,20 @@ export class InputHandler {
 
     setupEventListeners() {
         document.addEventListener('keyup', (event) => this.handleKeyUp(event));
-        document.addEventListener('keydown', (event) => {
-            // Prevent default for arrow keys, space, enter, and escape
-            if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Space', 'Enter', 'Escape'].includes(event.code)) {
-                event.preventDefault();
-            }
-            this.handleKeyDown(event);
-        });
+        document.addEventListener('keydown', (event) => this.handleKeyDown(event));
     }
 
     handleKeyDown(event) {
+        // Always allow Escape key, even if overlay is visible
+        const overlay = document.getElementById('idCanvasOverlay');
+        if (overlay && overlay.style.display !== 'none' && event.code !== 'Escape') {
+            return;
+        }
+
+        if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Space', 'Enter', 'Escape'].includes(event.code)) {
+            event.preventDefault();
+        }
+
         // Arrow keys: just set state, repeat handled in getInput
         if (event.code === 'ArrowLeft' || event.code === 'ArrowRight') {
             this.keyState[event.code] = true;
