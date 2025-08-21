@@ -1,11 +1,11 @@
 import { DiagnosticPanel } from './diagnostics.js';
 import { SceneBase } from './scenebase.js';
 
-// Import scene classes after SceneBase is available
 import { SceneBallsX } from './sceneballsx.js';
 import { SceneSplash } from './scenesplash.js';
 import { SceneMainmenu } from './scenemainmenu.js';
 import { SceneSettings } from './scenesettings.js';
+import { SceneSettingsAudio } from './scenesettings.js';
 
 export class SceneManager {
     constructor(canvas) {
@@ -24,9 +24,6 @@ export class SceneManager {
         this.currentSceneKey = null;
         this.currentScene = null;
 
-        // Initialize scene instances
-        this.scenes = [];
-
         this.setCurrentScene(SceneBase.GameScenes.splash);
     }
 
@@ -34,31 +31,30 @@ export class SceneManager {
         if (this.currentScene) {
             this.currentScene.exit();
             this.currentScene = null;
-            this.scenes[this.currentSceneKey] = null;
         }
 
         switch (sceneKey) {
             case SceneBase.GameScenes.splash:
-                this.scenes[sceneKey] = new SceneSplash(this.canvas, this);
+                this.currentScene = new SceneSplash(this.canvas, this);
                 break;
             case SceneBase.GameScenes.mainmenu:
-                this.scenes[sceneKey] = new SceneMainmenu(this.canvas, this);
+                this.currentScene = new SceneMainmenu(this.canvas, this);
                 break;
             case SceneBase.GameScenes.ballsX:
-                this.scenes[sceneKey] = new SceneBallsX(this.canvas, this);
+                this.currentScene = new SceneBallsX(this.canvas, this);
                 break;
             case SceneBase.GameScenes.settings:
-                this.scenes[sceneKey] = new SceneSettings(this.canvas, this);
+                this.currentScene = new SceneSettings(this.canvas, this);
+                break;
+            case SceneBase.GameScenes.settingsaudio:
+                this.currentScene = new SceneSettingsAudio(this.canvas, this);
                 break;
             default:
                 break;
         }
 
-        if (this.scenes[sceneKey]) {
-            this.currentSceneKey = sceneKey;
-            this.currentScene = this.scenes[sceneKey];
-            this.currentScene.enter();
-        }
+        this.currentSceneKey = sceneKey;
+        this.currentScene.enter();
     }
 
     registerInputHandler(inputHandler) {
@@ -76,25 +72,7 @@ export class SceneManager {
     getSceneStateHtml() {
         let vHtml = '';
 
-        switch (this.currentSceneKey) {
-            case SceneBase.GameScenes.splash:
-                vHtml = this.scenes.splash.getSceneStateHtml();
-                break;
-            case SceneBase.GameScenes.mainmenu:
-                vHtml = this.scenes.mainmenu.getSceneStateHtml();
-                break;
-            case SceneBase.GameScenes.main:
-                vHtml = this.getSceneMainStateHtml();
-                break;
-            case SceneBase.GameScenes.ballsX:
-                vHtml = this.scenes.ballsX.getSceneStateHtml();
-                break;
-            case SceneBase.GameScenes.settings:
-                vHtml = this.scenes.settings.getSceneStateHtml();
-                break;
-            default:
-                break;
-        }
+        vHtml = this.currentScene.getSceneStateHtml();
 
         return vHtml;
     }
@@ -102,12 +80,7 @@ export class SceneManager {
     setupEventHandlers() {}
 
     destroy() {
-        Object.values(this.scenes).forEach((scene) => {
-            if (scene.exit) {
-                scene.exit();
-            }
-        });
-        this.scenes = null;
+        this.currentScene.exit();
         this.currentScene = null;
         this.diagnosticsPanel = null;
     }
@@ -115,75 +88,18 @@ export class SceneManager {
     renderSceneMain() {
         const ballInfoElement = document.getElementById('currentBallSize');
         ballInfoElement.textContent = 'Harrison Digital - Scene Manager';
-
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
-        this.ctx.fillStyle = '#777777';
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-
-        const text = 'Scene Manager';
-        this.ctx.font = '24px Arial';
-        this.ctx.textAlign = 'center';
-        this.ctx.textBaseline = 'middle';
-        this.ctx.fillStyle = '#fff';
-        this.ctx.fillText(text, this.canvas.width / 2, this.canvas.height / 2);
-
-        // Get all bodies and render them
     }
 
-    inputKeyPressedSplash(code) {
-        // No manual input - auto-transition handles this
-    }
-
-    inputKeyPressedMainmenu(code) {
-        switch (code) {
-            case 'ArrowUp':
-            case 'ArrowDown':
-                this.scenes.mainmenu.inputKeyPressed(code, false);
-                break;
-            case 'Enter':
-                // Handle menu selection
-                if (this.scenes.mainmenu.selectedOption === 0) {
-                    // Start Game
-                    this.setCurrentScene(SceneBase.GameScenes.ballsX);
-                } else if (this.scenes.mainmenu.selectedOption === 1) {
-                    // Settings
-                    this.setCurrentScene(SceneBase.GameScenes.settings);
-                }
-                break;
-            default:
-                break;
-        }
-    }
-
-    inputKeyPressed(code) {
+    inputKeyPressed(comboId) {
         let debug = this.diagnosticsPanel.enabled;
 
-        switch (code) {
-            case 'KeyD':
+        switch (comboId) {
+            case 'Control+KeyD':
                 this.diagnosticsPanel.toggle();
                 break;
-            default: {
-                switch (this.currentSceneKey) {
-                    case SceneBase.GameScenes.splash:
-                        this.inputKeyPressedSplash(code);
-                        break;
-                    case SceneBase.GameScenes.mainmenu:
-                        this.inputKeyPressedMainmenu(code);
-                        break;
-                    case SceneBase.GameScenes.main:
-                        this.inputKeyPressedMain(code);
-                        break;
-                    case SceneBase.GameScenes.ballsX:
-                        this.scenes.ballsX.inputKeyPressed(code, debug);
-                        break;
-                    case SceneBase.GameScenes.settings:
-                        this.scenes.settings.inputKeyPressed(code);
-                        break;
-                    default:
-                        break;
-                }
-            }
+            default:
+                this.currentScene.inputKeyPressed(comboId);
+                break;
         }
     }
 

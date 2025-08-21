@@ -5,6 +5,7 @@ class Main {
     constructor() {
         this.canvas = document.getElementById('idCanvas');
         this.running = false;
+        this.rafId = null;
 
         this.inputHandler = new InputHandler();
 
@@ -15,9 +16,12 @@ class Main {
     gameLoop() {
         if (!this.running) return;
 
-        this.sceneManager.updateFrame();
+        // guard against sceneManager being cleared during teardown
+        if (this.sceneManager && typeof this.sceneManager.updateFrame === 'function') {
+            this.sceneManager.updateFrame();
+        }
 
-        requestAnimationFrame(() => this.gameLoop());
+        this.rafId = requestAnimationFrame(() => this.gameLoop());
     }
 
     start() {
@@ -28,6 +32,13 @@ class Main {
     }
 
     destroy() {
+        // stop the loop and cancel any pending animation frame
+        this.running = false;
+        if (this.rafId) {
+            cancelAnimationFrame(this.rafId);
+            this.rafId = null;
+        }
+
         this.sceneManager = null;
         this.inputHandler = null;
     }

@@ -3,104 +3,88 @@ import { SceneBase } from './scenebase.js';
 export class SceneMainmenu extends SceneBase {
     constructor(canvas, manager) {
         super(canvas, manager);
-        this.inputHandler = null;
-
-        this.clock = {
-            deltaTime: 0,
-            currentTime: 0,
-        };
 
         this.selectedOption = 0;
-        this.options = ['Start Game', 'Settings'];
+        this.nextScene = null;
+
+        this.menuOptions = ['Start Game', 'Settings'];
+        this.menuContainerId = 'mainmenuButtons';
     }
 
     enter() {
-        // Called when the scene becomes active
+        this.showOverlay();
+
+        const footerElement = document.getElementById('idFooterInfo');
+        if (footerElement) {
+            footerElement.textContent = 'Harrison Digital - Main Menu';
+        }
     }
 
     exit() {
-        // Called when the scene is deactivated
+        this.hideOverlay();
+    }
+
+    setNextScene(sel) {
+        if (sel === 1) {
+            this.nextScene = SceneBase.GameScenes.settings;
+        } else if (sel === 0) {
+            this.nextScene = SceneBase.GameScenes.ballsX;
+        }
+    }
+
+    insertHTMLOverlayContent() {
+        const overlay = document.getElementById('idCanvasOverlay');
+        if (!overlay) return;
+        overlay.innerHTML = `
+                <div class="mainmenu-ui">
+                    <div class="menu-panel">
+                        <div id="mainmenuButtons" class="mainmenu-buttons"></div>
+                        <div class="settings-footer">↑ ↓ Navigate • ENTER to select</div>
+                    </div>
+                    <div id="menuDetailPanel" class="detail-panel" >
+                        Hello
+                    </div>
+                </div>
+            `;
+
+        SceneBase.createMenuButtons('Main Menu', this.menuContainerId, this.menuOptions, this.selectedOption, (idx, opt) => {
+            this.setNextScene(idx);
+        });
     }
 
     update(dt) {
-        // Update timing
-        const currentTime = performance.now();
-        const lastTime = this.clock.currentTime;
-        this.clock.currentTime = currentTime;
-        this.clock.deltaTime = this.clock.currentTime - lastTime;
-
-        return null; // No automatic transitions - handled by input
+        return this.nextScene;
     }
 
-    render(ctx) {
-        this.renderScene();
-    }
+    render(ctx) {}
 
     getSceneStateHtml() {
         const vHtml = `
             <strong>Scene: Menu</strong><br>
-            Selected: ${this.options[this.selectedOption]}
         `;
         return vHtml;
     }
 
     setupEventHandlers() {}
 
-    renderScene() {
-        const ballInfoElement = document.getElementById('currentBallSize');
-        ballInfoElement.textContent = 'Harrison Digital - Main Menu';
-
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
-        // Dark background
-        this.ctx.fillStyle = '#2a2a2a';
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-
-        // Title
-        this.ctx.font = 'bold 72px Arial';
-        this.ctx.textAlign = 'center';
-        this.ctx.textBaseline = 'middle';
-        this.ctx.fillStyle = '#ffffff';
-        this.ctx.fillText('OH BALLS', this.canvas.width / 2, 200);
-
-        // Menu options
-        const startY = 350;
-        const lineHeight = 80;
-
-        this.options.forEach((option, index) => {
-            const y = startY + index * lineHeight;
-            const isSelected = index === this.selectedOption;
-
-            // Highlight selected option
-            if (isSelected) {
-                this.ctx.fillStyle = '#444444';
-                this.ctx.fillRect(this.canvas.width / 2 - 150, y - 30, 300, 60);
-            }
-
-            // Option text
-            this.ctx.font = '36px Arial';
-            this.ctx.fillStyle = isSelected ? '#00ff00' : '#cccccc';
-            this.ctx.textAlign = 'center';
-            this.ctx.fillText(option, this.canvas.width / 2, y);
-        });
-
-        // Instructions
-        this.ctx.font = '20px Arial';
-        this.ctx.fillStyle = '#888888';
-        this.ctx.textAlign = 'center';
-        this.ctx.fillText('↑ ↓ Navigate • ENTER Select', this.canvas.width / 2, this.canvas.height - 60);
-    }
-
-    inputKeyPressed(code, debug) {
-        switch (code) {
+    inputKeyPressed(comboId) {
+        switch (comboId) {
             case 'ArrowUp':
-                this.selectedOption = (this.selectedOption - 1 + this.options.length) % this.options.length;
+                if (this.selectedOption > 0) {
+                    this.selectedOption = this.selectedOption - 1;
+                    SceneBase.setSelectedButton(this.menuContainerId, this.selectedOption);
+                }
                 break;
             case 'ArrowDown':
-                this.selectedOption = (this.selectedOption + 1) % this.options.length;
+                if (this.selectedOption < this.menuOptions.length - 1) {
+                    this.selectedOption = this.selectedOption + 1;
+                    SceneBase.setSelectedButton(this.menuContainerId, this.selectedOption);
+                }
                 break;
             case 'Enter':
-                // Selection is handled by SceneManager
+                this.setNextScene(this.selectedOption);
+                break;
+            case 'Escape':
                 break;
             default:
                 break;

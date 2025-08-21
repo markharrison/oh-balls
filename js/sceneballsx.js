@@ -320,8 +320,10 @@ export class SceneBallsX extends SceneBase {
     }
 
     renderScene() {
-        const ballInfoElement = document.getElementById('currentBallSize');
-        ballInfoElement.textContent = 'Harrison Digital';
+        const footerElement = document.getElementById('idFooterInfo');
+        if (footerElement) {
+            footerElement.textContent = 'Harrison Digital - Oh Balls';
+        }
 
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
@@ -350,10 +352,9 @@ export class SceneBallsX extends SceneBase {
         }
     }
 
-    inputKeyPressed(code, debug) {
-        // If exit dialog is shown, handle dialog input
+    inputKeyPressed(comboId) {
         if (this.showExitDialog) {
-            switch (code) {
+            switch (comboId) {
                 case 'ArrowLeft':
                     this.dialogSelectedOption =
                         (this.dialogSelectedOption - 1 + this.dialogOptions.length) % this.dialogOptions.length;
@@ -383,7 +384,7 @@ export class SceneBallsX extends SceneBase {
         }
 
         // Normal game input handling
-        switch (code) {
+        switch (comboId) {
             case 'ArrowLeft':
                 this.ballManager.moveCurrentBall(-1);
                 break;
@@ -400,9 +401,7 @@ export class SceneBallsX extends SceneBase {
                 this.dialogSelectedOption = 1; // Default focus on "Return"
                 break;
             case 'KeyT':
-                if (debug) {
-                    this.ballManager.testBalls();
-                }
+                this.ballManager.testBalls();
                 break;
             default:
                 break;
@@ -432,7 +431,7 @@ export class SceneBallsX extends SceneBase {
         if (this.exitToMenu) {
             console.log('Exit to menu requested, transitioning to menu scene');
             this.exitToMenu = false; // Reset the flag
-            return 'menu'; // Return the target scene key
+            return SceneBase.GameScenes.mainmenu; // Return the target scene key
         }
 
         return null; // Stay in this scene

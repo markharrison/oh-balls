@@ -3,46 +3,35 @@ import { SceneBase } from './scenebase.js';
 export class SceneSplash extends SceneBase {
     constructor(canvas, manager) {
         super(canvas, manager);
-        this.inputHandler = null;
-
-        this.clock = {
-            deltaTime: 0,
-            currentTime: 0,
-        };
 
         this.startTime = null;
-        this.displayDuration = 5000; // 5 seconds
-        this.hasTransitioned = false;
     }
 
     enter() {
-        // Called when the scene becomes active
+        this.showOverlay();
+
         this.startTime = performance.now();
-        this.hasTransitioned = false;
+        this.exitFlag = false;
+
+        const footerElement = document.getElementById('idFooterInfo');
+        if (footerElement) {
+            footerElement.textContent = 'Harrison Digital - Splash Screen';
+        }
     }
 
     exit() {
-        // Called when the scene is deactivated
+        this.hideOverlay();
     }
 
     update(dt) {
-        // Update timing
-        const currentTime = performance.now();
-        const lastTime = this.clock.currentTime;
-        this.clock.currentTime = currentTime;
-        this.clock.deltaTime = this.clock.currentTime - lastTime;
-
-        // Check for auto-transition
-        if (this.shouldTransition()) {
-            this.hasTransitioned = true;
+        if (performance.now() - this.startTime >= 5000 || this.exitFlag) {
             return SceneBase.GameScenes.mainmenu;
         }
+
         return null; // Stay in this scene
     }
 
-    render(ctx) {
-        this.renderScene();
-    }
+    render(ctx) {}
 
     getSceneStateHtml() {
         const vHtml = `
@@ -51,48 +40,32 @@ export class SceneSplash extends SceneBase {
         return vHtml;
     }
 
-    setupEventHandlers() {}
+    insertHTMLOverlayContent() {
+        const overlay = document.getElementById('idCanvasOverlay');
+        if (!overlay) return;
+        overlay.innerHTML = `
+                <div >
+                    <br /><br /><br /><br /><br />
+                    <div style="text-align: center;">
+                        <h1 style="font-size: 72px; font-weight: bold; color: #ffffff;">OH BALLS</h1>
+                        <h2 style="font-size: 32px; color: #cccccc;">Physics Game</h2>
+                        <p style="font-size: 24px; color: #999999;">Loading...</p>
+                    </div>
+                </div>
+            `;
 
-    renderScene() {
-        const ballInfoElement = document.getElementById('currentBallSize');
-        ballInfoElement.textContent = 'Harrison Digital - Splash Screen';
-
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
-        // Dark blue gradient background
-        const gradient = this.ctx.createLinearGradient(0, 0, 0, this.canvas.height);
-        gradient.addColorStop(0, '#1a1a2e');
-        gradient.addColorStop(1, '#16213e');
-        this.ctx.fillStyle = gradient;
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-
-        // Main title
-        this.ctx.font = 'bold 72px Arial';
-        this.ctx.textAlign = 'center';
-        this.ctx.textBaseline = 'middle';
-        this.ctx.fillStyle = '#ffffff';
-        this.ctx.fillText('OH BALLS', this.canvas.width / 2, this.canvas.height / 2 - 100);
-
-        // Subtitle
-        this.ctx.font = '32px Arial';
-        this.ctx.fillStyle = '#cccccc';
-        this.ctx.fillText('Physics Game', this.canvas.width / 2, this.canvas.height / 2 - 40);
-
-        // Loading message
-        this.ctx.font = '24px Arial';
-        this.ctx.fillStyle = '#999999';
-        this.ctx.fillText('Loading...', this.canvas.width / 2, this.canvas.height / 2 + 80);
+        SceneBase.createMenuButtons('Main Menu', this.menuContainerId, this.menuOptions, this.selectedOption, (idx, opt) => {
+            if (idx === 1) {
+                this.nextScene = SceneBase.GameScenes.settings;
+            } else if (idx === 0) {
+                this.nextScene = SceneBase.GameScenes.ballsX;
+            }
+        });
     }
 
-    inputKeyPressed(code, debug) {
-        // No manual input handling - auto-transition after 5 seconds
-    }
-
-    shouldTransition() {
-        return this.startTime && performance.now() - this.startTime >= this.displayDuration && !this.hasTransitioned;
-    }
-
-    markTransitioned() {
-        this.hasTransitioned = true;
+    inputKeyPressed(comboId) {
+        if (comboId === 'Escape') {
+            this.exitFlag = true;
+        }
     }
 }
