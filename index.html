@@ -1,26 +1,37 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="dark">
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Oh Balls 2 - Physics Game</title>
+        <!-- Bootstrap CSS v5.3.7 -->
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha512-oQRiWzqp1zj1DxOMZ5Nl5Lsyc4lSEWj5FZABKmUiOZGcF4c9OgbOkksQCUW/J3w1p2r+A3YPZKdIZ32Z4QRhCw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+        <!-- Project-specific styles -->
         <link rel="stylesheet" href="styles.css" />
     </head>
     <body>
-        <div class="game-container">
-            <div class="ui-header">
+        <div class="container-fluid min-vh-100 d-flex flex-column justify-content-center align-items-center p-3">
+            <!-- Title Block -->
+            <div class="ui-header text-center mb-3">
                 <h1>OH BALLS</h1>
             </div>
 
-            <canvas id="idCanvas" class="canvas" width="1280" height="720"></canvas>
+            <!-- Canvas Control Block with exact dimensions -->
+            <div class="position-relative mb-3">
+                <canvas id="idCanvas" class="canvas" width="1280" height="720"></canvas>
+                <div id="idCanvasOverlay" class="canvas canvas-overlay d-none">** Temporary Canvas Content **</div>
+            </div>
 
-            <div id="idCanvasOverlay" class="canvas canvas-overlay" style="display: none">** Temporary Canvas Content **</div>
-            <div class="ui-footer">
+            <!-- Footer Block -->
+            <div class="ui-footer text-center">
                 <div id="idFooterInfo" class="footer-info">Harrison Digital</div>
             </div>
         </div>
 
         <script src="lib/planck.min.js"></script>
+        
+        <!-- Bootstrap JS v5.3.7 -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.7/js/bootstrap.bundle.min.js" integrity="sha512-VFKV9Nwzt3Zf4vd6z/ERH6dj9+7s6jA5yJU2r1Z9e8iXHUb8dJrEYLPJCksG8gd2M2pR9m+P1wq/R8N8H9KNmA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
         <script type="module" src="js/screenmanager.js"></script>
         <script type="module" src="js/physics.js"></script>

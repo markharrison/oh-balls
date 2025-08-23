@@ -1,3 +1,7 @@
 node_modules/
 package-lock.json
 package.json
+
+# Temporary Bootstrap files (use CDN instead)
+bootstrap.min.css
+bootstrap.bundle.min.js
