@@ -1,39 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Oh Balls 2 - Physics Game</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-    <div class="game-container">
-        <div class="ui-header"  >
-            <h1>OH BALLS</h1>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Oh Balls 2 - Physics Game</title>
+        <link rel="stylesheet" href="styles.css" />
+    </head>
+    <body>
+        <div class="game-container">
+            <div class="ui-header">
+                <h1>OH BALLS</h1>
+            </div>
 
-        </div>
-        <canvas id="idCanvas" class="canvas" width="1280" height="720""></canvas>
-        <div id="idCanvasOverlay" class="canvas canvas-overlay" style="display: none;">
-                 ** Temporary Canvas Content ** 
-         </div>
-        <div class="ui-footer">
-            <div id="idFooterInfo" class="footer-info">
-                Harrison Digital 
+            <canvas id="idCanvas" class="canvas" width="1280" height="720"></canvas>
+
+            <div id="idCanvasOverlay" class="canvas canvas-overlay" style="display: none">** Temporary Canvas Content **</div>
+            <div class="ui-footer">
+                <div id="idFooterInfo" class="footer-info">Harrison Digital</div>
             </div>
         </div>
-    </div>
 
-    <script src="lib/planck.min.js"></script>
-    
-    <script type="module" src="js/screenmanager.js"></script>
-    <script type="module" src="js/physics.js"></script>
-    <script type="module" src="js/scenesplash.js"></script>
-    <script type="module" src="js/scenemainmenu.js"></script>
-    <script type="module" src="js/scenesettings.js"></script>
-    <script type="module" src="js/sceneballsx.js"></script>
-    <script type="module" src="js/ball.js"></script>
-    <script type="module" src="js/input.js"></script>
-    <script type="module" src="js/diagnostics.js"></script>
-    <script type="module" src="js/main.js"></script>
-</body>
+        <script src="lib/planck.min.js"></script>
+
+        <script type="module" src="js/screenmanager.js"></script>
+        <script type="module" src="js/physics.js"></script>
+        <script type="module" src="js/scenesplash.js"></script>
+        <script type="module" src="js/scenemainmenu.js"></script>
+        <script type="module" src="js/scenesettings.js"></script>
+        <script type="module" src="js/sceneballsx.js"></script>
+        <script type="module" src="js/ball.js"></script>
+        <script type="module" src="js/input.js"></script>
+        <script type="module" src="js/diagnostics.js"></script>
+        <script type="module" src="js/main.js"></script>
+    </body>
 </html>
