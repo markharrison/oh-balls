@@ -38,7 +38,8 @@ export class InputHandler {
         const combo = this.buildKeyId(event);
         const keyId = event.code;
 
-        const specialKeys = ['Escape', 'ArrowUp', 'ArrowDown', 'Enter', 'Control+KeyD'];
+        let specialKeys = this.sceneManager.getSpecialKeys();
+
         if (specialKeys.includes(combo)) {
             event.preventDefault();
             if (!this.keyState[keyId]) {
@@ -91,10 +92,15 @@ export class InputHandler {
     }
 
     getInput() {
-        if (this.keyState['ArrowLeft'] || this.keyState['KeyA']) {
-            this.sceneManager.inputKeyPressed('ArrowLeft');
-        } else if (this.keyState['ArrowRight'] || this.keyState['KeyD']) {
-            this.sceneManager.inputKeyPressed('ArrowRight');
+        const overlay = document.getElementById('idCanvasOverlay');
+        const overlayVisible = overlay && overlay.style.display !== 'none';
+
+        if (!overlayVisible) {
+            if (this.keyState['ArrowLeft'] || this.keyState['KeyA']) {
+                this.sceneManager.inputKeyPressed('ArrowLeft');
+            } else if (this.keyState['ArrowRight'] || this.keyState['KeyD']) {
+                this.sceneManager.inputKeyPressed('ArrowRight');
+            }
         }
 
         // Gamepad polling

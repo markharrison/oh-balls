@@ -41,9 +41,6 @@ export class SceneMainmenu extends SceneBase {
                         <div id="mainmenuButtons" class="mainmenu-buttons"></div>
                         <div class="settings-footer">↑ ↓ Navigate • ENTER to select</div>
                     </div>
-                    <div id="menuDetailPanel" class="detail-panel" >
-                        Hello
-                    </div>
                 </div>
             `;
 

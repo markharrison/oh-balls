@@ -15,7 +15,6 @@ export class SceneBase {
     }
 
     static createMenuButtons(title = '', containerId, options = [], selectedIndex = 0, onClick = null) {
-        SceneBase.ensureMenuStyles();
         const container = document.getElementById(containerId);
         if (!container) return null;
 
@@ -75,106 +74,6 @@ export class SceneBase {
         }
     }
 
-    static ensureMenuStyles() {
-        if (SceneBase._menuStylesInjected) return;
-        const css = `
-/* Main menu layout */
-.mainmenu-ui {
-    display: flex;
-    flex-direction: row;
-    gap: 20px;
-    align-items: flex-start;
-    height: 100%;
-    width: 100%;
-    box-sizing: border-box;
-    padding: 28px;
-}
-
-.menu-panel {
-    width: 360px;
-    max-width: 40%;
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 12px;
-}
-
-.menu-title {
-    font-size: 1.4rem;
-    font-weight: 700;
-    color: #e6f0ff;
-    text-align: center;
-    padding: 6px 0;
-}
-
-.detail-panel {
-    flex: 1 1 auto;
-    min-width: 0;
-    background: rgba(20,20,20,0.06);
-    border-left: 1px solid rgba(255,255,255,0.04);
-    padding: 18px;
-    box-sizing: border-box;
-    overflow: auto;
-}
-
-.mainmenu-buttons {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 12px;
-    margin-top: 6px;
-}
-
-.menu-button {
-    display: inline-block;
-    width: 100%;
-    padding: 14px 18px;
-    background: rgba(60,60,60,0.65);
-    color: #e6f0ff;
-    border: 2px solid rgba(100, 181, 246, 0.12);
-    border-radius: 8px;
-    font-size: 1.15rem;
-    font-weight: 600;
-    cursor: pointer;
-    text-align: center;
-    transition: background 0.12s ease, transform 0.06s ease, box-shadow 0.12s ease;
-}
-
-.menu-button:hover {
-    background: rgba(80,80,80,0.9);
-}
-
-.menu-button:focus,
-.menu-button:focus-visible {
-    outline: none;
-    background: linear-gradient(90deg, rgba(0,170,80,0.12), rgba(0,255,128,0.06));
-    border-color: rgba(255,255,255,1);
-    color: #00ff88;
-    box-shadow: 0 6px 18px rgba(255,255,255,0.02);
-}
-
-.menu-button.selected {
-    background: linear-gradient(90deg, rgba(0,170,80,0.12), rgba(0,255,128,0.06));
-    border-color: rgba(255,255,255,1);
-    color: #00ff88;
-    box-shadow: 0 6px 18px rgba(255,255,255,0.02);
-}
-
-@media (max-width: 760px) {
-    .mainmenu-ui { flex-direction: column; padding: 14px; }
-    .menu-panel { width: 100%; max-width: 100%; }
-    .detail-panel { width: 100%; border-left: none; margin-top: 12px; }
-    .menu-button { font-size: 1rem; }
-}
-                `;
-
-        const style = document.createElement('style');
-        style.setAttribute('data-scenebase-menu-styles', '1');
-        style.textContent = css;
-        document.head.appendChild(style);
-        SceneBase._menuStylesInjected = true;
-    }
-
     enter() {
         // Called when the scene becomes active
     }
@@ -193,6 +92,10 @@ export class SceneBase {
 
     getSceneStateHtml() {
         return '';
+    }
+
+    getSpecialKeys() {
+        return ['Escape', 'Enter', 'ArrowUp', 'ArrowDown', 'Control+KeyD'];
     }
 
     inputKeyPressed(comboId) {

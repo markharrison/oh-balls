@@ -90,6 +90,10 @@ export class SceneManager {
         ballInfoElement.textContent = 'Harrison Digital - Scene Manager';
     }
 
+    getSpecialKeys() {
+        return this.currentScene.getSpecialKeys();
+    }
+
     inputKeyPressed(comboId) {
         let debug = this.diagnosticsPanel.enabled;
 

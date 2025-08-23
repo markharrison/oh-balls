@@ -1,8 +1,11 @@
 import { SceneBase } from './scenebase.js';
 import { BallManager } from './ball.js';
 import { PhysicsEngine, PhysicsBodyFactory, PhysicsUtils, metersToPixels } from './physics.js';
-import { wallThickness } from './constants.js';
-import { fixedTimeStep } from './constants.js';
+// import { wallThickness } from './constants.js';
+// import { fixedTimeStep } from './constants.js';
+
+export const wallThickness = 16;
+export const fixedTimeStep = 1000 / 60; // ms per physics step (16.666...)
 
 export class SceneBallsX extends SceneBase {
     constructor(canvas, manager) {

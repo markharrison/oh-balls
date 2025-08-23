@@ -41,9 +41,6 @@ export class SceneSettings extends SceneBase {
                         <div id="mainmenuButtons" class="mainmenu-buttons"></div>
                         <div class="settings-footer">↑ ↓ Navigate • ENTER to select</div>
                     </div>
-                    <div id="menuDetailPanel" class="detail-panel" >
-                        Hello
-                    </div>
                 </div>
             `;
 
@@ -83,7 +80,7 @@ export class SceneSettingsAudio extends SceneBase {
         this.selectedOption = 0;
         this.nextScene = null;
 
-        this.menuOptions = ['Home', 'xxxxx'];
+        this.menuOptions = ['Home'];
         this.menuContainerId = 'mainmenuButtons';
     }
 
@@ -113,19 +110,44 @@ export class SceneSettingsAudio extends SceneBase {
         if (!overlay) return;
         overlay.innerHTML = `
                 <div class="mainmenu-ui">
-                    <div class="menu-panel">
-                        <div id="mainmenuButtons" class="mainmenu-buttons"></div>
-                        <div class="settings-footer">↑ ↓ Navigate • ENTER to select</div>
-                    </div>
-                    <div id="menuDetailPanel" class="detail-panel" >
-                        Hello
+                    <div class="settings-title">Audio Settings</div>
+                    <div class="settings-panel-ui">
+                        <label for="idVolumeSlider" class="settings-label">Volume:&nbsp;</label>
+                        <input type="range" id="idVolumeSlider" min="0" max="100" value="50">
+                        <br><br>
+                        <label class="settings-label" for="idAudioToggle">Audio:&nbsp;</label>
+                        <input type="checkbox" id="idAudioToggle" checked tabindex="0" class="audio-toggle-checkbox">
+                        <label class="toggle-switch" for="idAudioToggle">
+                            <span class="slider"></span>
+                        </label>
                     </div>
                 </div>
             `;
 
-        SceneBase.createMenuButtons('Audio', this.menuContainerId, this.menuOptions, this.selectedOption, (idx, opt) => {
-            this.setNextScene(idx);
-        });
+        setTimeout(() => {
+            const slider = document.getElementById('idVolumeSlider');
+            if (slider) {
+                // focus the slider for keyboard accessibility
+                slider.focus();
+
+                // updates the slider background to show a green filled track up to the current value
+                const updateSliderBg = (s) => {
+                    const min = parseFloat(s.min) || 0;
+                    const max = parseFloat(s.max) || 100;
+                    const val = parseFloat(s.value) || 0;
+                    const pct = ((val - min) / (max - min)) * 100;
+                    // green for the filled portion, light gray for the remainder
+                    s.style.background = `linear-gradient(90deg, #28a745 ${pct}%, #ddd ${pct}%)`;
+                };
+
+                const onInput = () => updateSliderBg(slider);
+                slider.addEventListener('input', onInput);
+                slider.addEventListener('change', onInput);
+
+                // initialize the background immediately
+                updateSliderBg(slider);
+            }
+        }, 50);
     }
 
     update(dt) {
@@ -143,9 +165,20 @@ export class SceneSettingsAudio extends SceneBase {
 
     setupEventHandlers() {}
 
-    // inputKeyPressed now inherited from SceneBase
+    getSpecialKeys() {
+        return ['Escape', 'Enter', 'ArrowUp', 'ArrowRight', 'ArrowLeft', 'ArrowDown', 'Control+KeyD'];
+    }
 
     inputKeyPressedOther(comboId) {
-        // Handle other keys specific to SceneSettingsAudio here
+        switch (comboId) {
+            case 'ArrowRight':
+                alert('Right arrow pressed');
+                break;
+            case 'ArrowLeft':
+                SceneBase.setSelectedButton(this.menuContainerId, this.selectedOption);
+                break;
+            default:
+                break;
+        }
     }
 }

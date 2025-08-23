@@ -1,6 +1,6 @@
 // Ball Module for creating and managing balls
 import { PhysicsBodyFactory, PhysicsConstants, pixelsToMeters } from './physics.js';
-import { wallThickness } from './constants.js';
+import { wallThickness } from './sceneballsx.js';
 
 export function generateRandomSize() {
     // Random size from 1 to 5 as specified

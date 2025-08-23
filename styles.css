@@ -27,18 +27,17 @@ body::before {
     left: 0;
     right: 0;
     bottom: 0;
-    background: 
-        radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+    background: radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
         radial-gradient(circle at 80% 20%, rgba(139, 195, 74, 0.15) 0%, transparent 50%),
         radial-gradient(circle at 40% 40%, rgba(3, 169, 244, 0.2) 0%, transparent 50%);
     pointer-events: none;
 }
 
 .game-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    /* display: flex; */
+    /* flex-direction: column; */
+    /* align-items: center; */
+    /* justify-content: center; */
     height: 100vh;
     padding: 20px;
     position: relative;
@@ -46,15 +45,15 @@ body::before {
 }
 
 .ui-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 1284px; 
+    /* display: flex; */
+    /* justify-content: space-between; */
+    /* align-items: center; */
+    width: 1284px;
     margin-bottom: 15px;
     padding: 20px 30px;
     background: rgba(13, 71, 161, 0.25);
     backdrop-filter: blur(20px);
-    border: 2px solid rgba(100, 181, 246, 1.0);
+    border: 2px solid rgba(100, 181, 246, 1);
     border-radius: 16px;
 }
 
@@ -69,26 +68,22 @@ body::before {
     text-shadow: 0 0 30px rgba(33, 150, 243, 0.5);
 }
 
-
-
 .canvas {
-    border: 2px solid rgba(100, 181, 246, 1.0);
+    border: 2px solid rgba(100, 181, 246, 1);
     border-radius: 12px;
-    width: 1284px; 
-
+    width: 1284px;
 }
 
-
 .ui-footer {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 1284px; 
+    /* display: flex; */
+    /* justify-content: center; */
+    /* align-items: center; */
+    width: 1284px;
     margin-top: 15px;
     padding: 18px 30px;
     background: rgba(26, 35, 126, 0.25);
     backdrop-filter: blur(20px);
-    border: 2px solid rgba(100, 181, 246, 1.0);
+    border: 2px solid rgba(100, 181, 246, 1);
     border-radius: 12px;
 }
 
@@ -99,122 +94,242 @@ body::before {
     text-shadow: 0 0 15px rgba(139, 195, 74, 0.4);
 }
 
-
-
 /* Settings Overlay UI Styles */
 .canvas-overlay {
     background: #2a2a2a;
 }
 
-.settings-ui {
-    width: 520px;
-    margin: 0 auto;
-    padding: 40px 0 0 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+/* Main menu layout */
+.mainmenu-ui {
+    /* display: flex; */
+    /* flex-direction: row; */
+    /* gap: 20px; */
+    /* align-items: flex-start; */
+    height: 100%;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 28px;
 }
 
-.settings-title {
-    font-size: 3rem;
+.menu-panel {
+    width: 360px;
+    max-width: 40%;
+    /* display: flex; */
+    /* flex-direction: column; */
+    /* align-items: stretch; */
+    /* gap: 12px; */
+}
+
+.menu-title {
+    font-size: 1.4rem;
     font-weight: 700;
-    color: #fff;
-    margin-bottom: 40px;
-    letter-spacing: 2px;
-    align-items: center;
-    justify-content: space-between;
-    width: 400px;
-    margin-bottom: 32px;
-    font-size: 2rem;
+    color: #e6f0ff;
+    text-align: center;
+    padding: 6px 0;
+}
+
+.mainmenu-buttons {
+    display: block;
+    margin-top: 6px;
+}
+
+.mainmenu-buttons .menu-button {
+    display: block;
+    margin-bottom: 12px;
+}
+
+.menu-button {
+    display: inline-block;
+    width: 100%;
+    padding: 14px 18px;
+    background: rgba(60, 60, 60, 0.65);
+    color: #e6f0ff;
+    border: 2px solid rgba(100, 181, 246, 0.12);
+    border-radius: 8px;
+    font-size: 1.15rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.12s ease, transform 0.06s ease, box-shadow 0.12s ease;
+}
+
+.menu-button:hover {
+    background: rgba(80, 80, 80, 0.9);
+}
+
+.menu-button:focus,
+.menu-button:focus-visible {
+    outline: none;
+    background: linear-gradient(90deg, rgba(0, 170, 80, 0.12), rgba(0, 255, 128, 0.06));
+    border-color: rgba(255, 255, 255, 1);
+    color: #00ff88;
+    box-shadow: 0 6px 18px rgba(255, 255, 255, 0.02);
+}
+
+.menu-button.selected {
+    background: linear-gradient(90deg, rgba(0, 170, 80, 0.12), rgba(0, 255, 128, 0.06));
+    border-color: rgba(255, 255, 255, 1);
+    color: #00ff88;
+    box-shadow: 0 6px 18px rgba(255, 255, 255, 0.02);
+}
+
+
+.detail-panel {
+    /* flex: 1 1 auto; */
+    min-width: 0;
+    min-height: 400px;
+    border: 0px;
+    padding: 58px 0px 0px 50px;
+    box-sizing: border-box;
+    overflow: auto;
+}
+
+
+.settings-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #e6f0ff;
+    text-align: left;
+    padding: 6px 0;
+}
+
+.settings-panel-ui {
+    position: relative;
+    top: 0px;
+    padding-top: 20px;
 }
 
 .settings-label {
-    color: #ccc;
-    font-weight: 400;
-    flex: 1;
-    text-align: left;
-}
-.settings-value {
-    flex: 1;
-    text-align: right;
-}
-
-.settings-btn {
-    background: rgba(60,60,60,0.7);
-    border: none;
-    border-radius: 6px;
-    color: #00ff00;
-    font-size: 2rem;
     font-weight: 600;
-    padding: 8px 32px;
-    cursor: pointer;
-    outline: none;
-    transition: background 0.2s;
+    color: #e3f2fd;
+    margin-right: 10px;
 }
-.settings-btn:hover {
-    background: rgba(80,80,80,0.9);
+
+#idVolumeSlider:focus {
+    outline: 1px solid  #888888;
+    outline-offset: 2px;
 }
-.settings-on {
-    color: #00ff00;
-    font-weight: 600;
+
+/* Make the range input use the element background so the JS gradient shows through */
+#idVolumeSlider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 220px;
+    height: 12px;
+    background: transparent; /* JS will set a gradient on the element */
+    border-radius: 8px;
+    padding: 0;
+    margin: 6px 0;
+    vertical-align: middle;
 }
-.settings-off {
-    color: #ff3333;
-    font-weight: 600;
-}
-/* Make dropdown text green to match UI */
-.settings-select {
-    background: rgba(60,60,60,0.7);
-    color: #00ff00; /* Selected value in closed dropdown */
-    font-size: 1.5rem;
+
+/* WebKit/Blink track/thumb reset so the element background is visible */
+#idVolumeSlider::-webkit-slider-runnable-track {
+    height: 12px;
+    background: transparent;
     border: none;
-    border-radius: 6px;
-    padding: 6px 18px;
-    outline: none;
-    font-weight: 500;
+    border-radius: 8px;
+}
+#idVolumeSlider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    margin-top: -3px; /* vertically center the thumb */
+    background: #666;
+    border-radius: 50%;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+    border: 2px solid rgba(255,255,255,0.12);
 }
 
-.settings-select option {
-    color: #fff; /* All options default to white */
-    background: #2a2a2a;
+/* Firefox */
+#idVolumeSlider::-moz-range-track {
+    height: 12px;
+    background: transparent;
+    border-radius: 8px;
 }
-
-.settings-select option:checked,
-.settings-select option:focus,
-.settings-select option[selected] {
-    color: #00ff00; /* Selected option in open dropdown */
-}
-.settings-select:focus {
-    background: rgba(80,80,80,0.9);
-    color: #00ff00;
-}
-.settings-footer {
-    margin-top: 40px;
-    color: #bbb;
-    font-size: 1.2rem;
-    text-align: center;
-    letter-spacing: 1px;
-}
-
-.settings-back-link {
-    color: #00ff00;
-    font-weight: 700;
-    font-size: 2rem;
-    text-decoration: none;
-    background: none;
+#idVolumeSlider::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    background: #666;
+    border-radius: 50%;
     border: none;
-    padding: 8px 32px;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background 0.2s;
+}
+
+/* IE/Edge legacy fallback */
+#idVolumeSlider::-ms-track {
+    height: 12px;
+    background: transparent;
+    border-color: transparent;
+    color: transparent;
+}
+#idVolumeSlider::-ms-thumb {
+    width: 18px;
+    height: 18px;
+    background: #666;
+    border-radius: 50%;
+    border: none;
+}
+
+#idAudioToggle:focus {
+    outline: 1px solid  #888888;
+    outline-offset: 2px;
+}
+
+/* Custom toggle switch styles */
+.audio-toggle-checkbox {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-switch {
     display: inline-block;
-}
-.settings-back-link:hover {
-    background: rgba(80,80,80,0.3);
-    text-decoration: underline;
-}
-
-.settings-row.settings-back {
-    margin-bottom: 16px;
+    width: 48px;
+    height: 24px;
+    position: relative;
+    vertical-align: middle;
+    cursor: pointer;
+    user-select: none;
 }
 
+.toggle-switch .slider {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    border-radius: 24px;
+    transition: background 0.2s;
+}
+
+.toggle-switch .slider:before {
+    content: "";
+    position: absolute;
+    left: 4px;
+    top: 4px;
+    width: 16px;
+    height: 16px;
+    background: white;
+    border-radius: 50%;
+    transition: transform 0.2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+/* Checked state: move knob and change color */
+.audio-toggle-checkbox:checked + .toggle-switch .slider {
+    background-color: #4caf50;
+}
+.audio-toggle-checkbox:checked + .toggle-switch .slider:before {
+    transform: translateX(24px);
+    background: #fff;
+}
+
+/* Focus indicator for accessibility */
+.audio-toggle-checkbox:focus + .toggle-switch .slider {
+    box-shadow: 0 0 0 2px #4caf50;
+}
+
+ 
