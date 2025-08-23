@@ -4,19 +4,21 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Oh Balls 2 - Physics Game</title>
+        <!-- Custom styles with Bootstrap-like utilities -->
         <link rel="stylesheet" href="styles.css" />
     </head>
-    <body>
-        <div class="game-container">
-            <div class="ui-header">
-                <h1>OH BALLS</h1>
+    <body class="bg-dark text-light">
+        <div class="container-fluid d-flex flex-column align-items-center justify-content-center min-vh-100 py-3">
+            <div class="ui-header text-center mb-3">
+                <h1 class="display-3 fw-bold text-gradient">OH BALLS</h1>
             </div>
 
-            <canvas id="idCanvas" class="canvas" width="1280" height="720"></canvas>
+            <canvas id="idCanvas" class="canvas border border-primary rounded" width="1280" height="720"></canvas>
 
-            <div id="idCanvasOverlay" class="canvas canvas-overlay" style="display: none">** Temporary Canvas Content **</div>
-            <div class="ui-footer">
-                <div id="idFooterInfo" class="footer-info">Harrison Digital</div>
+            <div id="idCanvasOverlay" class="canvas canvas-overlay border border-primary rounded position-absolute" style="display: none">** Temporary Canvas Content **</div>
+            
+            <div class="ui-footer text-center mt-3">
+                <div id="idFooterInfo" class="footer-info fs-5 fw-semibold text-success">Harrison Digital</div>
             </div>
         </div>
 

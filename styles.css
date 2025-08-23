@@ -1,25 +1,65 @@
+/* Oh Balls - Custom styles with Bootstrap v5.3.7 utilities and dark theme */
 
-/* Modern Dark UI Theme CSS */
 :root {
     --canvas-width: 1280px;
+    --canvas-height: 720px;
+    /* Custom color variables for dark theme */
+    --primary-glass: rgba(13, 71, 161, 0.25);
+    --secondary-glass: rgba(26, 35, 126, 0.25);
+    --border-bright: rgba(100, 181, 246, 1);
+    --text-glow: rgba(33, 150, 243, 0.5);
+    --success-glow: rgba(139, 195, 74, 0.4);
+    --font-stack: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
+/* Reset and Bootstrap-like base styles */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
+/* Bootstrap-like utility classes */
+.container-fluid {
+    width: 100%;
+    padding-right: 0.75rem;
+    padding-left: 0.75rem;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+.d-flex { display: flex !important; }
+.flex-column { flex-direction: column !important; }
+.align-items-center { align-items: center !important; }
+.justify-content-center { justify-content: center !important; }
+.text-center { text-align: center !important; }
+.min-vh-100 { min-height: 100vh !important; }
+.py-3 { padding-top: 1rem !important; padding-bottom: 1rem !important; }
+.mb-3 { margin-bottom: 1rem !important; }
+.mt-3 { margin-top: 1rem !important; }
+.border { border: 1px solid #dee2e6 !important; }
+.border-primary { border-color: var(--border-bright) !important; }
+.rounded { border-radius: 0.375rem !important; }
+.position-absolute { position: absolute !important; }
+.bg-dark { background-color: #212529 !important; }
+.text-light { color: #f8f9fa !important; }
+.display-3 { font-size: 2.8rem; font-weight: 700; line-height: 1.2; }
+.fw-bold { font-weight: 700 !important; }
+.fw-semibold { font-weight: 600 !important; }
+.fs-5 { font-size: 1.25rem !important; }
+.text-success { color: #198754 !important; }
+
+/* Override Bootstrap's body styles for our dark theme */
 body {
-    background: linear-gradient(135deg, #0d1421 0%, #1a237e 25%, #283593 50%, #3949ab 75%, #5e35b1 100%);
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    color: #e3f2fd;
-    overflow: hidden;
-    height: 100vh;
+    font-family: var(--font-stack) !important;
+    background: linear-gradient(135deg, #0d1421 0%, #1a237e 25%, #283593 50%, #3949ab 75%, #5e35b1 100%) !important;
+    color: #e3f2fd !important;
+    overflow: hidden !important;
+    height: 100vh !important;
     position: relative;
 }
 
+/* Add the decorative background gradient overlay */
 body::before {
     content: '';
     position: absolute;
@@ -31,80 +71,61 @@ body::before {
         radial-gradient(circle at 80% 20%, rgba(139, 195, 74, 0.15) 0%, transparent 50%),
         radial-gradient(circle at 40% 40%, rgba(3, 169, 244, 0.2) 0%, transparent 50%);
     pointer-events: none;
+    z-index: -1;
 }
 
-.game-container {
-    /* display: flex; */
-    /* flex-direction: column; */
-    /* align-items: center; */
-    /* justify-content: center; */
-    height: 100vh;
-    padding: 20px;
-    position: relative;
-    z-index: 1;
-}
-
+/* Custom header styling */
 .ui-header {
-    /* display: flex; */
-    /* justify-content: space-between; */
-    /* align-items: center; */
     width: 1284px;
-    margin-bottom: 15px;
+    max-width: 100%;
     padding: 20px 30px;
-    background: rgba(13, 71, 161, 0.25);
+    background: var(--primary-glass);
     backdrop-filter: blur(20px);
-    border: 2px solid rgba(100, 181, 246, 1);
+    border: 2px solid var(--border-bright) !important;
     border-radius: 16px;
 }
 
-.ui-header h1 {
-    font-size: 2.8em;
-    font-weight: 700;
-    background: white;
+.text-gradient {
+    background: linear-gradient(135deg, #ffffff 0%, #e3f2fd 100%);
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     letter-spacing: 2px;
-    text-shadow: 0 0 30px rgba(33, 150, 243, 0.5);
+    text-shadow: 0 0 30px var(--text-glow);
 }
 
+/* Canvas styling */
 .canvas {
-    border: 2px solid rgba(100, 181, 246, 1);
-    border-radius: 12px;
-    width: 1284px;
+    width: var(--canvas-width) !important;
+    height: var(--canvas-height) !important;
+    border: 2px solid var(--border-bright) !important;
+    border-radius: 12px !important;
 }
 
+/* Canvas overlay (when visible) */
+.canvas-overlay {
+    background: #2a2a2a;
+    z-index: 100;
+}
+
+/* Footer styling */
 .ui-footer {
-    /* display: flex; */
-    /* justify-content: center; */
-    /* align-items: center; */
     width: 1284px;
-    margin-top: 15px;
+    max-width: 100%;
     padding: 18px 30px;
-    background: rgba(26, 35, 126, 0.25);
+    background: var(--secondary-glass);
     backdrop-filter: blur(20px);
-    border: 2px solid rgba(100, 181, 246, 1);
+    border: 2px solid var(--border-bright) !important;
     border-radius: 12px;
 }
 
 .footer-info {
-    font-size: 1.3em;
-    font-weight: 600;
-    color: white;
-    text-shadow: 0 0 15px rgba(139, 195, 74, 0.4);
+    color: white !important;
+    text-shadow: 0 0 15px var(--success-glow);
 }
 
-/* Settings Overlay UI Styles */
-.canvas-overlay {
-    background: #2a2a2a;
-}
-
-/* Main menu layout */
+/* Menu and UI overlay styles - preserved from original for JS functionality */
 .mainmenu-ui {
-    /* display: flex; */
-    /* flex-direction: row; */
-    /* gap: 20px; */
-    /* align-items: flex-start; */
     height: 100%;
     width: 100%;
     box-sizing: border-box;
@@ -114,10 +135,6 @@ body::before {
 .menu-panel {
     width: 360px;
     max-width: 40%;
-    /* display: flex; */
-    /* flex-direction: column; */
-    /* align-items: stretch; */
-    /* gap: 12px; */
 }
 
 .menu-title {
@@ -148,13 +165,16 @@ body::before {
     border-radius: 8px;
     font-size: 1.15rem;
     font-weight: 600;
-    cursor: pointer;
+    text-decoration: none;
     text-align: center;
+    cursor: pointer;
     transition: background 0.12s ease, transform 0.06s ease, box-shadow 0.12s ease;
 }
 
 .menu-button:hover {
     background: rgba(80, 80, 80, 0.9);
+    color: #e6f0ff;
+    text-decoration: none;
 }
 
 .menu-button:focus,
@@ -173,9 +193,16 @@ body::before {
     box-shadow: 0 6px 18px rgba(255, 255, 255, 0.02);
 }
 
+.settings-footer {
+    text-align: center;
+    margin-top: auto;
+    padding: 8px 0;
+    font-size: 0.95rem;
+    color: #66bb6a;
+    font-weight: 500;
+}
 
 .detail-panel {
-    /* flex: 1 1 auto; */
     min-width: 0;
     min-height: 400px;
     border: 0px;
@@ -183,7 +210,6 @@ body::before {
     box-sizing: border-box;
     overflow: auto;
 }
-
 
 .settings-title {
     font-size: 1.4rem;
@@ -205,41 +231,35 @@ body::before {
     margin-right: 10px;
 }
 
+/* Volume slider styles */
+#idVolumeSlider {
+    appearance: none;
+    width: 200px;
+    height: 12px;
+    border-radius: 8px;
+    background: transparent;
+    outline: none;
+}
+
 #idVolumeSlider:focus {
-    outline: 1px solid  #888888;
+    outline: 1px solid #888888;
     outline-offset: 2px;
 }
 
-/* Make the range input use the element background so the JS gradient shows through */
-#idVolumeSlider {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 220px;
-    height: 12px;
-    background: transparent; /* JS will set a gradient on the element */
-    border-radius: 8px;
-    padding: 0;
-    margin: 6px 0;
-    vertical-align: middle;
-}
-
-/* WebKit/Blink track/thumb reset so the element background is visible */
-#idVolumeSlider::-webkit-slider-runnable-track {
+/* Webkit browsers */
+#idVolumeSlider::-webkit-slider-track {
     height: 12px;
     background: transparent;
-    border: none;
     border-radius: 8px;
 }
+
 #idVolumeSlider::-webkit-slider-thumb {
-    -webkit-appearance: none;
     appearance: none;
     width: 18px;
     height: 18px;
-    margin-top: -3px; /* vertically center the thumb */
     background: #666;
     border-radius: 50%;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.4);
-    border: 2px solid rgba(255,255,255,0.12);
+    cursor: pointer;
 }
 
 /* Firefox */
@@ -248,6 +268,7 @@ body::before {
     background: transparent;
     border-radius: 8px;
 }
+
 #idVolumeSlider::-moz-range-thumb {
     width: 18px;
     height: 18px;
@@ -256,27 +277,12 @@ body::before {
     border: none;
 }
 
-/* IE/Edge legacy fallback */
-#idVolumeSlider::-ms-track {
-    height: 12px;
-    background: transparent;
-    border-color: transparent;
-    color: transparent;
-}
-#idVolumeSlider::-ms-thumb {
-    width: 18px;
-    height: 18px;
-    background: #666;
-    border-radius: 50%;
-    border: none;
-}
-
+/* Audio toggle styles */
 #idAudioToggle:focus {
-    outline: 1px solid  #888888;
+    outline: 1px solid #888888;
     outline-offset: 2px;
 }
 
-/* Custom toggle switch styles */
 .audio-toggle-checkbox {
     position: absolute;
     opacity: 0;
@@ -289,47 +295,55 @@ body::before {
     width: 48px;
     height: 24px;
     position: relative;
-    vertical-align: middle;
-    cursor: pointer;
-    user-select: none;
 }
 
-.toggle-switch .slider {
+.slider {
     position: absolute;
+    cursor: pointer;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: #ccc;
+    background-color: #555;
+    transition: 0.3s;
     border-radius: 24px;
-    transition: background 0.2s;
 }
 
-.toggle-switch .slider:before {
-    content: "";
+.slider:before {
     position: absolute;
-    left: 4px;
-    top: 4px;
-    width: 16px;
-    height: 16px;
-    background: white;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: 0.3s;
     border-radius: 50%;
-    transition: transform 0.2s;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
 
-/* Checked state: move knob and change color */
 .audio-toggle-checkbox:checked + .toggle-switch .slider {
     background-color: #4caf50;
 }
+
 .audio-toggle-checkbox:checked + .toggle-switch .slider:before {
     transform: translateX(24px);
-    background: #fff;
 }
 
-/* Focus indicator for accessibility */
 .audio-toggle-checkbox:focus + .toggle-switch .slider {
     box-shadow: 0 0 0 2px #4caf50;
 }
 
- 
+/* Responsive adjustments */
+@media (max-width: 1400px) {
+    .ui-header,
+    .ui-footer {
+        width: 100%;
+        max-width: 1284px;
+    }
+    
+    .canvas {
+        max-width: 100%;
+        height: auto;
+        aspect-ratio: 16/9;
+    }
+}
