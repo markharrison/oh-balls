@@ -25,7 +25,7 @@ export class SceneBase {
 
         var button = document.createElement('button');
         button.type = 'button';
-        button.className = 'btn btn-warning';
+        button.className = 'btn btn-primary';
         button.textContent = title;
         button.id = 'idMenuButton_' + idx;
 
