@@ -8,8 +8,8 @@ export const wallThickness = 16;
 export const fixedTimeStep = 1000 / 60; // ms per physics step (16.666...)
 
 export class SceneBallsX extends SceneBase {
-    constructor(canvas, manager) {
-        super(canvas, manager);
+    constructor(canvas, manager, config) {
+        super(canvas, manager, config);
         this.inputHandler = null;
 
         this.ballManager = new BallManager(this);
@@ -146,9 +146,9 @@ export class SceneBallsX extends SceneBase {
         this.physics.addBody(rightWall);
     }
 
-    start() {
-        this.ballManager.start();
-    }
+    // start() {
+    //     this.ballManager.start();
+    // }
 
     addBody(body) {
         this.physics.addBody(body);
@@ -417,7 +417,9 @@ export class SceneBallsX extends SceneBase {
     }
 
     exit() {
-        // Called when the scene is deactivated
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.fillStyle = '#111111';
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
     }
 
     update(dt) {

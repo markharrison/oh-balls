@@ -1,8 +1,8 @@
 import { SceneBase } from './scenebase.js';
 
 export class SceneSplash extends SceneBase {
-    constructor(canvas, manager) {
-        super(canvas, manager);
+    constructor(canvas, manager, config) {
+        super(canvas, manager, config);
 
         this.startTime = null;
     }
@@ -53,14 +53,6 @@ export class SceneSplash extends SceneBase {
                     </div>
                 </div>
             `;
-
-        SceneBase.createMenuButtons('Main Menu', this.menuContainerId, this.menuOptions, this.selectedOption, (idx, opt) => {
-            if (idx === 1) {
-                this.nextScene = SceneBase.GameScenes.settings;
-            } else if (idx === 0) {
-                this.nextScene = SceneBase.GameScenes.ballsX;
-            }
-        });
     }
 
     inputKeyPressed(comboId) {

@@ -1,14 +1,10 @@
 import { SceneBase } from './scenebase.js';
 
 export class SceneSettings extends SceneBase {
-    constructor(canvas, manager) {
-        super(canvas, manager);
+    constructor(canvas, manager, config) {
+        super(canvas, manager, config);
 
-        this.selectedOption = 0;
         this.nextScene = null;
-
-        this.menuOptions = ['Home', 'Audio', 'Theme'];
-        this.menuContainerId = 'mainmenuButtons';
     }
 
     enter() {
@@ -21,32 +17,40 @@ export class SceneSettings extends SceneBase {
     }
 
     exit() {
+        this.deleteMenuEventListeners();
         this.hideOverlay();
     }
 
-    setNextScene(sel) {
-        if (sel === 0) {
-            this.nextScene = SceneBase.GameScenes.mainmenu;
-        } else if (sel === 1) {
-            this.nextScene = SceneBase.GameScenes.settingsaudio;
+    doMenuHandler(sel) {
+        switch (sel) {
+            case 1:
+                this.nextScene = SceneBase.GameScenes.mainmenu;
+                break;
+            case 2:
+                this.nextScene = SceneBase.GameScenes.settingsaudio;
+                break;
+            default:
+                break;
         }
     }
 
     insertHTMLOverlayContent() {
         const overlay = document.getElementById('idCanvasOverlay');
         if (!overlay) return;
-        overlay.innerHTML = `
-                <div class="mainmenu-ui">
-                    <div class="menu-panel">
-                        <div id="mainmenuButtons" class="mainmenu-buttons"></div>
-                        <div class="settings-footer">↑ ↓ Navigate • ENTER to select</div>
-                    </div>
-                </div>
-            `;
 
-        SceneBase.createMenuButtons('Settings', this.menuContainerId, this.menuOptions, this.selectedOption, (idx, opt) => {
-            this.setNextScene(idx);
-        });
+        let vHtml = '';
+
+        vHtml += '<div class="canvas-overlay-page">';
+        vHtml += '<div><h3 class="overlay-title">Settings</h3></div><div>&nbsp;</div>';
+        vHtml += '<div id="idButtonContainer" class="d-grid gap-2">';
+
+        vHtml += '</div>';
+        vHtml += '<div>&nbsp;</div>';
+        vHtml += '</div>';
+
+        overlay.innerHTML = vHtml;
+
+        this.addMenuButtons(['Home', 'Audio', 'Theme']);
     }
 
     update(dt) {
@@ -62,10 +66,6 @@ export class SceneSettings extends SceneBase {
         return vHtml;
     }
 
-    setupEventHandlers() {}
-
-    // inputKeyPressed now inherited from SceneBase
-
     inputKeyPressedOther(comboId) {
         // Handle other keys specific to SceneSettings here
     }
@@ -74,8 +74,8 @@ export class SceneSettings extends SceneBase {
 // ------------ Audio -------------------
 
 export class SceneSettingsAudio extends SceneBase {
-    constructor(canvas, manager) {
-        super(canvas, manager);
+    constructor(canvas, manager, config) {
+        super(canvas, manager, config);
 
         this.selectedOption = 0;
         this.nextScene = null;
@@ -94,60 +94,84 @@ export class SceneSettingsAudio extends SceneBase {
     }
 
     exit() {
+        this.deleteEventListeners();
         this.hideOverlay();
     }
 
-    setNextScene(sel) {
-        if (sel === 0) {
-            this.nextScene = SceneBase.GameScenes.settings;
-        } else if (sel === 99) {
-            this.nextScene = SceneBase.GameScenes.ballsX;
+    doMenuHandler(sel) {
+        switch (sel) {
+            case 1:
+                this.nextScene = SceneBase.GameScenes.settings;
+                break;
+            default:
+                break;
         }
     }
 
     insertHTMLOverlayContent() {
         const overlay = document.getElementById('idCanvasOverlay');
         if (!overlay) return;
-        overlay.innerHTML = `
-                <div class="mainmenu-ui">
-                    <div class="settings-title">Audio Settings</div>
-                    <div class="settings-panel-ui">
-                        <label for="idVolumeSlider" class="settings-label">Volume:&nbsp;</label>
-                        <input type="range" id="idVolumeSlider" min="0" max="100" value="50">
-                        <br><br>
-                        <label class="settings-label" for="idAudioToggle">Audio:&nbsp;</label>
-                        <input type="checkbox" id="idAudioToggle" checked tabindex="0" class="audio-toggle-checkbox">
-                        <label class="toggle-switch" for="idAudioToggle">
-                            <span class="slider"></span>
-                        </label>
-                    </div>
+        let vHtml = '';
+
+        vHtml += '<div class="canvas-overlay-page">';
+        vHtml += '<div><h3 class="overlay-title">Audio Settings</h3></div><div>&nbsp;</div>';
+        vHtml += '<div id="idButtonContainer" class="d-grid gap-2">';
+
+        vHtml += '</div>';
+        vHtml += '<div id="idSettingsPanel" class="settings-panel" role="region">';
+        vHtml += '</div>';
+        vHtml += '</div>';
+
+        overlay.innerHTML = vHtml;
+
+        const panel = document.getElementById('idSettingsPanel');
+        if (!panel) return;
+
+        // Get current config values
+        const initVolume = this.config.volume;
+        const initAudio = this.config.audio ? 'checked' : '';
+
+        vHtml = '';
+        vHtml = `
+            <form>
+                <div class="mb-3 form-check form-switch">
+                    <input class="form-check-input" type="checkbox" role="switch" id="idAudio" ${initAudio}>
+                    <label class="form-check-label" for="idAudio">Audio</label>
                 </div>
-            `;
 
-        setTimeout(() => {
-            const slider = document.getElementById('idVolumeSlider');
-            if (slider) {
-                // focus the slider for keyboard accessibility
-                slider.focus();
+                <div class="mb-3" style="max-width: 300px;">
+                    <label for="idVolume" class="form-label">Volume: </label>
+                    <input type="range" class="form-range" min="0" max="100" step="10" value="${initVolume}" id="idVolume">
+                 </div>
+                <button id="idSaveSettings" type="button" class="btn btn-primary">Save</button>
+            </form>
+        `;
+        panel.innerHTML = vHtml;
 
-                // updates the slider background to show a green filled track up to the current value
-                const updateSliderBg = (s) => {
-                    const min = parseFloat(s.min) || 0;
-                    const max = parseFloat(s.max) || 100;
-                    const val = parseFloat(s.value) || 0;
-                    const pct = ((val - min) / (max - min)) * 100;
-                    // green for the filled portion, light gray for the remainder
-                    s.style.background = `linear-gradient(90deg, #28a745 ${pct}%, #ddd ${pct}%)`;
-                };
+        // Attach save handler with correct context
+        this._boundSaveSettings = this.saveSettings.bind(this);
+        document.getElementById('idSaveSettings').addEventListener('click', this._boundSaveSettings);
+    }
 
-                const onInput = () => updateSliderBg(slider);
-                slider.addEventListener('input', onInput);
-                slider.addEventListener('change', onInput);
+    // Handler for Save button (must be at class level)
+    saveSettings(e) {
+        e.preventDefault();
+        const volume = parseInt(document.getElementById('idVolume').value, 10);
+        const audioEnabled = document.getElementById('idAudio').checked;
 
-                // initialize the background immediately
-                updateSliderBg(slider);
-            }
-        }, 50);
+        this.config.volume = volume;
+        this.config.audio = audioEnabled;
+        this.config.saveToLocalStorage();
+        this.manager.doToast('Audio Settings changed', 'Volume: ' + volume + ', Audio: ' + (audioEnabled ? 'On' : 'Off'));
+        this.nextScene = SceneBase.GameScenes.settings;
+    }
+
+    deleteEventListeners() {
+        const saveBtn = document.getElementById('idSaveSettings');
+        if (saveBtn && this._boundSaveSettings) {
+            saveBtn.removeEventListener('click', this._boundSaveSettings);
+            this._boundSaveSettings = null;
+        }
     }
 
     update(dt) {

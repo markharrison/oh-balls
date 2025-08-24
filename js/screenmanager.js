@@ -35,19 +35,19 @@ export class SceneManager {
 
         switch (sceneKey) {
             case SceneBase.GameScenes.splash:
-                this.currentScene = new SceneSplash(this.canvas, this);
+                this.currentScene = new SceneSplash(this.canvas, this, this.config);
                 break;
             case SceneBase.GameScenes.mainmenu:
-                this.currentScene = new SceneMainmenu(this.canvas, this);
+                this.currentScene = new SceneMainmenu(this.canvas, this, this.config);
                 break;
             case SceneBase.GameScenes.ballsX:
-                this.currentScene = new SceneBallsX(this.canvas, this);
+                this.currentScene = new SceneBallsX(this.canvas, this, this.config);
                 break;
             case SceneBase.GameScenes.settings:
-                this.currentScene = new SceneSettings(this.canvas, this);
+                this.currentScene = new SceneSettings(this.canvas, this, this.config);
                 break;
             case SceneBase.GameScenes.settingsaudio:
-                this.currentScene = new SceneSettingsAudio(this.canvas, this);
+                this.currentScene = new SceneSettingsAudio(this.canvas, this, this.config);
                 break;
             default:
                 break;
@@ -60,6 +60,10 @@ export class SceneManager {
     registerInputHandler(inputHandler) {
         this.inputHandler = inputHandler;
         this.inputHandler.registerSceneManager(this);
+    }
+
+    registerConfig(config) {
+        this.config = config;
     }
 
     getSceneMainStateHtml() {
@@ -140,5 +144,52 @@ export class SceneManager {
         this.render(this.ctx);
 
         this.diagnosticsPanel.renderPanel();
+    }
+
+    randomString(length) {
+        var chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz'.split('');
+
+        if (!length) {
+            length = Math.floor(Math.random() * chars.length);
+        }
+
+        var str = '';
+        for (var i = 0; i < length; i++) {
+            str += chars[Math.floor(Math.random() * chars.length)];
+        }
+        return str;
+    }
+
+    doToast(vTitle, vText) {
+        var vHtml = '';
+        var vId = 'idToast' + this.randomString(8);
+        var vDate = new Date();
+        var vTime = vDate.toLocaleTimeString();
+
+        vHtml += "<div id='" + vId + "' class='toast fade hide'><div class='toast-header'>";
+        vHtml += "<strong class='mr-auto'>" + vTitle + "</strong><small class='text-muted'>&nbsp;" + vTime + '</small>';
+        vHtml += "<button type='button' class='btn-close ms-auto mb-1' data-bs-dismiss='toast' ></button>";
+        vHtml += "</div><div class='toast-body' style='color: black;'>" + vText + '</div></div>';
+
+        const toasterElement = document.getElementById('idToaster');
+        if (toasterElement) {
+            toasterElement.insertAdjacentHTML('beforeend', vHtml);
+
+            const toastElement = document.getElementById(vId);
+            if (toastElement) {
+                // Define the cleanup function
+                const cleanupToast = (event) => {
+                    event.currentTarget.removeEventListener('hidden.bs.toast', cleanupToast);
+                    event.currentTarget.remove();
+                };
+
+                // Add event listener for when toast is hidden
+                toastElement.addEventListener('hidden.bs.toast', cleanupToast);
+
+                // Initialize and show the toast using Bootstrap's toast API
+                const toast = new bootstrap.Toast(toastElement, { delay: 10000 });
+                toast.show();
+            }
+        }
     }
 }

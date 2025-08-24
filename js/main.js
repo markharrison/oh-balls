@@ -1,16 +1,23 @@
 import { SceneManager } from './screenmanager.js';
 import { InputHandler } from './input.js';
+import { Config } from './config.js';
 
 class Main {
     constructor() {
-        this.canvas = document.getElementById('idCanvas');
+        this.canvas = document.getElementById('idCanvasControl');
         this.running = false;
         this.rafId = null;
+
+        // Initialize configuration
+        this.config = new Config();
+        // Try to load saved configuration from localStorage
+        this.config.loadFromLocalStorage();
 
         this.inputHandler = new InputHandler();
 
         this.sceneManager = new SceneManager(this.canvas);
         this.sceneManager.registerInputHandler(this.inputHandler);
+        this.sceneManager.registerConfig(this.config);
     }
 
     gameLoop() {
@@ -32,6 +39,11 @@ class Main {
     }
 
     destroy() {
+        // Save configuration before destroying
+        if (this.config) {
+            this.config.saveToLocalStorage();
+        }
+
         // stop the loop and cancel any pending animation frame
         this.running = false;
         if (this.rafId) {
@@ -41,6 +53,7 @@ class Main {
 
         this.sceneManager = null;
         this.inputHandler = null;
+        this.config = null;
     }
 }
 

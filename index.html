@@ -3,22 +3,29 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Oh Balls 2 - Physics Game</title>
+        <title>Oh Balls</title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.7/css/bootstrap.min.css" />
         <link rel="stylesheet" href="styles.css" />
     </head>
     <body>
-        <div class="game-container">
-            <div class="ui-header">
-                <h1>OH BALLS</h1>
+        <div class="container d-flex flex-column justify-content-center align-items-center" style="min-height: 80vh">
+            <div class="ui-header w-100 text-center mb-3">
+                <h1>Oh Balls Merge</h1>
+                <p>Harrison Digital</p>
             </div>
 
-            <canvas id="idCanvas" class="canvas" width="1280" height="720"></canvas>
+            <div id="idCanvas" class="canvas" style="display: block; position: relative">
+                <canvas id="idCanvasControl" width="1280" height="720"></canvas>
+                <div id="idToaster"></div>
+            </div>
+            <div id="idCanvasOverlay" class="canvas canvas-overlay" style="display: none"></div>
 
-            <div id="idCanvasOverlay" class="canvas canvas-overlay" style="display: none">** Temporary Canvas Content **</div>
-            <div class="ui-footer">
-                <div id="idFooterInfo" class="footer-info">Harrison Digital</div>
+            <div class="ui-footer w-100 text-center mt-3">
+                <div id="idFooterInfo" class="ui-footer-info">Harrison Digital</div>
             </div>
         </div>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.7/js/bootstrap.bundle.min.js"></script>
 
         <script src="lib/planck.min.js"></script>
 

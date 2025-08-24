@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Oh Balls</title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.7/css/bootstrap.min.css" />
+        <link rel="stylesheet" href="styles.css" />
+    </head>
+    <body>
+        <div class="container d-flex flex-column justify-content-center align-items-center" style="min-height: 80vh">
+            <div class="ui-header w-100 text-center mb-3">
+                <h1>Test</h1>
+                <p>Harrison Digital</p>
+            </div>
+
+            <div id="idCanvasOverlay" class="canvas canvas-overlay" style="display: block">
+                <div class="canvas-overlay-page">
+                    <h3 class="overlay-title">Title</h3>
+                    <div>&nbsp;</div>
+                    <div id="idButtonContainer" class="d-grid gap-2"></div>
+                    <div class="settings-panel" role="region" aria-label="Content panel">Hello World<br /></div>
+                </div>
+            </div>
+
+            <div class="ui-footer w-100 text-center mt-3">
+                <div id="idFooterInfo" class="ui-footer-info">Harrison Digital</div>
+            </div>
+        </div>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.7/js/bootstrap.bundle.min.js"></script>
+
+        <script src="lib/planck.min.js"></script>
+
+        <script>
+            function addButton(title, idx) {
+                var butContainer = document.getElementById('idButtonContainer');
+                if (!butContainer) {
+                    alert('Target container #idButtonContainer not found');
+                    return;
+                }
+
+                var button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'btn btn-warning';
+                button.textContent = title;
+                button.setAttribute('data-bs-toggle', 'button');
+                butContainer.appendChild(button);
+
+                // create bootstrap instance and store on element for later cleanup
+                var progInstance = new bootstrap.Button(button);
+                button._bsInstance = progInstance;
+
+                button.idx = idx;
+
+                // store the handler so it can be removed later
+                button._onClick = function onClick(e) {
+                    var btn = e.currentTarget || button;
+                    bootstrap.Button.getOrCreateInstance(btn).toggle();
+                };
+                button.addEventListener('click', button._onClick);
+            }
+
+            // Remove and cleanup helper
+            function removeButton(btn) {
+                if (!btn) return;
+                // remove event listener if it was stored
+                if (btn._onClick) {
+                    btn.removeEventListener('click', btn._onClick);
+                    btn._onClick = null;
+                }
+                // dispose bootstrap instance if present
+                var inst = btn._bsInstance || bootstrap.Button.getInstance(btn);
+                if (inst && typeof inst.dispose === 'function') {
+                    inst.dispose();
+                }
+                btn._bsInstance = null;
+                // remove from DOM
+                if (btn.parentNode) btn.parentNode.removeChild(btn);
+            }
+
+            // Remove handlers and dispose bootstrap instances for all buttons in the container
+            function removeAllButtonHandlers() {
+                var container = document.getElementById('idButtonContainer');
+                if (!container) return;
+                container.querySelectorAll('button').forEach(function (btn) {
+                    // remove stored handler if present
+                    if (btn._onClick) {
+                        btn.removeEventListener('click', btn._onClick);
+                        btn._onClick = null;
+                    }
+
+                    var inst = btn._bsInstance || (window.bootstrap && bootstrap.Button.getInstance(btn));
+                    if (inst && typeof inst.dispose === 'function') inst.dispose();
+                    btn._bsInstance = null;
+                    // remove bootstrap data attribute if present
+                    btn.removeAttribute('data-bs-toggle');
+                });
+                console.log('All button handlers removed and Bootstrap instances disposed.');
+            }
+        </script>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                // addButton('Four', 4);
+                // addButton('Five', 5);
+            });
+        </script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                var removeLast = document.getElementById('removeLastBtn');
+                var container = document.getElementById('idButtonContainer');
+                if (removeLast && container) {
+                    removeLast.addEventListener('click', function () {
+                        // pick the last button that was added (skip the original static ones by checking _onClick)
+                        var children = Array.from(container.querySelectorAll('button'));
+                        var last = children.reverse().find(function (b) {
+                            return b._onClick;
+                        });
+                        if (last) {
+                            removeButton(last);
+                            console.log('Removed button', last.textContent);
+                        } else {
+                            console.log('No dynamic buttons to remove.');
+                        }
+                    });
+                    var removeAll = document.getElementById('removeAllBtn');
+                    if (removeAll) {
+                        removeAll.addEventListener('click', function () {
+                            removeAllButtonHandlers();
+                        });
+                    }
+                }
+            });
+        </script>
+    </body>
+</html>

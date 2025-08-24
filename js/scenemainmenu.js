@@ -1,14 +1,10 @@
 import { SceneBase } from './scenebase.js';
 
 export class SceneMainmenu extends SceneBase {
-    constructor(canvas, manager) {
-        super(canvas, manager);
+    constructor(canvas, manager, config) {
+        super(canvas, manager, config);
 
-        this.selectedOption = 0;
         this.nextScene = null;
-
-        this.menuOptions = ['Start Game', 'Settings'];
-        this.menuContainerId = 'mainmenuButtons';
     }
 
     enter() {
@@ -21,32 +17,40 @@ export class SceneMainmenu extends SceneBase {
     }
 
     exit() {
+        this.deleteMenuEventListeners();
         this.hideOverlay();
     }
 
-    setNextScene(sel) {
-        if (sel === 1) {
-            this.nextScene = SceneBase.GameScenes.settings;
-        } else if (sel === 0) {
-            this.nextScene = SceneBase.GameScenes.ballsX;
+    doMenuHandler(sel) {
+        switch (sel) {
+            case 1:
+                this.nextScene = SceneBase.GameScenes.ballsX;
+                break;
+            case 2:
+                this.nextScene = SceneBase.GameScenes.settings;
+                break;
+            default:
+                break;
         }
     }
 
     insertHTMLOverlayContent() {
         const overlay = document.getElementById('idCanvasOverlay');
         if (!overlay) return;
-        overlay.innerHTML = `
-                <div class="mainmenu-ui">
-                    <div class="menu-panel">
-                        <div id="mainmenuButtons" class="mainmenu-buttons"></div>
-                        <div class="settings-footer">↑ ↓ Navigate • ENTER to select</div>
-                    </div>
-                </div>
-            `;
 
-        SceneBase.createMenuButtons('Main Menu', this.menuContainerId, this.menuOptions, this.selectedOption, (idx, opt) => {
-            this.setNextScene(idx);
-        });
+        let vHtml = '';
+
+        vHtml += '<div class="canvas-overlay-page">';
+        vHtml += '<div><h3 class="overlay-title">Main Menu</h3></div><div>&nbsp;</div>';
+        vHtml += '<div id="idButtonContainer" class="d-grid gap-2">';
+
+        vHtml += '</div>';
+        vHtml += '<div>&nbsp;</div>';
+        vHtml += '</div>';
+
+        overlay.innerHTML = vHtml;
+
+        this.addMenuButtons(['Start Game', 'Settings']);
     }
 
     update(dt) {
@@ -62,24 +66,22 @@ export class SceneMainmenu extends SceneBase {
         return vHtml;
     }
 
-    setupEventHandlers() {}
-
     inputKeyPressed(comboId) {
         switch (comboId) {
             case 'ArrowUp':
-                if (this.selectedOption > 0) {
+                if (this.selectedOption > 1) {
                     this.selectedOption = this.selectedOption - 1;
-                    SceneBase.setSelectedButton(this.menuContainerId, this.selectedOption);
+                    this.selectMenuButton(this.selectedOption);
                 }
                 break;
             case 'ArrowDown':
-                if (this.selectedOption < this.menuOptions.length - 1) {
+                if (c < 2) {
                     this.selectedOption = this.selectedOption + 1;
-                    SceneBase.setSelectedButton(this.menuContainerId, this.selectedOption);
+                    this.selectMenuButton(this.selectedOption);
                 }
                 break;
             case 'Enter':
-                this.setNextScene(this.selectedOption);
+                this.doMenuHandler(this.selectedOption);
                 break;
             case 'Escape':
                 break;

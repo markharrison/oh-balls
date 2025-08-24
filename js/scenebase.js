@@ -6,72 +6,70 @@ export class SceneBase {
         settings: 'settings',
         settingsaudio: 'settingsaudio',
     });
-    constructor(canvas, manager) {
+    constructor(canvas, manager, config = null) {
         this.canvas = canvas;
         this.ctx = canvas.getContext('2d');
-        this.manager = manager; // Optional: reference to SceneManager if needed
-        // Per-instance resize handler used by overlay positioning
+        this.manager = manager;
+        this.config = config;
+        this.selectedOption = 1;
+        this.menuOptionsCount = 0;
         this._resizeHandler = null;
     }
 
-    static createMenuButtons(title = '', containerId, options = [], selectedIndex = 0, onClick = null) {
-        const container = document.getElementById(containerId);
-        if (!container) return null;
-
-        // Clear existing
-        container.innerHTML = '';
-
-        // Optional title at the top of the menu
-        if (title) {
-            const titleEl = document.createElement('div');
-            titleEl.className = 'menu-title';
-            titleEl.textContent = title;
-            container.appendChild(titleEl);
+    addMenuButton(title, idx) {
+        var butContainer = document.getElementById('idButtonContainer');
+        if (!butContainer) {
+            // alert('Target container #idButtonContainer not found');
+            return;
         }
 
-        options.forEach((opt, idx) => {
-            const label = typeof opt === 'object' && opt !== null ? opt.label ?? String(opt) : String(opt);
-            const value = typeof opt === 'object' && opt !== null ? opt.value ?? opt : opt;
+        var button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'btn btn-warning';
+        button.textContent = title;
+        button.id = 'idMenuButton_' + idx;
 
-            const btn = document.createElement('button');
-            btn.className = 'menu-button';
-            btn.type = 'button';
-            btn.textContent = label;
-            btn.dataset.index = String(idx);
-            btn.dataset.value = typeof value === 'string' ? value : JSON.stringify(value);
+        button.dataset.idx = String(idx);
 
-            if (idx === selectedIndex) btn.classList.add('selected');
+        button._onClick = (e) => {
+            var btn = e.currentTarget || button;
+            this.selectedOption = Number(btn.dataset.idx);
+            if (typeof this.doMenuHandler === 'function') {
+                this.doMenuHandler(this.selectedOption);
+            }
+        };
 
-            btn.addEventListener('click', (e) => {
-                // Update selection styling
-                SceneBase.setSelectedButton(containerId, idx);
-                if (typeof onClick === 'function') onClick(idx, opt);
-            });
+        button.addEventListener('click', button._onClick);
 
-            // When a button receives keyboard focus (e.g., via Tab), make it the selected button
-            btn.addEventListener('focus', (e) => {
-                SceneBase.setSelectedButton(containerId, idx);
-            });
-
-            container.appendChild(btn);
-        });
-
-        return container;
+        butContainer.appendChild(button);
     }
 
-    static setSelectedButton(containerId, index) {
-        const container = document.getElementById(containerId);
-        if (!container) return;
-        const buttons = Array.from(container.querySelectorAll('.menu-button'));
-        buttons.forEach((b) => b.classList.remove('selected'));
-        const target = buttons[index];
-        if (target) target.classList.add('selected');
-        // Move DOM focus to the selected button so native keyboard activation works
-        try {
-            if (target && typeof target.focus === 'function') target.focus();
-        } catch (e) {
-            // ignore focus errors in older environments
-        }
+    addMenuButtons(menuOptions) {
+        menuOptions.forEach((menuOption, index) => {
+            this.addMenuButton(menuOption, index + 1);
+        });
+        this.menuOptionsCount = menuOptions.length;
+    }
+
+    selectMenuButton(opt) {
+        this.selectedOption = opt;
+
+        const btn = document.getElementById('idMenuButton_' + opt);
+
+        if (btn) btn.focus();
+    }
+
+    deleteMenuEventListeners() {
+        const butContainer = document.getElementById('idButtonContainer');
+        if (!butContainer) return;
+
+        const buttons = Array.from(butContainer.querySelectorAll('button'));
+        buttons.forEach((btn) => {
+            if (btn._onClick) {
+                btn.removeEventListener('click', btn._onClick);
+                btn._onClick = null;
+            }
+        });
     }
 
     enter() {
@@ -101,22 +99,22 @@ export class SceneBase {
     inputKeyPressed(comboId) {
         switch (comboId) {
             case 'ArrowUp':
-                if (this.selectedOption > 0) {
+                if (this.selectedOption > 1) {
                     this.selectedOption = this.selectedOption - 1;
-                    SceneBase.setSelectedButton(this.menuContainerId, this.selectedOption);
+                    this.selectMenuButton(this.selectedOption);
                 }
                 break;
             case 'ArrowDown':
-                if (this.selectedOption < this.menuOptions.length - 1) {
+                if (this.selectedOption < 2) {
                     this.selectedOption = this.selectedOption + 1;
-                    SceneBase.setSelectedButton(this.menuContainerId, this.selectedOption);
+                    this.selectMenuButton(this.selectedOption);
                 }
                 break;
             case 'Enter':
-                this.setNextScene(this.selectedOption);
+                this.doMenuHandler(this.selectedOption);
                 break;
             case 'Escape':
-                this.setNextScene(0);
+                this.doMenuHandler(1);
                 break;
             default:
                 this.inputKeyPressedOther(comboId);
