@@ -104,12 +104,12 @@ export class Config {
     }
 
     // Save to localStorage (convenience method)
-    saveToLocalStorage(key = 'oh-balls-config2') {
+    saveToLocalStorage(key = 'oh-balls-merge-config') {
         localStorage.setItem(key, this.serialize());
     }
 
     // Load from localStorage (convenience method)
-    loadFromLocalStorage(key = 'oh-balls-config2') {
+    loadFromLocalStorage(key = 'oh-balls-merge-config') {
         const stored = localStorage.getItem(key);
         if (stored) {
             this.deserialize(stored);

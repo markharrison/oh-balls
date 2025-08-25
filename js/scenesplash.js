@@ -1,8 +1,8 @@
 import { SceneBase } from './scenebase.js';
 
 export class SceneSplash extends SceneBase {
-    constructor(canvas, manager, config) {
-        super(canvas, manager, config);
+    constructor(manager) {
+        super(manager);
 
         this.startTime = null;
     }
@@ -47,7 +47,7 @@ export class SceneSplash extends SceneBase {
                 <div >
                     <br /><br /><br /><br /><br />
                     <div style="text-align: center;">
-                        <h1 style="font-size: 72px; font-weight: bold; color: #ffffff;">OH BALLS</h1>
+                        <h1 style="font-size: 72px; font-weight: bold; color: #ffffff;">OH BALLS MERGE</h1>
                         <h2 style="font-size: 32px; color: #cccccc;">Physics Game</h2>
                         <p style="font-size: 24px; color: #999999;">Loading...</p>
                     </div>

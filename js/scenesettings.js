@@ -1,8 +1,8 @@
 import { SceneBase } from './scenebase.js';
 
 export class SceneSettings extends SceneBase {
-    constructor(canvas, manager, config) {
-        super(canvas, manager, config);
+    constructor(manager) {
+        super(manager);
 
         this.nextScene = null;
     }
@@ -28,6 +28,9 @@ export class SceneSettings extends SceneBase {
                 break;
             case 2:
                 this.nextScene = SceneBase.GameScenes.settingsaudio;
+                break;
+            case 3:
+                this.nextScene = SceneBase.GameScenes.settingstheme;
                 break;
             default:
                 break;
@@ -74,14 +77,10 @@ export class SceneSettings extends SceneBase {
 // ------------ Audio -------------------
 
 export class SceneSettingsAudio extends SceneBase {
-    constructor(canvas, manager, config) {
-        super(canvas, manager, config);
+    constructor(manager) {
+        super(manager);
 
-        this.selectedOption = 0;
         this.nextScene = null;
-
-        this.menuOptions = ['Home'];
-        this.menuContainerId = 'mainmenuButtons';
     }
 
     enter() {
@@ -162,7 +161,7 @@ export class SceneSettingsAudio extends SceneBase {
         this.config.volume = volume;
         this.config.audio = audioEnabled;
         this.config.saveToLocalStorage();
-        this.manager.doToast('Audio Settings changed', 'Volume: ' + volume + ', Audio: ' + (audioEnabled ? 'On' : 'Off'));
+        this.manager.doToast('Audio Settings', 'Updated.  Volume: ' + volume + ', Audio: ' + (audioEnabled ? 'On' : 'Off'));
         this.nextScene = SceneBase.GameScenes.settings;
     }
 
@@ -182,7 +181,7 @@ export class SceneSettingsAudio extends SceneBase {
 
     getSceneStateHtml() {
         const vHtml = `
-            <strong>Scene: Settings</strong><br>
+            <strong>Scene: Audio Settings</strong><br>
         `;
         return vHtml;
     }
@@ -190,16 +189,140 @@ export class SceneSettingsAudio extends SceneBase {
     setupEventHandlers() {}
 
     getSpecialKeys() {
-        return ['Escape', 'Enter', 'ArrowUp', 'ArrowRight', 'ArrowLeft', 'ArrowDown', 'Control+KeyD'];
+        return ['Escape', 'Control+KeyD'];
     }
 
     inputKeyPressedOther(comboId) {
         switch (comboId) {
-            case 'ArrowRight':
-                alert('Right arrow pressed');
+            case 'Escape':
+                this.nextScene = SceneBase.GameScenes.settings;
                 break;
-            case 'ArrowLeft':
-                SceneBase.setSelectedButton(this.menuContainerId, this.selectedOption);
+            default:
+                break;
+        }
+    }
+}
+
+// ------------ Theme -------------------
+
+export class SceneSettingsTheme extends SceneBase {
+    constructor(manager) {
+        super(manager);
+
+        this.nextScene = null;
+    }
+
+    enter() {
+        this.showOverlay();
+
+        const footerElement = document.getElementById('idFooterInfo');
+        if (footerElement) {
+            footerElement.textContent = 'Harrison Digital - Settings Theme';
+        }
+    }
+
+    exit() {
+        this.deleteEventListeners();
+        this.hideOverlay();
+    }
+
+    doMenuHandler(sel) {
+        switch (sel) {
+            case 1:
+                this.nextScene = SceneBase.GameScenes.settings;
+                break;
+            default:
+                break;
+        }
+    }
+
+    insertHTMLOverlayContent() {
+        const overlay = document.getElementById('idCanvasOverlay');
+        if (!overlay) return;
+        let vHtml = '';
+
+        vHtml += '<div class="canvas-overlay-page">';
+        vHtml += '<div><h3 class="overlay-title">Theme Settings</h3></div><div>&nbsp;</div>';
+        vHtml += '<div id="idButtonContainer" class="d-grid gap-2">';
+
+        vHtml += '</div>';
+        vHtml += '<div id="idSettingsPanel" class="settings-panel" role="region">';
+        vHtml += '</div>';
+        vHtml += '</div>';
+
+        overlay.innerHTML = vHtml;
+
+        const panel = document.getElementById('idSettingsPanel');
+        if (!panel) return;
+
+        // Get current config values
+        const initTheme = this.config.theme;
+
+        vHtml = '';
+        vHtml = `
+            <form>
+                <div class="mb-3">
+                    <label for="idTheme" class="form-label">Theme: </label>
+                    <select class="form-select" id="idTheme">
+                        <option selected>Default</option>
+                        <option value="One">One</option>
+                        <option value="Two">Two</option>
+                        <option value="Three">Three</option>
+                    </select>
+                </div>
+
+                <button id="idSaveSettings" type="button" class="btn btn-primary">Save</button>
+            </form>
+        `;
+        panel.innerHTML = vHtml;
+
+        // Attach save handler with correct context
+        this._boundSaveSettings = this.saveSettings.bind(this);
+        document.getElementById('idSaveSettings').addEventListener('click', this._boundSaveSettings);
+    }
+
+    // Handler for Save button (must be at class level)
+    saveSettings(e) {
+        e.preventDefault();
+        const theme = document.getElementById('idTheme').value;
+        this.config.theme = theme;
+
+        this.config.saveToLocalStorage();
+        this.manager.doToast('Theme Settings', 'Updated. Theme: ' + theme);
+        this.nextScene = SceneBase.GameScenes.settings;
+    }
+
+    deleteEventListeners() {
+        const saveBtn = document.getElementById('idSaveSettings');
+        if (saveBtn && this._boundSaveSettings) {
+            saveBtn.removeEventListener('click', this._boundSaveSettings);
+            this._boundSaveSettings = null;
+        }
+    }
+
+    update(dt) {
+        return this.nextScene;
+    }
+
+    render(ctx) {}
+
+    getSceneStateHtml() {
+        const vHtml = `
+            <strong>Scene: Theme Settings</strong><br>
+        `;
+        return vHtml;
+    }
+
+    setupEventHandlers() {}
+
+    getSpecialKeys() {
+        return ['Escape', 'Control+KeyD'];
+    }
+
+    inputKeyPressedOther(comboId) {
+        switch (comboId) {
+            case 'Escape':
+                this.nextScene = SceneBase.GameScenes.settings;
                 break;
             default:
                 break;

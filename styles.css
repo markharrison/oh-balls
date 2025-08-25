@@ -90,8 +90,14 @@ body::before {
     width: min(100%, 1284px);
     max-width: 100%;
     display: block;
-    min-width: 1280px;
-    min-height: 720px;
+    overflow: hidden; /* Ensure canvas fits exactly within rounded borders */
+}
+
+.canvas canvas {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 10px; /* Slightly smaller radius to fit within parent border */
 }
 
 .canvas-overlay {

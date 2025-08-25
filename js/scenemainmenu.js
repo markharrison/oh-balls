@@ -1,8 +1,8 @@
 import { SceneBase } from './scenebase.js';
 
 export class SceneMainmenu extends SceneBase {
-    constructor(canvas, manager, config) {
-        super(canvas, manager, config);
+    constructor(manager) {
+        super(manager);
 
         this.nextScene = null;
     }
@@ -66,27 +66,7 @@ export class SceneMainmenu extends SceneBase {
         return vHtml;
     }
 
-    inputKeyPressed(comboId) {
-        switch (comboId) {
-            case 'ArrowUp':
-                if (this.selectedOption > 1) {
-                    this.selectedOption = this.selectedOption - 1;
-                    this.selectMenuButton(this.selectedOption);
-                }
-                break;
-            case 'ArrowDown':
-                if (c < 2) {
-                    this.selectedOption = this.selectedOption + 1;
-                    this.selectMenuButton(this.selectedOption);
-                }
-                break;
-            case 'Enter':
-                this.doMenuHandler(this.selectedOption);
-                break;
-            case 'Escape':
-                break;
-            default:
-                break;
-        }
+    getSpecialKeys() {
+        return ['Enter', 'ArrowUp', 'ArrowDown', 'Control+KeyD'];
     }
 }

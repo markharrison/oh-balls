@@ -5,12 +5,13 @@ export class SceneBase {
         ballsX: 'ballsX',
         settings: 'settings',
         settingsaudio: 'settingsaudio',
+        settingstheme: 'settingstheme',
     });
-    constructor(canvas, manager, config = null) {
-        this.canvas = canvas;
-        this.ctx = canvas.getContext('2d');
+    constructor(manager) {
         this.manager = manager;
-        this.config = config;
+        this.canvas = manager.canvas;
+        this.ctx = this.canvas.getContext('2d');
+        this.config = manager.config;
         this.selectedOption = 1;
         this.menuOptionsCount = 0;
         this._resizeHandler = null;
@@ -92,33 +93,47 @@ export class SceneBase {
         return '';
     }
 
+    getFocusedMenuButtonIndex() {
+        const active = document.activeElement;
+        if (active && active.id && active.id.startsWith('idMenuButton_')) {
+            return Number(active.dataset.idx);
+        }
+        return 1;
+    }
+
     getSpecialKeys() {
         return ['Escape', 'Enter', 'ArrowUp', 'ArrowDown', 'Control+KeyD'];
     }
 
     inputKeyPressed(comboId) {
-        switch (comboId) {
-            case 'ArrowUp':
-                if (this.selectedOption > 1) {
-                    this.selectedOption = this.selectedOption - 1;
-                    this.selectMenuButton(this.selectedOption);
-                }
-                break;
-            case 'ArrowDown':
-                if (this.selectedOption < 2) {
-                    this.selectedOption = this.selectedOption + 1;
-                    this.selectMenuButton(this.selectedOption);
-                }
-                break;
-            case 'Enter':
-                this.doMenuHandler(this.selectedOption);
-                break;
-            case 'Escape':
-                this.doMenuHandler(1);
-                break;
-            default:
-                this.inputKeyPressedOther(comboId);
-                break;
+        if (this.menuOptionsCount > 0) {
+            this.selectedOption = this.getFocusedMenuButtonIndex();
+
+            switch (comboId) {
+                case 'ArrowUp':
+                    if (this.selectedOption > 1) {
+                        this.selectedOption = this.selectedOption - 1;
+                        this.selectMenuButton(this.selectedOption);
+                    }
+                    break;
+                case 'ArrowDown':
+                    if (this.selectedOption < this.menuOptionsCount) {
+                        this.selectedOption = this.selectedOption + 1;
+                        this.selectMenuButton(this.selectedOption);
+                    }
+                    break;
+                case 'Enter':
+                    this.doMenuHandler(this.selectedOption);
+                    break;
+                case 'Escape':
+                    this.doMenuHandler(1);
+                    break;
+                default:
+                    this.inputKeyPressedOther(comboId);
+                    break;
+            }
+        } else {
+            this.inputKeyPressedOther(comboId);
         }
     }
 

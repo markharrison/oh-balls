@@ -6,6 +6,7 @@ import { SceneSplash } from './scenesplash.js';
 import { SceneMainmenu } from './scenemainmenu.js';
 import { SceneSettings } from './scenesettings.js';
 import { SceneSettingsAudio } from './scenesettings.js';
+import { SceneSettingsTheme } from './scenesettings.js';
 
 export class SceneManager {
     constructor(canvas) {
@@ -35,19 +36,22 @@ export class SceneManager {
 
         switch (sceneKey) {
             case SceneBase.GameScenes.splash:
-                this.currentScene = new SceneSplash(this.canvas, this, this.config);
+                this.currentScene = new SceneSplash(this);
                 break;
             case SceneBase.GameScenes.mainmenu:
-                this.currentScene = new SceneMainmenu(this.canvas, this, this.config);
+                this.currentScene = new SceneMainmenu(this);
                 break;
             case SceneBase.GameScenes.ballsX:
-                this.currentScene = new SceneBallsX(this.canvas, this, this.config);
+                this.currentScene = new SceneBallsX(this);
                 break;
             case SceneBase.GameScenes.settings:
-                this.currentScene = new SceneSettings(this.canvas, this, this.config);
+                this.currentScene = new SceneSettings(this);
                 break;
             case SceneBase.GameScenes.settingsaudio:
-                this.currentScene = new SceneSettingsAudio(this.canvas, this, this.config);
+                this.currentScene = new SceneSettingsAudio(this);
+                break;
+            case SceneBase.GameScenes.settingstheme:
+                this.currentScene = new SceneSettingsTheme(this);
                 break;
             default:
                 break;
