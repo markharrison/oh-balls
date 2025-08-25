@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Oh Balls</title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.7/css/bootstrap.min.css" />
+        <link rel="stylesheet" href="styles.css" />
+    </head>
+    <body>
+        <div class="container d-flex flex-column justify-content-center align-items-center" style="min-height: 80vh">
+            <div class="ui-header w-100 text-center mb-3">
+                <h1>Oh Balls Merge</h1>
+                <p>Harrison Digital</p>
+            </div>
+
+            <div id="idCanvas" class="canvas" style="display: block; position: relative">
+                <canvas id="idCanvasControl" width="1280" height="720"></canvas>
+                <div id="idCanvasBackdrop" style="display: none"></div>
+                <div id="idCanvasDialog" style="display: none"></div>
+                <div id="idToaster" style="display: none"></div>
+                <div id="idCanvasOverlay" class="canvas canvas-overlay" style="display: none"></div>
+            </div>
+
+            <div class="ui-footer w-100 text-center mt-3">
+                <div id="idFooterInfo" class="ui-footer-info">Harrison Digital</div>
+            </div>
+        </div>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.7/js/bootstrap.bundle.min.js"></script>
+
+        <script src="lib/planck.min.js"></script>
+
+        <script type="module" src="js/screenmanager.js"></script>
+        <script type="module" src="js/physics.js"></script>
+        <script type="module" src="js/scenesplash.js"></script>
+        <script type="module" src="js/scenemainmenu.js"></script>
+        <script type="module" src="js/scenesettings.js"></script>
+        <script type="module" src="js/sceneballsx.js"></script>
+        <script type="module" src="js/ball.js"></script>
+        <script type="module" src="js/input.js"></script>
+        <script type="module" src="js/diagnostics.js"></script>
+        <script type="module" src="js/main.js"></script>
+    </body>
+</html>

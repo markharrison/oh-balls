@@ -1,0 +1,218 @@
+:root {
+    --canvas-width: 1280px;
+}
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html,
+body {
+    height: 100%;
+}
+
+html {
+    background: linear-gradient(135deg, #0d1421 0%, #1a237e 25%, #283593 50%, #3949ab 75%, #5e35b1 100%);
+    background-attachment: fixed;
+}
+
+body {
+    background: transparent;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: #e3f2fd;
+    overflow: auto;
+    position: relative;
+}
+
+body::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 75vh;
+    background-repeat: no-repeat;
+
+    background-image: radial-gradient(800px 600px at 20% 20%, rgba(120, 119, 198, 0.06), transparent 40%),
+        radial-gradient(900px 600px at 80% 10%, rgba(3, 169, 244, 0.04), transparent 40%);
+    pointer-events: none;
+    mix-blend-mode: screen;
+}
+
+.ui-header {
+    max-width: 1284px;
+    margin: 20px auto;
+    padding: 20px 30px;
+    background: rgba(13, 71, 161, 0.12);
+    backdrop-filter: blur(8px);
+    border: 2px solid rgba(100, 181, 246, 0.12);
+    border-radius: 12px;
+    text-align: center;
+}
+
+.ui-header h1 {
+    font-size: 2.4em;
+    font-weight: 700;
+    background: white;
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: 2px;
+    text-shadow: 0 0 24px rgba(33, 150, 243, 0.35);
+}
+.ui-footer {
+    width: min(100%, 1284px);
+    margin-top: 15px;
+    padding: 14px 20px;
+    background: rgba(26, 35, 126, 0.12);
+    backdrop-filter: blur(8px);
+    border: 2px solid rgba(100, 181, 246, 0.08);
+    border-radius: 10px;
+    text-align: center;
+}
+
+.ui-footer-info {
+    font-size: 1.05em;
+    font-weight: 600;
+    color: #eaf6ff;
+    text-shadow: 0 0 12px rgba(139, 195, 74, 0.25);
+}
+
+/* Canvas styles - responsive while keeping a visual max width */
+.canvas {
+    border: 2px solid rgba(100, 181, 246, 1);
+    border-radius: 12px;
+    width: min(100%, 1284px);
+    max-width: 100%;
+    display: block;
+    min-width: 1280px;
+    min-height: 720px;
+    overflow: hidden; /* Ensure canvas fits exactly within rounded borders */
+}
+
+.canvas canvas {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 10px; /* Slightly smaller radius to fit within parent border */
+}
+
+.canvas-overlay {
+    background: rgba(42, 42, 42, 0.9);
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 5;
+}
+
+.canvas-overlay-page {
+    padding: 20px;
+    color: #e3f2fd;
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    grid-template-rows: auto 1fr;
+    gap: 12px 24px;
+    align-items: start;
+}
+
+.overlay-title {
+    grid-column: 1 / 2;
+    margin: 0 0 0 0;
+    text-align: center;
+}
+
+.settings-panel {
+    flex: 1 1 auto;
+    min-height: 50px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 8px;
+    padding: 18px;
+    color: #eaf6ff;
+}
+
+#idToaster {
+    background: transparent;
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    z-index: 2000;
+    width: 300px;
+}
+
+#idCanvasBackdrop {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.75);
+    border-radius: 12px;
+    z-index: 10;
+    pointer-events: auto;
+}
+
+#idCanvasDialog {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #23272a !important;
+    color: #ffffff !important;
+    border: 2px solid #ffffff !important;
+    border-radius: 10px;
+
+    box-shadow: none;
+    padding: 24px;
+    min-width: 400px;
+    text-align: center;
+    z-index: 20;
+}
+
+.btn:focus,
+.btn:focus-visible {
+    outline: 2px solid #ffffff !important;
+    outline-offset: 0px;
+    box-shadow: none;
+}
+
+.form-select:focus,
+.form-select:focus-visible {
+    outline: 2px solid #ffffff !important;
+    outline-offset: 0px;
+    box-shadow: none;
+    background-color: #f5f5dc;
+}
+
+.form-check-input:focus,
+.form-check-input:focus-visible {
+    outline: 1px solid #ffffff !important;
+    outline-offset: 0px;
+    box-shadow: none;
+    border-color: #ffffff !important;
+}
+
+.form-range:focus::-webkit-slider-thumb,
+.form-range:focus-visible::-webkit-slider-thumb {
+    outline-offset: 0px;
+    border: 1px solid #ffffff;
+}
+
+.form-range:focus::-moz-range-thumb,
+.form-range:focus-visible::-moz-range-thumb {
+    outline-offset: 0px;
+    border: 1px solid ffffff;
+}
+
+.form-range:focus::-ms-thumb,
+.form-range:focus-visible::-ms-thumb {
+    outline-offset: 0px;
+    border: 1px solid #ffffff;
+}
