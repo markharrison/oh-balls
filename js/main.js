@@ -1,6 +1,43 @@
 import { SceneManager } from './screenmanager.js';
 import { InputHandler } from './input.js';
-import { Config } from './config.js';
+import { ConfigManager } from './config.js';
+import { AudioHandler } from './audio.js';
+
+class ObjectManager {
+    constructor() {
+        this.registry = {};
+    }
+    register(key, obj) {
+        if (this.registry.hasOwnProperty(key)) {
+            alert(`ObjectManager: key '${key}' is already registered!`);
+        }
+        this.registry[key] = obj;
+    }
+    deregister(key) {
+        if (!this.registry.hasOwnProperty(key)) {
+            alert(`ObjectManager: key '${key}' does not exist!`);
+            return;
+        }
+        delete this.registry[key];
+    }
+    get(key) {
+        if (!this.registry.hasOwnProperty(key)) {
+            alert(`ObjectManager: key '${key}' does not exist!`);
+            return null;
+        }
+        return this.registry[key];
+    }
+    getAll() {
+        return this.registry;
+    }
+    getObjectStateHtml() {
+        let vHtml = '<strong>Objects</strong><br/>';
+        Object.entries(this.registry).map(([key, obj]) => {
+            vHtml += `<div>${key}: ${obj?.constructor?.name || typeof obj}</div>`;
+        });
+        return vHtml;
+    }
+}
 
 class Main {
     constructor() {
@@ -8,17 +45,26 @@ class Main {
         this.running = false;
         this.rafId = null;
 
-        // Initialize configuration
-        this.config = new Config();
-        // Try to load saved configuration from localStorage
-        this.config.loadFromLocalStorage();
+        this.objectManager = new ObjectManager();
+        this.objectManager.register('Main', this);
 
-        this.inputHandler = new InputHandler();
+        this.ConfigManager = new ConfigManager();
+        this.objectManager.register('ConfigManager', this.ConfigManager);
 
-        this.sceneManager = new SceneManager(this.canvas);
-        this.sceneManager.registerInputHandler(this.inputHandler);
-        this.sceneManager.registerConfig(this.config);
+        this.inputHandler = new InputHandler(this);
+        this.objectManager.register('InputHandler', this.inputHandler);
+
+        this.audioHandler = new AudioHandler(this.objectManager);
+        this.objectManager.register('AudioHandler', this.audioHandler);
+
+        this.sceneManager = new SceneManager(this);
+        this.objectManager.register('SceneManager', this.sceneManager);
+ 
     }
+
+    // getObjectSummary() {
+    //     return this.objectManager.getSummary();
+    // }
 
     gameLoop() {
         if (!this.running) return;

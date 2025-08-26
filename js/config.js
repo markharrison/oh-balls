@@ -1,4 +1,4 @@
-export class Config {
+export class ConfigManager {
     constructor() {
         // Default configuration values
         this._config = {
@@ -10,6 +10,8 @@ export class Config {
             userName: '',
             userId: '',
         };
+
+        this.loadFromLocalStorage();
     }
 
     // Audio getter/setter

@@ -140,12 +140,11 @@ body::before {
 }
 
 #idToaster {
-    background: transparent;
     position: absolute;
-    bottom: 5px;
-    right: 5px;
-    z-index: 2000;
-    width: 300px;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1100;
+    width: 350px;
 }
 
 #idCanvasBackdrop {
@@ -260,7 +259,6 @@ input[type='range']::-ms-thumb {
     border: 2px solid #ffffff;
 }
 
-./* RANGE-FOCUS-THUMB - consolidated (keep only one block; do not duplicate) */
 .form-range:focus::-webkit-slider-thumb,
 .form-range:focus-visible::-webkit-slider-thumb,
 .form-range:focus::-moz-range-thumb,
@@ -269,4 +267,29 @@ input[type='range']::-ms-thumb {
 .form-range:focus-visible::-ms-thumb {
     outline-offset: 0px;
     border: 1px solid #ffffff;
+}
+
+.volume-control {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+    max-width: 400px;
+}
+
+.volume-control .form-label {
+    margin-bottom: 0;
+    width: 120px;
+    flex-shrink: 0;
+}
+
+.volume-control .form-range {
+    flex-grow: 1;
+    margin-right: 1rem;
+}
+
+.volume-value {
+    font-weight: bold;
+    color: var(--bs-primary);
+    width: 30px;
+    text-align: right;
 }

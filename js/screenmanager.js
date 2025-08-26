@@ -9,10 +9,15 @@ import { SceneSettingsAudio } from './scenesettings.js';
 import { SceneSettingsTheme } from './scenesettings.js';
 
 export class SceneManager {
-    constructor(canvas) {
-        this.canvas = canvas;
-        this.ctx = canvas.getContext('2d');
-        this.inputHandler = null;
+    constructor(main) {
+        this.main = main;
+        this.canvas = main.canvas;
+        this.configManager = main.ConfigManager;
+        this.inputHandler = main.inputHandler;
+        this.audioManager = main.audioManager;
+
+        this.ctx = this.canvas.getContext('2d');
+
         this.dialogEnabled = false;
         this.dialogButtonsCount = 0;
         this.overlayEnabled = false;
@@ -22,8 +27,7 @@ export class SceneManager {
             currentTime: 0,
         };
 
-        this.diagnosticsPanel = new DiagnosticPanel();
-        this.diagnosticsPanel.registerSceneManager(this);
+        this.diagnosticsPanel = new DiagnosticPanel(this);
 
         this.currentSceneKey = null;
         this.currentScene = null;
@@ -65,26 +69,19 @@ export class SceneManager {
         this.currentScene.enter();
     }
 
-    registerInputHandler(inputHandler) {
-        this.inputHandler = inputHandler;
-        this.inputHandler.registerSceneManager(this);
-    }
-
-    registerConfig(config) {
-        this.config = config;
-    }
-
-    getSceneMainStateHtml() {
-        const vHtml = `
-            <strong>Scene: Main</strong><br>
-        `;
-        return vHtml;
-    }
+    // getSceneMainStateHtml() {
+    //     const vHtml = `
+    //         <strong>Scene: Main</strong><br>
+    //     `;
+    //     return vHtml;
+    // }
 
     getSceneStateHtml() {
         let vHtml = '';
 
-        vHtml = this.currentScene.getSceneStateHtml();
+        if (this.currentScene && typeof this.currentScene.getSceneStateHtml === 'function') {
+            vHtml = this.currentScene.getSceneStateHtml();
+        }
 
         return vHtml;
     }
@@ -171,11 +168,15 @@ export class SceneManager {
         return str;
     }
 
-    doToast(vTitle, vText) {
+    doToast(vTitle, vText = '') {
         var vHtml = '';
         var vId = 'idToast' + this.randomString(8);
         var vDate = new Date();
         var vTime = vDate.toLocaleTimeString();
+
+        if (typeof vText === 'undefined') {
+            vText = '(No message provided)';
+        }
 
         vHtml += "<div id='" + vId + "' class='toast fade hide'><div class='toast-header'>";
         vHtml += "<strong class='mr-auto'>" + vTitle + "</strong><small class='text-muted'>&nbsp;" + vTime + '</small>';
@@ -198,7 +199,7 @@ export class SceneManager {
                 toastElement.addEventListener('hidden.bs.toast', cleanupToast);
 
                 // Initialize and show the toast using Bootstrap's toast API
-                const toast = new bootstrap.Toast(toastElement, { delay: 10000 });
+                const toast = new bootstrap.Toast(toastElement, { delay: 5000 });
                 toast.show();
             }
         }

@@ -1,22 +1,27 @@
 // Input Handling Module
 export class InputHandler {
-    constructor() {
-        this.diagnosticsPanel = null;
+    constructor(main) {
+        this.main = main;
+
         this.sceneManager = null;
-        // keyState: true if key is currently down
+        const startTime = Date.now();
+        const getSceneManager = () => {
+            if (this.main.sceneManager) {
+                this.sceneManager = this.main.sceneManager;
+            } else {
+                if (Date.now() - startTime > 50000) {
+                    alert('sceneManager not created after 5 seconds');
+                    return;
+                }
+                setTimeout(getSceneManager, 20);
+            }
+        };
+        getSceneManager();
+
         this.keyState = {};
-        // gamepadState: true if gamepad button is currently down
         this.gamepadState = {};
-        // (simpler) no combo mapping: track physical event.code only
+
         this.setupEventListeners();
-    }
-
-    registerDiagnosticsPanel(diagnosticsPanel) {
-        this.diagnosticsPanel = diagnosticsPanel;
-    }
-
-    registerSceneManager(sceneManager) {
-        this.sceneManager = sceneManager;
     }
 
     setupEventListeners() {
@@ -120,6 +125,8 @@ export class InputHandler {
     }
 
     getInput() {
+        if (!this.sceneManager) return;
+
         const dialogVisible = this.sceneManager.dialogEnabled;
         const overlayVisible = this.sceneManager.overlayEnabled;
 

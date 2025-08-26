@@ -1,30 +1,35 @@
 import { SceneBase } from './scenebase.js';
 
 export class SceneSplash extends SceneBase {
-    constructor(manager) {
-        super(manager);
+    constructor(sceneManager) {
+        super(sceneManager);
 
         this.startTime = null;
     }
 
-    enter() {
+    enter2() {
         this.showOverlay();
-
         this.startTime = performance.now();
         this.exitFlag = false;
-
         const footerElement = document.getElementById('idFooterInfo');
         if (footerElement) {
             footerElement.textContent = 'Harrison Digital - Splash Screen';
         }
     }
 
-    exit() {
+    exit2() {
         this.hideOverlay();
     }
 
+    initAudio() {
+        let audio = this.objectManager.get('AudioHandler');
+        audio?.initialize();
+    }
+
     update(dt) {
-        if (performance.now() - this.startTime >= 5000 || this.exitFlag) {
+        if (this.exitFlag) {
+            this.initAudio();
+
             return SceneBase.GameScenes.mainmenu;
         }
 
@@ -50,14 +55,26 @@ export class SceneSplash extends SceneBase {
                         <h1 style="font-size: 72px; font-weight: bold; color: #ffffff;">OH BALLS MERGE</h1>
                         <h2 style="font-size: 32px; color: #cccccc;">Physics Game</h2>
                         <p style="font-size: 24px; color: #999999;">Loading...</p>
+                        <br /><br /><br /><br />
+                        <button id="idButtonEnter" class="btn btn-primary  btn-lg ">Enter</button>
+
                     </div>
                 </div>
             `;
+
+        const btnEnter = document.getElementById('idButtonEnter');
+
+        btnEnter.onclick = () => {
+            this.exitFlag = true;
+        };
     }
 
     inputKeyPressed(comboId) {
-        if (comboId === 'Escape') {
-            this.exitFlag = true;
+        switch (comboId) {
+            case 'Escape':
+            case 'Enter':
+                this.exitFlag = true;
+                break;
         }
     }
 }

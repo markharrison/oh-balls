@@ -8,13 +8,16 @@ export const wallThickness = 16;
 export const fixedTimeStep = 1000 / 60; // ms per physics step (16.666...)
 
 export class SceneBallsX extends SceneBase {
-    constructor(manager) {
-        super(manager);
+    constructor(sceneManager) {
+        super(sceneManager);
         this.inputHandler = null;
 
         this.ballManager = new BallManager(this);
 
-        this.physics = new PhysicsEngine().create();
+        this.physics = new PhysicsEngine();
+        this.objectManager.register('PhysicsEngine', this.physics);
+
+        this.physics.create();
         this.physics.setGravity(0, 300); // Gentler gravity for relaxed gameplay
         this.physics.setTimeScale(1);
 
@@ -147,10 +150,6 @@ export class SceneBallsX extends SceneBase {
         this.physics.addBody(rightWall);
     }
 
-    // start() {
-    //     this.ballManager.start();
-    // }
-
     addBody(body) {
         this.physics.addBody(body);
     }
@@ -260,69 +259,6 @@ export class SceneBallsX extends SceneBase {
         this.clock.stepTime = fixedTimeStep;
     }
 
-    // renderExitDialog() {
-    //     // Semi-transparent overlay
-    //     this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-    //     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-
-    //     // Dialog box
-    //     const dialogWidth = 400;
-    //     const dialogHeight = 250;
-    //     const dialogX = (this.canvas.width - dialogWidth) / 2;
-    //     const dialogY = (this.canvas.height - dialogHeight) / 2;
-
-    //     // Dialog background
-    //     this.ctx.fillStyle = '#333333';
-    //     this.ctx.fillRect(dialogX, dialogY, dialogWidth, dialogHeight);
-
-    //     // Dialog border
-    //     this.ctx.strokeStyle = '#666666';
-    //     this.ctx.lineWidth = 2;
-    //     this.ctx.strokeRect(dialogX, dialogY, dialogWidth, dialogHeight);
-
-    //     // Dialog title
-    //     this.ctx.font = 'bold 24px Arial';
-    //     this.ctx.fillStyle = '#ffffff';
-    //     this.ctx.textAlign = 'center';
-    //     this.ctx.textBaseline = 'middle';
-    //     this.ctx.fillText('Exit game - are you sure', this.canvas.width / 2, dialogY + 80);
-
-    //     // Dialog options
-    //     const startY = dialogY + 140;
-    //     const buttonWidth = 120;
-    //     const buttonHeight = 40;
-    //     const buttonSpacing = 40;
-    //     const totalButtonWidth = this.dialogOptions.length * buttonWidth + (this.dialogOptions.length - 1) * buttonSpacing;
-    //     const startX = (this.canvas.width - totalButtonWidth) / 2;
-
-    //     this.dialogOptions.forEach((option, index) => {
-    //         const buttonX = startX + index * (buttonWidth + buttonSpacing);
-    //         const buttonY = startY;
-    //         const isSelected = index === this.dialogSelectedOption;
-
-    //         // Button background
-    //         this.ctx.fillStyle = isSelected ? '#555555' : '#444444';
-    //         this.ctx.fillRect(buttonX, buttonY, buttonWidth, buttonHeight);
-
-    //         // Button border
-    //         this.ctx.strokeStyle = isSelected ? '#00ff00' : '#666666';
-    //         this.ctx.lineWidth = isSelected ? 3 : 1;
-    //         this.ctx.strokeRect(buttonX, buttonY, buttonWidth, buttonHeight);
-
-    //         // Button text
-    //         this.ctx.font = '18px Arial';
-    //         this.ctx.fillStyle = isSelected ? '#00ff00' : '#cccccc';
-    //         this.ctx.textAlign = 'center';
-    //         this.ctx.fillText(option, buttonX + buttonWidth / 2, buttonY + buttonHeight / 2);
-    //     });
-
-    //     // Instructions
-    //     this.ctx.font = '16px Arial';
-    //     this.ctx.fillStyle = '#888888';
-    //     this.ctx.textAlign = 'center';
-    //     this.ctx.fillText('← → Navigate • ENTER Select • ESC Cancel', this.canvas.width / 2, dialogY + dialogHeight - 30);
-    // }
-
     renderScene() {
         const footerElement = document.getElementById('idFooterInfo');
         if (footerElement) {
@@ -357,37 +293,6 @@ export class SceneBallsX extends SceneBase {
     }
 
     inputKeyPressed(comboId) {
-        // if (this.showExitDialog) {
-        //     switch (comboId) {
-        //         case 'ArrowLeft':
-        //             this.dialogSelectedOption =
-        //                 (this.dialogSelectedOption - 1 + this.dialogOptions.length) % this.dialogOptions.length;
-        //             break;
-        //         case 'ArrowRight':
-        //             this.dialogSelectedOption = (this.dialogSelectedOption + 1) % this.dialogOptions.length;
-        //             break;
-        //         case 'Enter':
-        //             if (this.dialogSelectedOption === 0) {
-        //                 // Exit selected - signal to scene manager to return to menu
-        //                 console.log('Exit option selected, setting exitToMenu to true');
-        //                 this.exitToMenu = true;
-        //             }
-        //             // Hide dialog regardless of selection
-        //             this.showExitDialog = false;
-        //             this.dialogSelectedOption = 1; // Reset to default
-        //             break;
-        //         case 'Escape':
-        //             // Cancel dialog - hide it
-        //             this.showExitDialog = false;
-        //             this.dialogSelectedOption = 1; // Reset to default
-        //             break;
-        //         default:
-        //             break;
-        //     }
-        //     return; // Don't process game controls when dialog is shown
-        // }
-
-        // Normal game input handling
         switch (comboId) {
             case 'ArrowLeft':
                 this.ballManager.moveCurrentBall(-1);
@@ -403,7 +308,7 @@ export class SceneBallsX extends SceneBase {
                 // Show exit confirmation dialog
                 this.showingExitDialog = true;
 
-                this.manager.doDialog('Exit Game', 'Are you sure you want to exit?', ['Yes', 'No'], (result) => {
+                this.sceneManager.doDialog('Exit Game', 'Are you sure you want to exit?', ['Yes', 'No'], (result) => {
                     this.showingExitDialog = false;
                     this.clock.currentTime = performance.now();
                     if (result === 'Yes') {
@@ -420,15 +325,16 @@ export class SceneBallsX extends SceneBase {
         }
     }
 
-    enter() {
-        // Called when the scene becomes active
-        // The BallManager will start spawning balls via its updateFrame method
-    }
+    enter2() {}
 
-    exit() {
+    exit2() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.ctx.fillStyle = '#111111';
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+        this.physics.destroy();
+        this.physics = null;
+        this.objectManager.deregister('PhysicsEngine');
     }
 
     update(dt) {
@@ -456,13 +362,4 @@ export class SceneBallsX extends SceneBase {
     render(ctx) {
         this.renderScene();
     }
-
-    // shouldExitToMenu() {
-    //     console.log('shouldExitToMenu called, exitToMenu:', this.exitToMenu);
-    //     return this.exitToMenu;
-    // }
-
-    // markExitProcessed() {
-    //     this.exitToMenu = false;
-    // }
 }

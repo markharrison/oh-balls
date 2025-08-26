@@ -1,0 +1,33 @@
+{
+    "servers": {
+        // "AzureMCPServer": {
+        //     "command": "npx",
+        //     "args": [
+        //         "-y",
+        //         "@azure/mcp@latest",
+        //         "server",
+        //         "start"
+        //     ]
+        // },
+        // "time": {
+        //     "command": "docker",
+        //     "args": [
+        //         "run",
+        //         "-i",
+        //         "--rm",
+        //         "mcp/time"
+        //     ]
+        // },
+        // "colors": {
+        //     "url": "https://colorsmcp.azure1.dev/"
+        //     //"url": "http://localhost:3000/"
+        // },
+        "playwright": {
+            "command": "npx",
+            "args": [
+                "@playwright/mcp@latest"
+            ]
+        }
+    }
+}
+

@@ -1,22 +1,21 @@
 import { SceneBase } from './scenebase.js';
 
 export class SceneSettings extends SceneBase {
-    constructor(manager) {
-        super(manager);
+    constructor(sceneManager) {
+        super(sceneManager);
 
         this.nextScene = null;
     }
 
-    enter() {
+    enter2() {
         this.showOverlay();
-
         const footerElement = document.getElementById('idFooterInfo');
         if (footerElement) {
             footerElement.textContent = 'Harrison Digital - Settings';
         }
     }
 
-    exit() {
+    exit2() {
         this.deleteMenuEventListeners();
         this.hideOverlay();
     }
@@ -75,13 +74,13 @@ export class SceneSettings extends SceneBase {
 // ------------ Audio -------------------
 
 export class SceneSettingsAudio extends SceneBase {
-    constructor(manager) {
-        super(manager);
+    constructor(sceneManager) {
+        super(sceneManager);
 
         this.nextScene = null;
     }
 
-    enter() {
+    enter2() {
         this.showOverlay();
 
         const footerElement = document.getElementById('idFooterInfo');
@@ -90,7 +89,7 @@ export class SceneSettingsAudio extends SceneBase {
         }
     }
 
-    exit() {
+    exit2() {
         this.deleteEventListeners();
         this.hideOverlay();
     }
@@ -128,40 +127,26 @@ export class SceneSettingsAudio extends SceneBase {
     }
 
     handleLeft() {
-        const activeElementId = document.activeElement.id;
-
-        switch (activeElementId) {
-            case 'idAudio':
-                document.getElementById('idAudio').checked = false;
-                break;
-
-            case 'idVolume':
-                let volume = parseInt(document.getElementById('idVolume').value, 10);
-                volume = Math.max(0, volume - 10);
-                document.getElementById('idVolume').value = volume;
-                break;
-
-            default:
-                break;
+        const activeElement = document.activeElement;
+        if (activeElement && activeElement.type === 'range') {
+            let volume = parseInt(activeElement.value, 10);
+            volume = Math.max(parseInt(activeElement.min, 10), volume - parseInt(activeElement.step, 10));
+            activeElement.value = volume;
+            activeElement.dispatchEvent(new Event('input'));
+        } else if (activeElement.id === 'idAudio') {
+            document.getElementById('idAudio').checked = false;
         }
     }
 
     handleRight() {
-        const activeElementId = document.activeElement.id;
-
-        switch (activeElementId) {
-            case 'idAudio':
-                document.getElementById('idAudio').checked = true;
-                break;
-
-            case 'idVolume':
-                let volume = parseInt(document.getElementById('idVolume').value, 10);
-                volume = Math.min(100, volume + 10);
-                document.getElementById('idVolume').value = volume;
-                break;
-
-            default:
-                break;
+        const activeElement = document.activeElement;
+        if (activeElement && activeElement.type === 'range') {
+            let volume = parseInt(activeElement.value, 10);
+            volume = Math.min(parseInt(activeElement.max, 10), volume + parseInt(activeElement.step, 10));
+            activeElement.value = volume;
+            activeElement.dispatchEvent(new Event('input'));
+        } else if (activeElement.id === 'idAudio') {
+            document.getElementById('idAudio').checked = true;
         }
     }
 
@@ -185,8 +170,10 @@ export class SceneSettingsAudio extends SceneBase {
         if (!panel) return;
 
         // Get current config values
-        const initVolume = this.config.masterVolume;
-        const initAudio = this.config.audio ? 'checked' : '';
+        const initMasterVolume = this.configManager.masterVolume;
+        const initMusicVolume = this.configManager.musicVolume;
+        const initSfxVolume = this.configManager.sfxVolume;
+        const initAudio = this.configManager.audio ? 'checked' : '';
 
         vHtml = '';
         vHtml = `
@@ -196,10 +183,24 @@ export class SceneSettingsAudio extends SceneBase {
                     <label class="form-check-label" for="idAudio">Audio</label>
                 </div>
 
-                <div class="mb-3" style="max-width: 300px;">
-                    <label for="idVolume" class="form-label">Volume: </label>
-                    <input type="range" class="form-range" min="0" max="100" step="10" value="${initVolume}" id="idVolume" data-idx="2" tabindex="0">
-                 </div>
+                <div class="volume-control">
+                    <label for="idMasterVolume" class="form-label">Master Volume:</label>
+                    <input type="range" class="form-range" min="0" max="100" step="10" value="${initMasterVolume}" id="idMasterVolume" data-config-key="masterVolume" tabindex="0">
+                    <span id="idMasterVolumeValue" class="volume-value">${initMasterVolume}</span>
+                </div>
+
+                <div class="volume-control">
+                    <label for="idMusicVolume" class="form-label">Music Volume:</label>
+                    <input type="range" class="form-range" min="0" max="100" step="10" value="${initMusicVolume}" id="idMusicVolume" data-config-key="musicVolume" tabindex="0">
+                    <span id="idMusicVolumeValue" class="volume-value">${initMusicVolume}</span>
+                </div>
+
+                <div class="volume-control">
+                    <label for="idSfxVolume" class="form-label">Sfx Volume:</label>
+                    <input type="range" class="form-range" min="0" max="100" step="10" value="${initSfxVolume}" id="idSfxVolume" data-config-key="sfxVolume" tabindex="0">
+                    <span id="idSfxVolumeValue" class="volume-value">${initSfxVolume}</span>
+                </div>
+
                 <button id="idSaveSettings" type="button" class="btn btn-primary" data-idx="3" tabindex="0">Save</button>
             </form>
         `;
@@ -218,26 +219,26 @@ export class SceneSettingsAudio extends SceneBase {
             this._settingsFocusable = Array.from(panelControls);
 
             document.querySelectorAll('input[type="range"]').forEach((r) => {
-                // local helper to update the track/fill background for the range
-                // Obtain colors from CSS variables (allow theming). Provide sensible fallbacks.
                 const computed = getComputedStyle(document.documentElement);
                 const fillColor = computed.getPropertyValue('--bs-primary')?.trim() || '#007bff';
                 const trackColor = computed.getPropertyValue('--bs-light')?.trim() || 'rgba(255,255,255,0.85)';
+                const valueSpan = document.getElementById(`${r.id}Value`);
 
-                const updateRangeFill = (elem) => {
+                const updateRangeVisuals = (elem) => {
                     const val = Number(elem.value || 0);
                     const min = Number(elem.min || 0);
                     const max = Number(elem.max || 100);
-                    const range = max - min || 1; // avoid division by zero
+                    const range = max - min || 1;
                     const pct = Math.round(((val - min) / range) * 100);
                     elem.style.background = `linear-gradient(to right, ${fillColor} 0%, ${fillColor} ${pct}%, ${trackColor} ${pct}%, ${trackColor} 100%)`;
+                    if (valueSpan) {
+                        valueSpan.textContent = val;
+                    }
                 };
 
-                // initialize visual fill
-                updateRangeFill(r);
+                updateRangeVisuals(r);
 
-                // update on input
-                r.addEventListener('input', () => updateRangeFill(r));
+                r.addEventListener('input', () => updateRangeVisuals(r));
             });
         }, 5);
     }
@@ -245,14 +246,18 @@ export class SceneSettingsAudio extends SceneBase {
     // Handler for Save button (must be at class level)
     saveSettings(e) {
         e.preventDefault();
-        const volume = parseInt(document.getElementById('idVolume').value, 10);
         const audioEnabled = document.getElementById('idAudio').checked;
+        this.configManager.audio = audioEnabled;
 
-        // Store master volume; music/sfx will inherit if needed elsewhere
-        this.config.masterVolume = volume;
-        this.config.audio = audioEnabled;
-        this.config.saveToLocalStorage();
-        this.manager.doToast('Audio Settings', 'Updated.  Volume: ' + volume + ', Audio: ' + (audioEnabled ? 'On' : 'Off'));
+        document.querySelectorAll('input[type="range"]').forEach((slider) => {
+            const configKey = slider.dataset.configKey;
+            if (configKey) {
+                this.configManager[configKey] = parseInt(slider.value, 10);
+            }
+        });
+
+        this.configManager.saveToLocalStorage();
+        this.sceneManager.doToast('Audio Settings', 'Settings updated.');
         this.nextScene = SceneBase.GameScenes.settings;
     }
 
@@ -315,13 +320,13 @@ export class SceneSettingsAudio extends SceneBase {
 // ------------ Theme -------------------
 
 export class SceneSettingsTheme extends SceneBase {
-    constructor(manager) {
-        super(manager);
+    constructor(sceneManager) {
+        super(sceneManager);
 
         this.nextScene = null;
     }
 
-    enter() {
+    enter2() {
         this.showOverlay();
 
         const footerElement = document.getElementById('idFooterInfo');
@@ -330,7 +335,7 @@ export class SceneSettingsTheme extends SceneBase {
         }
     }
 
-    exit() {
+    exit2() {
         this.deleteEventListeners();
         this.hideOverlay();
     }
@@ -418,7 +423,7 @@ export class SceneSettingsTheme extends SceneBase {
 
         // Get current config values
 
-        const initTheme = this.config.theme;
+        const initTheme = this.configManager.theme;
 
         vHtml = '';
         vHtml = `
@@ -462,10 +467,10 @@ export class SceneSettingsTheme extends SceneBase {
     saveSettings(e) {
         e.preventDefault();
         const theme = document.getElementById('idTheme').value;
-        this.config.theme = theme;
+        this.configManager.theme = theme;
 
-        this.config.saveToLocalStorage();
-        this.manager.doToast('Theme Settings', 'Updated. Theme: ' + theme);
+        this.configManager.saveToLocalStorage();
+        this.sceneManager.doToast('Theme Settings', 'Updated. Theme: ' + theme);
         this.nextScene = SceneBase.GameScenes.settings;
     }
 

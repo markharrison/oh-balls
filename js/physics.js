@@ -282,27 +282,7 @@ export class PhysicsBody {
         return 0;
     }
 
-    // set torque(value) {
-    //     // Torque is applied through applyTorque method in Plank
-    //     if (value !== 0) {
-    //         this.body.applyTorque(value);
-    //     }
-    // }
 
-    // // Custom properties access (for backward compatibility with raw body access)
-    // get customProperties() {
-    //     return this.body.getUserData() || {};
-    // }
-
-    // // Direct Plank body access for complex operations
-    // get plankBody() {
-    //     return this.body;
-    // }
-
-    // // Compatibility property for MatterJS code
-    // get matterBody() {
-    //     return this.body;
-    // }
 }
 
 export class PhysicsBodyFactory {

@@ -7,16 +7,15 @@ export class SceneMainmenu extends SceneBase {
         this.nextScene = null;
     }
 
-    enter() {
+    enter2() {
         this.showOverlay();
-
         const footerElement = document.getElementById('idFooterInfo');
         if (footerElement) {
             footerElement.textContent = 'Harrison Digital - Main Menu';
         }
     }
 
-    exit() {
+    exit2() {
         this.deleteMenuEventListeners();
         this.hideOverlay();
     }

@@ -7,11 +7,12 @@ export class SceneBase {
         settingsaudio: 'settingsaudio',
         settingstheme: 'settingstheme',
     });
-    constructor(manager) {
-        this.manager = manager;
-        this.canvas = manager.canvas;
+    constructor(sceneManager) {
+        this.sceneManager = sceneManager;
+        this.canvas = sceneManager.canvas;
         this.ctx = this.canvas.getContext('2d');
-        this.config = manager.config;
+        this.configManager = sceneManager.configManager;
+        this.objectManager = sceneManager.main.objectManager;
         this.selectedOption = 1;
         this.menuOptionsCount = 0;
     }
@@ -76,9 +77,19 @@ export class SceneBase {
         });
     }
 
-    enter() {}
+    enter2() {}
 
-    exit() {}
+    enter() {
+        this.enter2();
+        this.objectManager.register(this.constructor.name, this);
+    }
+
+    exit2() {}
+
+    exit() {
+        this.exit2();
+        this.objectManager.deregister(this.constructor.name, this);
+    }
 
     update(dt) {
         return null;
@@ -146,7 +157,7 @@ export class SceneBase {
 
         overlay.style.display = 'block';
 
-        this.manager.doShowOverlay();
+        this.sceneManager.doShowOverlay();
 
         setTimeout(() => {
             this.selectMenuButton(1);
@@ -158,6 +169,6 @@ export class SceneBase {
         if (!overlay) return;
         overlay.style.display = 'none';
 
-        this.manager.doHideOverlay();
+        this.sceneManager.doHideOverlay();
     }
 }
