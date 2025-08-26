@@ -185,7 +185,7 @@ export class SceneSettingsAudio extends SceneBase {
         if (!panel) return;
 
         // Get current config values
-        const initVolume = this.config.volume;
+        const initVolume = this.config.masterVolume;
         const initAudio = this.config.audio ? 'checked' : '';
 
         vHtml = '';
@@ -216,6 +216,29 @@ export class SceneSettingsAudio extends SceneBase {
 
             const panelControls = panel.querySelectorAll('input, select, textarea, button');
             this._settingsFocusable = Array.from(panelControls);
+
+            document.querySelectorAll('input[type="range"]').forEach((r) => {
+                // local helper to update the track/fill background for the range
+                // Obtain colors from CSS variables (allow theming). Provide sensible fallbacks.
+                const computed = getComputedStyle(document.documentElement);
+                const fillColor = computed.getPropertyValue('--bs-primary')?.trim() || '#007bff';
+                const trackColor = computed.getPropertyValue('--bs-light')?.trim() || 'rgba(255,255,255,0.85)';
+
+                const updateRangeFill = (elem) => {
+                    const val = Number(elem.value || 0);
+                    const min = Number(elem.min || 0);
+                    const max = Number(elem.max || 100);
+                    const range = max - min || 1; // avoid division by zero
+                    const pct = Math.round(((val - min) / range) * 100);
+                    elem.style.background = `linear-gradient(to right, ${fillColor} 0%, ${fillColor} ${pct}%, ${trackColor} ${pct}%, ${trackColor} 100%)`;
+                };
+
+                // initialize visual fill
+                updateRangeFill(r);
+
+                // update on input
+                r.addEventListener('input', () => updateRangeFill(r));
+            });
         }, 5);
     }
 
@@ -225,7 +248,8 @@ export class SceneSettingsAudio extends SceneBase {
         const volume = parseInt(document.getElementById('idVolume').value, 10);
         const audioEnabled = document.getElementById('idAudio').checked;
 
-        this.config.volume = volume;
+        // Store master volume; music/sfx will inherit if needed elsewhere
+        this.config.masterVolume = volume;
         this.config.audio = audioEnabled;
         this.config.saveToLocalStorage();
         this.manager.doToast('Audio Settings', 'Updated.  Volume: ' + volume + ', Audio: ' + (audioEnabled ? 'On' : 'Off'));

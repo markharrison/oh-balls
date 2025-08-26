@@ -1,5 +1,8 @@
 :root {
     --canvas-width: 1280px;
+    /* color tokens used by JS for range track/fill; can be overridden by theme or Bootstrap */
+    --bs-primary: #007bff;
+    --bs-light: rgba(255, 255, 255, 0.85);
 }
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
@@ -199,18 +202,69 @@ body::before {
     border-color: #ffffff !important;
 }
 
+/* base (remove native look) */
+input[type='range'] {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 10px;
+    border-radius: 6px;
+    background: transparent; /* JS will set a gradient on the element itself */
+    outline: none;
+}
+
+/* WebKit track + thumb */
+input[type='range']::-webkit-slider-runnable-track {
+    height: 10px;
+    border-radius: 6px;
+    background: transparent; /* allow element background gradient to show through */
+}
+input[type='range']::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--bs-primary, #007bff);
+    box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.15);
+    border: 2px solid #ffffff;
+    margin-top: -3px; /* vertically center the thumb */
+}
+
+/* Firefox track + thumb */
+input[type='range']::-moz-range-track {
+    height: 10px;
+    border-radius: 6px;
+    background: transparent;
+}
+input[type='range']::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--bs-primary, #007bff);
+    border: 2px solid #ffffff;
+}
+
+/* IE/Edge (legacy) */
+input[type='range']::-ms-track {
+    height: 10px;
+    border-radius: 6px;
+    background: transparent;
+    border-color: transparent;
+    color: transparent; /* hide the native track */
+}
+input[type='range']::-ms-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--bs-primary, #007bff);
+    border: 2px solid #ffffff;
+}
+
+./* RANGE-FOCUS-THUMB - consolidated (keep only one block; do not duplicate) */
 .form-range:focus::-webkit-slider-thumb,
-.form-range:focus-visible::-webkit-slider-thumb {
-    outline-offset: 0px;
-    border: 1px solid #ffffff;
-}
-
+.form-range:focus-visible::-webkit-slider-thumb,
 .form-range:focus::-moz-range-thumb,
-.form-range:focus-visible::-moz-range-thumb {
-    outline-offset: 0px;
-    border: 1px solid ffffff;
-}
-
+.form-range:focus-visible::-moz-range-thumb,
 .form-range:focus::-ms-thumb,
 .form-range:focus-visible::-ms-thumb {
     outline-offset: 0px;

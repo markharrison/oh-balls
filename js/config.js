@@ -3,7 +3,9 @@ export class Config {
         // Default configuration values
         this._config = {
             audio: true,
-            volume: 25,
+            masterVolume: 80,
+            musicVolume: 80,
+            sfxVolume: 80,
             theme: 'default',
             userName: '',
             userId: '',
@@ -19,14 +21,32 @@ export class Config {
         this._config.audio = Boolean(value);
     }
 
-    // Volume getter/setter (0-100)
-    get volume() {
-        return this._config.volume;
+    // Master/Music/SFX volume getters/setters (0-100)
+    get masterVolume() {
+        return this._config.masterVolume;
     }
 
-    set volume(value) {
-        const numValue = parseInt(value, 10);
-        this._config.volume = numValue;
+    set masterVolume(value) {
+        const numValue = Math.max(0, Math.min(100, parseInt(value, 10) || 0));
+        this._config.masterVolume = numValue;
+    }
+
+    get musicVolume() {
+        return this._config.musicVolume;
+    }
+
+    set musicVolume(value) {
+        const numValue = Math.max(0, Math.min(100, parseInt(value, 10) || 0));
+        this._config.musicVolume = numValue;
+    }
+
+    get sfxVolume() {
+        return this._config.sfxVolume;
+    }
+
+    set sfxVolume(value) {
+        const numValue = Math.max(0, Math.min(100, parseInt(value, 10) || 0));
+        this._config.sfxVolume = numValue;
     }
 
     // Theme getter/setter
@@ -70,8 +90,14 @@ export class Config {
             if (data.hasOwnProperty('audio')) {
                 this.audio = data.audio;
             }
-            if (data.hasOwnProperty('volume')) {
-                this.volume = data.volume;
+            if (data.hasOwnProperty('masterVolume')) {
+                this.masterVolume = data.masterVolume;
+            }
+            if (data.hasOwnProperty('musicVolume')) {
+                this.musicVolume = data.musicVolume;
+            }
+            if (data.hasOwnProperty('sfxVolume')) {
+                this.sfxVolume = data.sfxVolume;
             }
             if (data.hasOwnProperty('theme')) {
                 this.theme = data.theme;
@@ -96,7 +122,9 @@ export class Config {
     reset() {
         this._config = {
             audio: true,
-            volume: 80,
+            masterVolume: 80,
+            musicVolume: 80,
+            sfxVolume: 80,
             theme: 'default',
             userName: '',
             userId: '',
