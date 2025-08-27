@@ -125,23 +125,9 @@ export class SceneManager {
         this.diagnosticsPanel.renderPanel();
     }
 
-    randomString(length) {
-        var chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz'.split('');
-
-        if (!length) {
-            length = Math.floor(Math.random() * chars.length);
-        }
-
-        var str = '';
-        for (var i = 0; i < length; i++) {
-            str += chars[Math.floor(Math.random() * chars.length)];
-        }
-        return str;
-    }
-
     doToast(vTitle, vText = '') {
         var vHtml = '';
-        var vId = 'idToast' + this.randomString(8);
+        var vId = 'idToast-' + Math.floor(performance.now());
         var vDate = new Date();
         var vTime = vDate.toLocaleTimeString();
 

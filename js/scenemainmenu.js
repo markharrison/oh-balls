@@ -56,8 +56,6 @@ export class SceneMainmenu extends SceneBase {
         return this.nextScene;
     }
 
-    render(ctx) {}
-
     getSceneStateHtml() {
         const vHtml = `
             <strong>Scene: Menu</strong><br>
