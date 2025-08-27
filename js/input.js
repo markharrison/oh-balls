@@ -2,21 +2,7 @@
 export class InputHandler {
     constructor(objectManager) {
         this.objectManager = objectManager;
-
-        this.sceneManager = null;
-        const startTime = Date.now();
-        const getSceneManager = () => {
-            if (this.objectManager.keyExists('SceneManager')) {
-                this.sceneManager = this.objectManager.get('SceneManager');
-            } else {
-                if (Date.now() - startTime > 50000) {
-                    alert('sceneManager not created after 5 seconds');
-                    return;
-                }
-                setTimeout(getSceneManager, 20);
-            }
-        };
-        getSceneManager();
+        this.sceneManager = this.objectManager.get('SceneManager');
 
         this.keyState = {};
         this.gamepadState = {};

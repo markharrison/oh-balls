@@ -4,6 +4,7 @@ import { ConfigManager } from './config.js';
 import { AudioHandler } from './audio.js';
 
 class ObjectManager {
+    // To support Dependency Injection
     constructor() {
         this.registry = {};
     }
@@ -52,29 +53,27 @@ class Main {
         this.objectManager = new ObjectManager();
         this.objectManager.register('Main', this);
 
-        this.ConfigManager = new ConfigManager();
+        this.ConfigManager = new ConfigManager(this.objectManager);
         this.objectManager.register('ConfigManager', this.ConfigManager);
-
-        this.inputHandler = new InputHandler(this.objectManager);
-        this.objectManager.register('InputHandler', this.inputHandler);
 
         this.audioHandler = new AudioHandler(this.objectManager);
         this.objectManager.register('AudioHandler', this.audioHandler);
 
-        this.sceneManager = new SceneManager(this);
+        this.sceneManager = new SceneManager(this.objectManager);
         this.objectManager.register('SceneManager', this.sceneManager);
-    }
 
-    // getObjectSummary() {
-    //     return this.objectManager.getSummary();
-    // }
+        this.inputHandler = new InputHandler(this.objectManager);
+        this.objectManager.register('InputHandler', this.inputHandler);
+    }
 
     gameLoop() {
         if (!this.running) return;
 
-        // guard against sceneManager being cleared during teardown
-        if (this.sceneManager && typeof this.sceneManager.updateFrame === 'function') {
+        try {
+            this.inputHandler.getInput();
             this.sceneManager.updateFrame();
+        } catch (ex) {
+            this.running = false;
         }
 
         this.rafId = requestAnimationFrame(() => this.gameLoop());
@@ -83,26 +82,25 @@ class Main {
     start() {
         if (this.running) return;
 
+        this.sceneManager.start();
+
         this.running = true;
         this.gameLoop();
     }
 
     destroy() {
-        // Save configuration before destroying
-        if (this.config) {
-            this.config.saveToLocalStorage();
-        }
-
-        // stop the loop and cancel any pending animation frame
         this.running = false;
         if (this.rafId) {
             cancelAnimationFrame(this.rafId);
             this.rafId = null;
         }
 
+        if (this.config) {
+            this.config.saveToLocalStorage();
+        }
+        this.config = null;
         this.sceneManager = null;
         this.inputHandler = null;
-        this.config = null;
     }
 }
 

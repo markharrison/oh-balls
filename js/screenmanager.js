@@ -9,12 +9,11 @@ import { SceneSettingsAudio } from './scenesettings.js';
 import { SceneSettingsTheme } from './scenesettings.js';
 
 export class SceneManager {
-    constructor(main) {
-        this.main = main;
-        this.canvas = main.canvas;
-        this.configManager = main.ConfigManager;
-        this.inputHandler = main.inputHandler;
-        this.audioManager = main.audioManager;
+    constructor(objectManager) {
+        this.objectManager = objectManager;
+        this.canvas = objectManager.get('Main').canvas;
+        this.configManager = objectManager.get('ConfigManager');
+        this.audioManager = objectManager.get('AudioHandler');
 
         this.ctx = this.canvas.getContext('2d');
 
@@ -31,8 +30,6 @@ export class SceneManager {
 
         this.currentSceneKey = null;
         this.currentScene = null;
-
-        this.setCurrentScene(SceneBase.GameScenes.splash);
     }
 
     setCurrentScene(sceneKey) {
@@ -43,22 +40,22 @@ export class SceneManager {
 
         switch (sceneKey) {
             case SceneBase.GameScenes.splash:
-                this.currentScene = new SceneSplash(this);
+                this.currentScene = new SceneSplash(this.objectManager);
                 break;
             case SceneBase.GameScenes.mainmenu:
-                this.currentScene = new SceneMainmenu(this);
+                this.currentScene = new SceneMainmenu(this.objectManager);
                 break;
             case SceneBase.GameScenes.ballsX:
-                this.currentScene = new SceneBallsX(this);
+                this.currentScene = new SceneBallsX(this.objectManager);
                 break;
             case SceneBase.GameScenes.settings:
-                this.currentScene = new SceneSettings(this);
+                this.currentScene = new SceneSettings(this.objectManager);
                 break;
             case SceneBase.GameScenes.settingsaudio:
-                this.currentScene = new SceneSettingsAudio(this);
+                this.currentScene = new SceneSettingsAudio(this.objectManager);
                 break;
             case SceneBase.GameScenes.settingstheme:
-                this.currentScene = new SceneSettingsTheme(this);
+                this.currentScene = new SceneSettingsTheme(this.objectManager);
                 break;
             default:
                 alert('Unknown scene key: ' + sceneKey);
@@ -87,6 +84,10 @@ export class SceneManager {
     }
 
     setupEventHandlers() {}
+
+    start() {
+        this.setCurrentScene(SceneBase.GameScenes.splash);
+    }
 
     destroy() {
         this.currentScene.exit();
@@ -140,7 +141,7 @@ export class SceneManager {
     }
 
     updateFrame() {
-        this.inputHandler.getInput();
+        //        this.inputHandler.getInput();
 
         const currentTime = performance.now();
         const lastTime = this.clock.currentTime;

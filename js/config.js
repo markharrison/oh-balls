@@ -1,5 +1,5 @@
 export class ConfigManager {
-    constructor() {
+    constructor(objectHandler) {
         // Default configuration values
         this._config = {
             audio: true,
@@ -11,6 +11,7 @@ export class ConfigManager {
             userId: '',
         };
 
+        this.objectHandler = objectHandler;
         this.loadFromLocalStorage();
     }
 

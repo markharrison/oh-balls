@@ -7,12 +7,13 @@ export class SceneBase {
         settingsaudio: 'settingsaudio',
         settingstheme: 'settingstheme',
     });
-    constructor(sceneManager) {
-        this.sceneManager = sceneManager;
-        this.canvas = sceneManager.canvas;
+    constructor(objectManager) {
+        this.objectManager = objectManager;
+        this.configManager = objectManager.get('ConfigManager');
+        this.sceneManager = objectManager.get('SceneManager');
+        this.canvas = objectManager.get('Main').canvas;
         this.ctx = this.canvas.getContext('2d');
-        this.configManager = sceneManager.configManager;
-        this.objectManager = sceneManager.main.objectManager;
+
         this.selectedOption = 1;
         this.menuOptionsCount = 0;
     }
