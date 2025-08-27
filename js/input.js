@@ -1,13 +1,13 @@
 // Input Handling Module
 export class InputHandler {
-    constructor(main) {
-        this.main = main;
+    constructor(objectManager) {
+        this.objectManager = objectManager;
 
         this.sceneManager = null;
         const startTime = Date.now();
         const getSceneManager = () => {
-            if (this.main.sceneManager) {
-                this.sceneManager = this.main.sceneManager;
+            if (this.objectManager.keyExists('SceneManager')) {
+                this.sceneManager = this.objectManager.get('SceneManager');
             } else {
                 if (Date.now() - startTime > 50000) {
                     alert('sceneManager not created after 5 seconds');

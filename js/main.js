@@ -7,21 +7,25 @@ class ObjectManager {
     constructor() {
         this.registry = {};
     }
+    keyExists(key) {
+        return this.registry.hasOwnProperty(key);
+    }
     register(key, obj) {
-        if (this.registry.hasOwnProperty(key)) {
+        if (this.keyExists(key)) {
             alert(`ObjectManager: key '${key}' is already registered!`);
         }
         this.registry[key] = obj;
     }
     deregister(key) {
-        if (!this.registry.hasOwnProperty(key)) {
+        if (!this.keyExists(key)) {
             alert(`ObjectManager: key '${key}' does not exist!`);
             return;
         }
         delete this.registry[key];
     }
+
     get(key) {
-        if (!this.registry.hasOwnProperty(key)) {
+        if (!this.keyExists(key)) {
             alert(`ObjectManager: key '${key}' does not exist!`);
             return null;
         }
@@ -51,7 +55,7 @@ class Main {
         this.ConfigManager = new ConfigManager();
         this.objectManager.register('ConfigManager', this.ConfigManager);
 
-        this.inputHandler = new InputHandler(this);
+        this.inputHandler = new InputHandler(this.objectManager);
         this.objectManager.register('InputHandler', this.inputHandler);
 
         this.audioHandler = new AudioHandler(this.objectManager);
@@ -59,7 +63,6 @@ class Main {
 
         this.sceneManager = new SceneManager(this);
         this.objectManager.register('SceneManager', this.sceneManager);
- 
     }
 
     // getObjectSummary() {
