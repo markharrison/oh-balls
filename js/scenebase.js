@@ -92,11 +92,11 @@ export class SceneBase {
         this.objectManager.deregister(this.constructor.name, this);
     }
 
-    update(dt) {
+    updateFrame() {
         return null;
     }
 
-    render(ctx) {}
+ 
 
     getSceneStateHtml() {
         return '';

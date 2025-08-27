@@ -55,11 +55,9 @@ export class SceneSettings extends SceneBase {
         this.addMenuButtons(['Home', 'Audio', 'Theme']);
     }
 
-    update(dt) {
+    updateFrame() {
         return this.nextScene;
     }
-
-    render(ctx) {}
 
     getSceneStateHtml() {
         const vHtml = `
@@ -269,11 +267,9 @@ export class SceneSettingsAudio extends SceneBase {
         }
     }
 
-    update(dt) {
+    updateFrame() {
         return this.nextScene;
     }
-
-    render(ctx) {}
 
     getSceneStateHtml() {
         const vHtml = `
@@ -482,11 +478,9 @@ export class SceneSettingsTheme extends SceneBase {
         }
     }
 
-    update(dt) {
+    updateFrame() {
         return this.nextScene;
     }
-
-    render(ctx) {}
 
     getSceneStateHtml() {
         const vHtml = `

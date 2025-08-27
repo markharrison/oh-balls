@@ -21,13 +21,6 @@ export class SceneManager {
         this.dialogButtonsCount = 0;
         this.overlayEnabled = false;
 
-        this.clock = {
-            deltaTime: 0,
-            currentTime: 0,
-        };
-
-        this.diagnosticsPanel = new DiagnosticPanel(this);
-
         this.currentSceneKey = null;
         this.currentScene = null;
     }
@@ -86,6 +79,8 @@ export class SceneManager {
     setupEventHandlers() {}
 
     start() {
+        this.diagnosticsPanel = this.objectManager.register('DiagnosticPanel', new DiagnosticPanel(this.objectManager));
+
         this.setCurrentScene(SceneBase.GameScenes.splash);
     }
 
@@ -95,10 +90,10 @@ export class SceneManager {
         this.diagnosticsPanel = null;
     }
 
-    renderSceneMain() {
-        const ballInfoElement = document.getElementById('currentBallSize');
-        ballInfoElement.textContent = 'Harrison Digital - Scene Manager';
-    }
+    // renderSceneMain() {
+    //     const ballInfoElement = document.getElementById('currentBallSize');
+    //     ballInfoElement.textContent = 'Harrison Digital - Scene Manager';
+    // }
 
     getSpecialKeys() {
         return this.currentScene.getSpecialKeys();
@@ -120,37 +115,12 @@ export class SceneManager {
         }
     }
 
-    updateFrameMain() {
-        const currentTime = performance.now();
-        const lastTime = this.clock.currentTime;
-        this.clock.currentTime = currentTime;
-        this.clock.deltaTime = this.clock.currentTime - lastTime;
+    updateFrame() {
+        const nextSceneKey = this.currentScene.updateFrame();
 
-        this.renderSceneMain();
-    }
-
-    update(dt) {
-        const nextSceneKey = this.currentScene.update(dt);
         if (nextSceneKey !== null && nextSceneKey !== this.currentSceneKey) {
             this.setCurrentScene(nextSceneKey);
         }
-    }
-
-    render(ctx) {
-        this.currentScene.render(ctx);
-    }
-
-    updateFrame() {
-        //        this.inputHandler.getInput();
-
-        const currentTime = performance.now();
-        const lastTime = this.clock.currentTime;
-        this.clock.currentTime = currentTime;
-        this.clock.deltaTime = this.clock.currentTime - lastTime;
-
-        // Use new update/render interface
-        this.update(this.clock.deltaTime);
-        this.render(this.ctx);
 
         this.diagnosticsPanel.renderPanel();
     }

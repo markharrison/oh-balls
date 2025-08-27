@@ -16,6 +16,8 @@ class ObjectManager {
             alert(`ObjectManager: key '${key}' is already registered!`);
         }
         this.registry[key] = obj;
+
+        return obj;
     }
     deregister(key) {
         if (!this.keyExists(key)) {
@@ -53,17 +55,13 @@ class Main {
         this.objectManager = new ObjectManager();
         this.objectManager.register('Main', this);
 
-        this.ConfigManager = new ConfigManager(this.objectManager);
-        this.objectManager.register('ConfigManager', this.ConfigManager);
+        this.objectManager.register('ConfigManager', new ConfigManager(this.objectManager));
 
-        this.audioHandler = new AudioHandler(this.objectManager);
-        this.objectManager.register('AudioHandler', this.audioHandler);
+        this.objectManager.register('AudioHandler', new AudioHandler(this.objectManager));
 
-        this.sceneManager = new SceneManager(this.objectManager);
-        this.objectManager.register('SceneManager', this.sceneManager);
+        this.sceneManager = this.objectManager.register('SceneManager', new SceneManager(this.objectManager));
 
-        this.inputHandler = new InputHandler(this.objectManager);
-        this.objectManager.register('InputHandler', this.inputHandler);
+        this.inputHandler = this.objectManager.register('InputHandler', new InputHandler(this.objectManager));
     }
 
     gameLoop() {
@@ -73,6 +71,7 @@ class Main {
             this.inputHandler.getInput();
             this.sceneManager.updateFrame();
         } catch (ex) {
+            alert('Main loop error: ' + ex);
             this.running = false;
         }
 

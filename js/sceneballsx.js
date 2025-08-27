@@ -337,7 +337,7 @@ export class SceneBallsX extends SceneBase {
         this.objectManager.deregister('PhysicsEngine');
     }
 
-    update(dt) {
+    updateFrame() {
         if (this.showingExitDialog) {
             return null;
         }
@@ -354,12 +354,8 @@ export class SceneBallsX extends SceneBase {
         this.updatePhysics(this.clock.deltaTime);
         this.ballManager.updateFrame();
 
-        // Check for exit to menu request only once
+        this.renderScene();
 
         return null; // Stay in this scene
-    }
-
-    render(ctx) {
-        this.renderScene();
     }
 }

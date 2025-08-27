@@ -26,7 +26,7 @@ export class SceneSplash extends SceneBase {
         audio?.initialize();
     }
 
-    update(dt) {
+    updateFrame(dt) {
         if (this.exitFlag) {
             this.initAudio();
 
@@ -35,8 +35,6 @@ export class SceneSplash extends SceneBase {
 
         return null; // Stay in this scene
     }
-
-    render(ctx) {}
 
     getSceneStateHtml() {
         const vHtml = `

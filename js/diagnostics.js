@@ -1,7 +1,8 @@
 // Diagnostic Panel for debugging physics issues
 export class DiagnosticPanel {
-    constructor(scene) {
-        this.sceneManager = scene;
+    constructor(objectManager) {
+        this.objectManager = objectManager;
+        this.sceneManager = objectManager.get('SceneManager');
         this.enabled = false;
         this.panel = null;
 
@@ -52,16 +53,9 @@ export class DiagnosticPanel {
             content.innerHTML = '';
 
             if (this.sceneManager) {
-                let vHtml =
-                    this.sceneManager.main.objectManager &&
-                    typeof this.sceneManager.main.objectManager.getObjectStateHtml === 'function'
-                        ? this.sceneManager.main.objectManager.getObjectStateHtml()
-                        : '';
+                let vHtml = this.objectManager.getObjectStateHtml();
 
-                let vHtml2 =
-                    this.sceneManager.currentScene && typeof this.sceneManager.currentScene.getSceneStateHtml === 'function'
-                        ? this.sceneManager.currentScene.getSceneStateHtml()
-                        : '';
+                let vHtml2 = this.sceneManager.currentScene.getSceneStateHtml();
 
                 content.innerHTML += `
                     <div style="border-bottom: 1px solid #00ff00; margin-bottom: 10px; padding-bottom: 5px;">
@@ -72,17 +66,6 @@ export class DiagnosticPanel {
                     </div>
                    `;
             }
-
-            // Display all objects from ObjectManager
-            // if (window.main && typeof window.main.getObjectSummary === 'function') {
-            //     const objects = window.main.getObjectSummary();
-            //     content.innerHTML += `<div style="margin-bottom:10px;"><strong>Registered Objects:</strong></div>`;
-            //     content.innerHTML += '<ul style="margin-left:10px;">';
-            //     for (const obj of objects) {
-            //         content.innerHTML += `<li><span style="color:#00ffff;">${obj.key}</span>: <span style="color:#ff0;">${obj.type}</span></li>`;
-            //     }
-            //     content.innerHTML += '</ul>';
-            // }
         }
     }
 

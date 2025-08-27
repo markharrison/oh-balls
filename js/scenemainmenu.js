@@ -52,7 +52,7 @@ export class SceneMainmenu extends SceneBase {
         this.addMenuButtons(['Start Game', 'Settings']);
     }
 
-    update(dt) {
+    updateFrame() {
         return this.nextScene;
     }
 
