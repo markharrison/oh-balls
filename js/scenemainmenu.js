@@ -7,7 +7,7 @@ export class SceneMainmenu extends SceneBase {
         this.nextScene = null;
     }
 
-    enter2() {
+    enter() {
         this.showOverlay();
         const footerElement = document.getElementById('idFooterInfo');
         if (footerElement) {
@@ -15,7 +15,7 @@ export class SceneMainmenu extends SceneBase {
         }
     }
 
-    exit2() {
+    exit() {
         this.deleteMenuEventListeners();
         this.hideOverlay();
     }

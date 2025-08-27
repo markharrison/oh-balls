@@ -28,27 +28,28 @@ export class SceneManager {
     setCurrentScene(sceneKey) {
         if (this.currentScene) {
             this.currentScene.exit();
+            this.objectManager.deregister(this.currentScene.constructor.name);
             this.currentScene = null;
         }
 
         switch (sceneKey) {
             case SceneBase.GameScenes.splash:
-                this.currentScene = new SceneSplash(this.objectManager);
+                this.currentScene = this.objectManager.register('SceneSplash', new SceneSplash(this.objectManager));
                 break;
             case SceneBase.GameScenes.mainmenu:
-                this.currentScene = new SceneMainmenu(this.objectManager);
+                this.currentScene = this.objectManager.register('SceneMainmenu', new SceneMainmenu(this.objectManager));
                 break;
             case SceneBase.GameScenes.ballsX:
-                this.currentScene = new SceneBallsX(this.objectManager);
+                this.currentScene = this.objectManager.register('SceneBallsX', new SceneBallsX(this.objectManager));
                 break;
             case SceneBase.GameScenes.settings:
-                this.currentScene = new SceneSettings(this.objectManager);
+                this.currentScene = this.objectManager.register('SceneSettings', new SceneSettings(this.objectManager));
                 break;
             case SceneBase.GameScenes.settingsaudio:
-                this.currentScene = new SceneSettingsAudio(this.objectManager);
+                this.currentScene = this.objectManager.register('SceneSettingsAudio', new SceneSettingsAudio(this.objectManager));
                 break;
             case SceneBase.GameScenes.settingstheme:
-                this.currentScene = new SceneSettingsTheme(this.objectManager);
+                this.currentScene = this.objectManager.register('SceneSettingsTheme', new SceneSettingsTheme(this.objectManager));
                 break;
             default:
                 alert('Unknown scene key: ' + sceneKey);

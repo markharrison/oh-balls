@@ -7,7 +7,7 @@ export class SceneSplash extends SceneBase {
         this.startTime = null;
     }
 
-    enter2() {
+    enter() {
         this.showOverlay();
         this.startTime = performance.now();
         this.exitFlag = false;
@@ -17,7 +17,7 @@ export class SceneSplash extends SceneBase {
         }
     }
 
-    exit2() {
+    exit() {
         this.hideOverlay();
     }
 

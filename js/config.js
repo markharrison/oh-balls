@@ -2,7 +2,7 @@ export class ConfigManager {
     constructor(objectHandler) {
         // Default configuration values
         this._config = {
-            audio: true,
+            audioEnabled: true,
             masterVolume: 80,
             musicVolume: 80,
             sfxVolume: 80,
@@ -16,12 +16,12 @@ export class ConfigManager {
     }
 
     // Audio getter/setter
-    get audio() {
-        return this._config.audio;
+    get audioEnabled() {
+        return this._config.audioEnabled;
     }
 
-    set audio(value) {
-        this._config.audio = Boolean(value);
+    set audioEnabled(value) {
+        this._config.audioEnabled = Boolean(value);
     }
 
     // Master/Music/SFX volume getters/setters (0-100)
@@ -91,7 +91,7 @@ export class ConfigManager {
 
             // Validate and set each property using setters for validation
             if (data.hasOwnProperty('audio')) {
-                this.audio = data.audio;
+                this.audioEnabled = data.audioEnabled;
             }
             if (data.hasOwnProperty('masterVolume')) {
                 this.masterVolume = data.masterVolume;
@@ -124,7 +124,7 @@ export class ConfigManager {
     // Reset to default values
     reset() {
         this._config = {
-            audio: true,
+            audioEnabled: true,
             masterVolume: 80,
             musicVolume: 80,
             sfxVolume: 80,

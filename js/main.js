@@ -24,6 +24,7 @@ class ObjectManager {
             alert(`ObjectManager: key '${key}' does not exist!`);
             return;
         }
+
         delete this.registry[key];
     }
 

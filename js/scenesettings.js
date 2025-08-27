@@ -1,13 +1,13 @@
 import { SceneBase } from './scenebase.js';
 
 export class SceneSettings extends SceneBase {
-    constructor(sceneManager) {
-        super(sceneManager);
+    constructor(objectManager) {
+        super(objectManager);
 
         this.nextScene = null;
     }
 
-    enter2() {
+    enter() {
         this.showOverlay();
         const footerElement = document.getElementById('idFooterInfo');
         if (footerElement) {
@@ -15,7 +15,7 @@ export class SceneSettings extends SceneBase {
         }
     }
 
-    exit2() {
+    exit() {
         this.deleteMenuEventListeners();
         this.hideOverlay();
     }
@@ -72,13 +72,13 @@ export class SceneSettings extends SceneBase {
 // ------------ Audio -------------------
 
 export class SceneSettingsAudio extends SceneBase {
-    constructor(sceneManager) {
-        super(sceneManager);
-
+    constructor(objectManager) {
+        super(objectManager);
+        this.audioHandler = objectManager.get('AudioHandler');
         this.nextScene = null;
     }
 
-    enter2() {
+    enter() {
         this.showOverlay();
 
         const footerElement = document.getElementById('idFooterInfo');
@@ -87,7 +87,7 @@ export class SceneSettingsAudio extends SceneBase {
         }
     }
 
-    exit2() {
+    exit() {
         this.deleteEventListeners();
         this.hideOverlay();
     }
@@ -171,7 +171,7 @@ export class SceneSettingsAudio extends SceneBase {
         const initMasterVolume = this.configManager.masterVolume;
         const initMusicVolume = this.configManager.musicVolume;
         const initSfxVolume = this.configManager.sfxVolume;
-        const initAudio = this.configManager.audio ? 'checked' : '';
+        const initAudio = this.configManager.audioEnabled ? 'checked' : '';
 
         vHtml = '';
         vHtml = `
@@ -245,7 +245,7 @@ export class SceneSettingsAudio extends SceneBase {
     saveSettings(e) {
         e.preventDefault();
         const audioEnabled = document.getElementById('idAudio').checked;
-        this.configManager.audio = audioEnabled;
+        this.configManager.audioEnabled = audioEnabled;
 
         document.querySelectorAll('input[type="range"]').forEach((slider) => {
             const configKey = slider.dataset.configKey;
@@ -255,7 +255,10 @@ export class SceneSettingsAudio extends SceneBase {
         });
 
         this.configManager.saveToLocalStorage();
+        this.audioHandler.updateAudioNewSettings();
+
         this.sceneManager.doToast('Audio Settings', 'Settings updated.');
+
         this.nextScene = SceneBase.GameScenes.settings;
     }
 
@@ -316,13 +319,13 @@ export class SceneSettingsAudio extends SceneBase {
 // ------------ Theme -------------------
 
 export class SceneSettingsTheme extends SceneBase {
-    constructor(sceneManager) {
-        super(sceneManager);
+    constructor(objectManager) {
+        super(objectManager);
 
         this.nextScene = null;
     }
 
-    enter2() {
+    enter() {
         this.showOverlay();
 
         const footerElement = document.getElementById('idFooterInfo');
@@ -331,7 +334,7 @@ export class SceneSettingsTheme extends SceneBase {
         }
     }
 
-    exit2() {
+    exit() {
         this.deleteEventListeners();
         this.hideOverlay();
     }

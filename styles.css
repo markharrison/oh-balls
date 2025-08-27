@@ -109,9 +109,37 @@ body::before {
     position: absolute;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
+    right: 0;
+    bottom: 0;
     z-index: 5;
+    border: none; /* remove overlay border to avoid double-thickness */
+    border-radius: 10px; /* match inner content radius so corners align */
+    box-sizing: border-box;
+    pointer-events: auto; /* allow clicks on overlay content (buttons) */
+}
+
+/* the actual <canvas> should have inner radius = outer radius - border */
+.canvas canvas {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 10px; /* 12 - 2 (border) = 10 to avoid corner gaps */
+    box-sizing: border-box;
+}
+
+.canvas-overlay {
+    background: rgba(42, 42, 42, 0.9);
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 5;
+    border: none; /* remove overlay border to avoid double-thickness */
+    border-radius: 10px; /* match inner content radius so corners align */
+    box-sizing: border-box;
+    pointer-events: auto; /* allow clicks on overlay content (buttons) */
 }
 
 .canvas-overlay-page {

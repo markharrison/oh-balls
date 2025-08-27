@@ -78,25 +78,13 @@ export class SceneBase {
         });
     }
 
-    enter2() {}
+    enter() {}
 
-    enter() {
-        this.enter2();
-        this.objectManager.register(this.constructor.name, this);
-    }
-
-    exit2() {}
-
-    exit() {
-        this.exit2();
-        this.objectManager.deregister(this.constructor.name, this);
-    }
+    exit() {}
 
     updateFrame() {
         return null;
     }
-
- 
 
     getSceneStateHtml() {
         return '';

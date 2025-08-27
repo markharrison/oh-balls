@@ -8,8 +8,8 @@ export const wallThickness = 16;
 export const fixedTimeStep = 1000 / 60; // ms per physics step (16.666...)
 
 export class SceneBallsX extends SceneBase {
-    constructor(sceneManager) {
-        super(sceneManager);
+    constructor(objectManager) {
+        super(objectManager);
         this.inputHandler = null;
 
         this.ballManager = new BallManager(this);
@@ -325,9 +325,13 @@ export class SceneBallsX extends SceneBase {
         }
     }
 
-    enter2() {}
+    enter() {
+        this.objectManager.get('AudioHandler').transitionMusic('GameMusic');
+    }
 
-    exit2() {
+    exit() {
+        this.objectManager.get('AudioHandler').transitionMusic('MenuMusic');
+
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.ctx.fillStyle = '#111111';
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
