@@ -281,8 +281,6 @@ export class PhysicsBody {
         }
         return 0;
     }
-
-
 }
 
 export class PhysicsBodyFactory {
@@ -386,15 +384,16 @@ export class PhysicsBodyFactory {
     }
 }
 
-// Utility class for physics-related helpers
 export class PhysicsUtils {
-    // Check collision between bodies in an event
-    // static getCollisionPairs(event) {
-    //     return event.pairs.map((pair) => ({
-    //         bodyA: new PhysicsBody(pair.bodyA),
-    //         bodyB: new PhysicsBody(pair.bodyB),
-    //     }));
-    // }
+    static getCollisionPairs(event) {
+        // Return raw body objects from the physics event pairs so callers
+        // can call planck body methods directly (getUserData, getPosition, etc.).
+        return event.pairs.map((pair) => ({
+            bodyA: pair.bodyA,
+            bodyB: pair.bodyB,
+        }));
+    }
+
     // Find collision pairs with specific labels
     // static findCollisionByLabels(event, labelA, labelB) {
     //     const results = [];

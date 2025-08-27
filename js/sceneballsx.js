@@ -10,7 +10,8 @@ export const fixedTimeStep = 1000 / 60; // ms per physics step (16.666...)
 export class SceneBallsX extends SceneBase {
     constructor(objectManager) {
         super(objectManager);
-        this.inputHandler = null;
+        this.audioHandler = objectManager.get('AudioHandler');
+        this.sceneManager = objectManager.get('SceneManager');
 
         this.ballManager = new BallManager(this);
 
@@ -34,16 +35,12 @@ export class SceneBallsX extends SceneBase {
             cachedStepCount: 0,
         };
 
-        // Exit confirmation dialog state
         this.showingExitDialog = false;
         this.exitToMenu = false;
-        // this.dialogSelectedOption = 1; // 0 = Exit, 1 = Return (default focus on Return)
-        // this.dialogOptions = ['Exit', 'Return'];
 
         this.setupBoundaries();
         this.setupEventHandlers();
 
-        // Initialize accumulator for fixed timestep physics
         this._physicsAccumulator = 0;
     }
 
@@ -71,16 +68,33 @@ export class SceneBallsX extends SceneBase {
 
     setupEventHandlers() {
         this.physics.on('collisionStart', (event) => {
-            // const collisionPairs = PhysicsUtils.getCollisionPairs(event);
-            // collisionPairs.forEach(({ bodyA, bodyB }) => {
-            //     // Check for ball-ball collisions
-            //     const ballBodyA = bodyA.label === 'ball' ? bodyA : null;
-            //     const ballBodyB = bodyB.label === 'ball' ? bodyB : null;
-            //     // if (ballBodyA && ballBodyB) {
-            //     //     const ballA = ballBodyA.getUserData().ball;
-            //     //     const ballB = ballBodyB.getUserData().ball;
-            //     // }
-            // });
+            const collisionPairs = PhysicsUtils.getCollisionPairs(event);
+            collisionPairs.forEach(({ bodyA, bodyB }) => {
+                if (bodyA === bodyB) {
+                    alert('Self-collision detected');
+                }
+
+                const ballALabel = bodyA.getUserData().label;
+                const ballBLabel = bodyB.getUserData().label;
+
+                let vText = 'BodyA ' + ballALabel + ' collided with BodyB ' + ballBLabel;
+                this.sceneManager.doToast(vText);
+
+                if (ballALabel === 'ball' && ballBLabel === 'ball') {
+                    const ballASize = bodyA.getUserData().render.size;
+                    const ballBSize = bodyB.getUserData().render.size;
+
+                    if (ballASize === ballBSize) {
+
+                        // TODO:  combine balls
+                        //this.ballManager.combineBalls(bodyA, bodyB);
+
+                        let rnd = Math.floor(Math.random() * 6) + 1;
+                        this.audioHandler.playSFX(`Combine${rnd}`);
+                    }
+                }
+ 
+            });
         });
 
         this.physics.on('collisionEnd', (event) => {
@@ -191,7 +205,6 @@ export class SceneBallsX extends SceneBase {
     renderBall(body) {
         const ctx = this.ctx;
 
-        // Convert position from meters to pixels for rendering
         const meterPosition = body.getPosition();
         const position = {
             x: metersToPixels(meterPosition.x),
@@ -211,7 +224,6 @@ export class SceneBallsX extends SceneBase {
 
         let physicsRadius = render.radius;
 
-        // Adjust rendering radius so stroke doesn't extend beyond physics boundary
         const strokeWidth = ctx.lineWidth || 0;
         const renderRadius = physicsRadius - strokeWidth / 2;
 
@@ -285,11 +297,6 @@ export class SceneBallsX extends SceneBase {
                     break;
             }
         });
-
-        // Render exit dialog if shown
-        // if (this.showExitDialog) {
-        //     this.renderExitDialog();
-        // }
     }
 
     inputKeyPressed(comboId) {

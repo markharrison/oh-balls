@@ -28,6 +28,13 @@ export class AudioHandler {
         this.playMusic('MenuMusic');
 
         await this.audioMark.loadAudio('GameMusic', 'audio/BounceXJimHall.mp3');
+
+        await this.audioMark.loadAudio('Combine1', 'audio/combine1-pixabay.mp3');
+        await this.audioMark.loadAudio('Combine2', 'audio/combine2-pixabay.mp3');
+        await this.audioMark.loadAudio('Combine3', 'audio/combine3-pixabay.mp3');
+        await this.audioMark.loadAudio('Combine4', 'audio/combine4-pixabay.mp3');
+        await this.audioMark.loadAudio('Combine5', 'audio/combine5-pixabay.mp3');
+        await this.audioMark.loadAudio('Combine6', 'audio/combine6-pixabay.mp3');
     }
 
     initialize() {
@@ -36,7 +43,12 @@ export class AudioHandler {
         this.initialize2();
     }
 
-    // Example wrapper methods
+    playSFX(sound) {
+        if (this.audioEnabled) {
+            this.audioMark.playSFX(sound);
+        }
+    }
+
     playMusic(track) {
         if (this.audioEnabled) {
             this.audioMark.playMusic(track, { loop: true });

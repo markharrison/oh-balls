@@ -194,7 +194,7 @@ export class SceneSettingsAudio extends SceneBase {
                 </div>
 
                 <div class="volume-control">
-                    <label for="idSfxVolume" class="form-label">Sfx Volume:</label>
+                    <label for="idSfxVolume" class="form-label">SFX Volume:</label>
                     <input type="range" class="form-range" min="0" max="100" step="10" value="${initSfxVolume}" id="idSfxVolume" data-config-key="sfxVolume" tabindex="0">
                     <span id="idSfxVolumeValue" class="volume-value">${initSfxVolume}</span>
                 </div>
