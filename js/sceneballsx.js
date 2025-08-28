@@ -85,12 +85,13 @@ export class SceneBallsX extends SceneBase {
                     const ballBSize = bodyB.getUserData().render.size;
 
                     if (ballASize === ballBSize) {
-
-                        // TODO:  combine balls
-                        //this.ballManager.combineBalls(bodyA, bodyB);
-
-                        let rnd = Math.floor(Math.random() * 6) + 1;
-                        this.audioHandler.playSFX(`Combine${rnd}`);
+                        // Combine balls
+                        const combined = this.ballManager.combineBalls(bodyA, bodyB);
+                        
+                        if (combined) {
+                            let rnd = Math.floor(Math.random() * 6) + 1;
+                            this.audioHandler.playSFX(`Combine${rnd}`);
+                        }
                     }
                 }
  

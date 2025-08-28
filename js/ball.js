@@ -8,11 +8,12 @@ export function generateRandomSize() {
 }
 
 export class Ball {
-    constructor(sceneManager, x, y) {
+    constructor(sceneManager, x, y, size = null) {
         this.sceneManager = sceneManager;
-        this.size = generateRandomSize();
+        this.size = size !== null ? size : generateRandomSize();
         this.radius = this.calculateRadius(this.size);
         this.color = this.getColorForSize(this.size);
+        this.combining = false; // Flag to prevent multiple simultaneous combinations
 
         const render = {
             radius: this.radius,
@@ -258,5 +259,72 @@ export class BallManager {
                 ball.setPosition(pos.x - 2000, pos.y);
             }
         });
+    }
+
+    combineBalls(bodyA, bodyB) {
+        const ballA = bodyA.getUserData()?.ball;
+        const ballB = bodyB.getUserData()?.ball;
+
+        // Safety checks
+        if (!ballA || !ballB) {
+            console.warn('Invalid balls for combination');
+            return false;
+        }
+
+        // Check if either ball is already combining
+        if (ballA.combining || ballB.combining) {
+            return false;
+        }
+
+        // Check if balls are the same size
+        if (ballA.size !== ballB.size) {
+            return false;
+        }
+
+        // Check if we can create a larger ball (max size check)
+        const newSize = ballA.size + 1;
+        if (newSize > 15) { // Allow up to size 15 (matching color array length)
+            return false;
+        }
+
+        // Mark balls as combining to prevent multiple combinations
+        ballA.combining = true;
+        ballB.combining = true;
+
+        // Calculate new ball position (average of two positions)
+        const posA = ballA.getPosition();
+        const posB = ballB.getPosition();
+        const newX = (posA.x + posB.x) / 2;
+        const newY = (posA.y + posB.y) / 2;
+
+        // Calculate new ball velocity (conservation of momentum)
+        const velA = ballA.physicsBody.getVelocity();
+        const velB = ballB.physicsBody.getVelocity();
+        const massA = ballA.physicsBody.body.getMass();
+        const massB = ballB.physicsBody.body.getMass();
+        const totalMass = massA + massB;
+        
+        const newVelX = (velA.x * massA + velB.x * massB) / totalMass;
+        const newVelY = (velA.y * massA + velB.y * massB) / totalMass;
+
+        // Calculate new angular velocity (average)
+        const angVelA = ballA.physicsBody.getAngularVelocity();
+        const angVelB = ballB.physicsBody.getAngularVelocity();
+        const newAngVel = (angVelA + angVelB) / 2;
+
+        // Create new combined ball
+        const newBall = new Ball(this.sceneManager, newX, newY, newSize);
+        
+        // Apply the calculated velocity and angular velocity
+        newBall.physicsBody.setStatic(false);
+        newBall.physicsBody.setVelocity(newVelX, newVelY);
+        newBall.physicsBody.setAngularVelocity(newAngVel);
+
+        // Remove the old balls
+        ballA.destroy();
+        ballB.destroy();
+
+        console.log(`Combined two size ${ballA.size} balls into size ${newSize} ball`);
+        return true;
     }
 }

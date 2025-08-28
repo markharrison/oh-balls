@@ -156,9 +156,19 @@ export class SceneManager {
                 // Add event listener for when toast is hidden
                 toastElement.addEventListener('hidden.bs.toast', cleanupToast);
 
-                // Initialize and show the toast using Bootstrap's toast API
-                const toast = new bootstrap.Toast(toastElement, { delay: 5000 });
-                toast.show();
+                // Initialize and show the toast using Bootstrap's toast API (with fallback)
+                if (typeof bootstrap !== 'undefined' && bootstrap.Toast) {
+                    const toast = new bootstrap.Toast(toastElement, { delay: 5000 });
+                    toast.show();
+                } else {
+                    // Fallback when bootstrap is not available
+                    toastElement.style.display = 'block';
+                    setTimeout(() => {
+                        if (toastElement && toastElement.parentElement) {
+                            toastElement.remove();
+                        }
+                    }, 5000);
+                }
             }
         }
     }
