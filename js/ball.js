@@ -298,18 +298,18 @@ export class BallManager {
         const newY = (posA.y + posB.y) / 2;
 
         // Calculate new ball velocity (conservation of momentum)
-        const velA = ballA.physicsBody.getVelocity();
-        const velB = ballB.physicsBody.getVelocity();
-        const massA = ballA.physicsBody.body.getMass();
-        const massB = ballB.physicsBody.body.getMass();
+        const velA = (ballA.physicsBody && typeof ballA.physicsBody.getVelocity === 'function') ? ballA.physicsBody.getVelocity() : { x: 0, y: 0 };
+        const velB = (ballB.physicsBody && typeof ballB.physicsBody.getVelocity === 'function') ? ballB.physicsBody.getVelocity() : { x: 0, y: 0 };
+        const massA = (ballA.physicsBody && ballA.physicsBody.body && typeof ballA.physicsBody.body.getMass === 'function') ? ballA.physicsBody.body.getMass() : 1;
+        const massB = (ballB.physicsBody && ballB.physicsBody.body && typeof ballB.physicsBody.body.getMass === 'function') ? ballB.physicsBody.body.getMass() : 1;
         const totalMass = massA + massB;
         
         const newVelX = (velA.x * massA + velB.x * massB) / totalMass;
         const newVelY = (velA.y * massA + velB.y * massB) / totalMass;
 
         // Calculate new angular velocity (average)
-        const angVelA = ballA.physicsBody.getAngularVelocity();
-        const angVelB = ballB.physicsBody.getAngularVelocity();
+        const angVelA = (ballA.physicsBody && typeof ballA.physicsBody.getAngularVelocity === 'function') ? ballA.physicsBody.getAngularVelocity() : 0;
+        const angVelB = (ballB.physicsBody && typeof ballB.physicsBody.getAngularVelocity === 'function') ? ballB.physicsBody.getAngularVelocity() : 0;
         const newAngVel = (angVelA + angVelB) / 2;
 
         // Create new combined ball
