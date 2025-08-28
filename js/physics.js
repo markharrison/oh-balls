@@ -156,6 +156,7 @@ export class PhysicsEngine {
     destroy() {
         if (this.world) {
             this.eventHandlers.clear();
+            this.eventHandlers = null;
             this.world = null;
         }
     }

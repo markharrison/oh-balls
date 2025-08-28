@@ -1,6 +1,8 @@
 import { SceneBase } from './scenebase.js';
 import { BallManager } from './ball.js';
 import { PhysicsEngine, PhysicsBodyFactory, PhysicsUtils, metersToPixels } from './physics.js';
+import { LaserEffect } from './lasereffect.js';
+import { createLineOverlapDetector } from './lineoverlap.js';
 // import { wallThickness } from './constants.js';
 // import { fixedTimeStep } from './constants.js';
 
@@ -12,11 +14,8 @@ export class SceneBallsX extends SceneBase {
         super(objectManager);
         this.audioHandler = objectManager.get('AudioHandler');
         this.sceneManager = objectManager.get('SceneManager');
-
-        this.ballManager = new BallManager(this);
-
-        this.physics = new PhysicsEngine();
-        this.objectManager.register('PhysicsEngine', this.physics);
+        // this.ballManager = objectManager.register('BallManager', new BallManager(objectManager));
+        this.physics = objectManager.register('PhysicsEngine', new PhysicsEngine());
 
         this.physics.create();
         this.physics.setGravity(0, 300); // Gentler gravity for relaxed gameplay
@@ -42,6 +41,12 @@ export class SceneBallsX extends SceneBase {
         this.setupEventHandlers();
 
         this._physicsAccumulator = 0;
+
+        // Initialize laser effect
+        this.laserEffect = new LaserEffect(this.canvas, this.ctx);
+
+        // Initialize line overlap detector for spatial queries
+        this.lineOverlapDetector = createLineOverlapDetector(this.physics);
     }
 
     getSceneStateHtml() {
@@ -77,23 +82,17 @@ export class SceneBallsX extends SceneBase {
                 const ballALabel = bodyA.getUserData().label;
                 const ballBLabel = bodyB.getUserData().label;
 
-                let vText = 'BodyA ' + ballALabel + ' collided with BodyB ' + ballBLabel;
-                this.sceneManager.doToast(vText);
-
                 if (ballALabel === 'ball' && ballBLabel === 'ball') {
                     const ballASize = bodyA.getUserData().render.size;
                     const ballBSize = bodyB.getUserData().render.size;
 
                     if (ballASize === ballBSize) {
+                        const ballA = bodyA.getUserData()?.ball;
+                        const ballB = bodyB.getUserData()?.ball;
 
-                        // TODO:  combine balls
-                        //this.ballManager.combineBalls(bodyA, bodyB);
-
-                        let rnd = Math.floor(Math.random() * 6) + 1;
-                        this.audioHandler.playSFX(`Combine${rnd}`);
+                        this.ballManager.combineBalls(ballA, ballB);
                     }
                 }
- 
             });
         });
 
@@ -282,6 +281,9 @@ export class SceneBallsX extends SceneBase {
         this.ctx.fillStyle = '#111111';
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
+        // Render laser effect
+        this.laserEffect.render();
+
         // Get all bodies and render them
         const bodies = this.physics.getAllBodies();
 
@@ -324,8 +326,9 @@ export class SceneBallsX extends SceneBase {
                 });
 
                 break;
-            case 'KeyT':
-                this.ballManager.testBalls();
+            case 'KeyL':
+                // Manual laser trigger for testing
+                this.laserEffect.triggerLaser();
                 break;
             default:
                 break;
@@ -334,6 +337,7 @@ export class SceneBallsX extends SceneBase {
 
     enter() {
         this.objectManager.get('AudioHandler').transitionMusic('GameMusic');
+        this.ballManager = this.objectManager.register('BallManager', new BallManager(this.objectManager));
     }
 
     exit() {
@@ -343,9 +347,24 @@ export class SceneBallsX extends SceneBase {
         this.ctx.fillStyle = '#111111';
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-        this.physics.destroy();
-        this.physics = null;
-        this.objectManager.deregister('PhysicsEngine');
+        // Destroy BallManager first so it doesn't attempt to access physics during its teardown
+        if (this.ballManager) {
+            this.ballManager.destroy();
+            this.ballManager = null;
+            this.objectManager.deregister('BallManager');
+        }
+
+        if (this.physics) {
+            this.physics.destroy();
+            this.physics = null;
+            this.objectManager.deregister('PhysicsEngine');
+        }
+
+        // Clean up laser effect
+        if (this.laserEffect) {
+            this.laserEffect.destroy();
+            this.laserEffect = null;
+        }
     }
 
     updateFrame() {
@@ -365,7 +384,126 @@ export class SceneBallsX extends SceneBase {
         this.updatePhysics(this.clock.deltaTime);
         this.ballManager.updateFrame();
 
+        // Update laser effect
+        this.laserEffect.update(this.clock.deltaTime);
+
         this.renderScene();
+
+        // Example: Check if any balls are crossing a horizontal line
+        this.checkLineOverlapExample();
+    }
+
+    /**
+     * Example method showing how to use line-body overlap detection
+     * This demonstrates checking if any balls cross a horizontal line
+     */
+    checkLineOverlapExample() {
+        // Define a horizontal line across the middle of the screen
+        const lineStart = { x: wallThickness, y: this.canvas.height / 2 };
+        const lineEnd = { x: this.canvas.width - wallThickness, y: this.canvas.height / 2 };
+
+        // Check if any balls overlap with this line
+        const ballOverlaps = this.lineOverlapDetector.checkLineOverlapWithBalls(lineStart, lineEnd);
+
+        if (ballOverlaps.length > 0) {
+            // Log information about overlapping balls
+            ballOverlaps.forEach((overlap) => {
+                const ball = overlap.userData?.ball;
+                if (ball) {
+                    console.log(`Ball size ${ball.size} crossing line at point:`, overlap.point);
+                }
+            });
+        }
+    }
+
+    /**
+     * Check if there's a clear path between two points (no walls in the way)
+     * @param {number} startX - Start X coordinate in pixels
+     * @param {number} startY - Start Y coordinate in pixels
+     * @param {number} endX - End X coordinate in pixels
+     * @param {number} endY - End Y coordinate in pixels
+     * @returns {boolean} True if path is clear
+     */
+    isPathClear(startX, startY, endX, endY) {
+        return !this.lineOverlapDetector.hasLineOverlap({ x: startX, y: startY }, { x: endX, y: endY }, (body) => {
+            const label = body.getUserData()?.label;
+            // Only walls block the path, not balls
+            return ['leftwall', 'rightwall', 'ground'].includes(label);
+        });
+    }
+
+    /**
+     * Find all balls that would be hit by a laser from a point in a direction
+     * @param {number} startX - Laser start X coordinate
+     * @param {number} startY - Laser start Y coordinate
+     * @param {number} angle - Laser angle in radians
+     * @param {number} maxDistance - Maximum laser distance
+     * @returns {Array} Array of balls that would be hit
+     */
+    getLaserTargets(startX, startY, angle, maxDistance = 1000) {
+        const endX = startX + Math.cos(angle) * maxDistance;
+        const endY = startY + Math.sin(angle) * maxDistance;
+
+        return this.lineOverlapDetector.checkLineOverlapWithBalls({ x: startX, y: startY }, { x: endX, y: endY });
+    }
+
+    /**
+     * Check if any balls are within a scanning line that sweeps across the screen
+     * @param {number} scanY - Y coordinate of the horizontal scan line
+     * @returns {Array} Array of balls crossing the scan line
+     */
+    scanForBalls(scanY) {
+        const lineStart = { x: wallThickness, y: scanY };
+        const lineEnd = { x: this.canvas.width - wallThickness, y: scanY };
+
+        return this.lineOverlapDetector.checkLineOverlapWithBalls(lineStart, lineEnd);
+    }
+
+    /**
+     * Get all bodies that overlap with a specific line
+     * @param {Object} lineStart - {x, y} start point
+     * @param {Object} lineEnd - {x, y} end point
+     * @param {Array} filterLabels - Optional array of labels to filter by
+     * @returns {Array} Array of overlapping bodies
+     */
+    getBodiesOnLine(lineStart, lineEnd, filterLabels = null) {
+        if (filterLabels) {
+            return this.lineOverlapDetector.checkLineOverlapByLabel(lineStart, lineEnd, filterLabels);
+        } else {
+            return this.lineOverlapDetector.checkLineOverlap(lineStart, lineEnd);
+        }
+    }
+
+    /**
+     * Find the closest ball to a given point using line casting in multiple directions
+     * @param {number} centerX - Center X coordinate
+     * @param {number} centerY - Center Y coordinate
+     * @param {number} maxDistance - Maximum search distance
+     * @returns {Object|null} Closest ball information or null
+     */
+    findClosestBall(centerX, centerY, maxDistance = 500) {
+        let closestBall = null;
+        let closestDistance = Infinity;
+
+        // Cast rays in 8 directions to find the closest ball
+        for (let i = 0; i < 8; i++) {
+            const angle = (i / 8) * 2 * Math.PI;
+            const endX = centerX + Math.cos(angle) * maxDistance;
+            const endY = centerY + Math.sin(angle) * maxDistance;
+
+            const closest = this.lineOverlapDetector.getClosestLineOverlap(
+                { x: centerX, y: centerY },
+                { x: endX, y: endY },
+                (body) => body.getUserData()?.label === 'ball'
+            );
+
+            if (closest && closest.fraction < closestDistance) {
+                closestDistance = closest.fraction;
+                closestBall = closest;
+            }
+        }
+
+        return closestBall;
 
         return null; // Stay in this scene
     }

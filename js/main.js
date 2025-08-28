@@ -1,4 +1,4 @@
-import { SceneManager } from './screenmanager.js';
+import { SceneManager } from './scene.js';
 import { InputHandler } from './input.js';
 import { ConfigManager } from './config.js';
 import { AudioHandler } from './audio.js';
@@ -73,6 +73,7 @@ class Main {
             this.sceneManager.updateFrame();
         } catch (ex) {
             alert('Main loop error: ' + ex);
+            console.error(ex);
             this.running = false;
         }
 

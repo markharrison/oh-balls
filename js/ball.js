@@ -2,15 +2,14 @@
 import { PhysicsBodyFactory, PhysicsConstants, pixelsToMeters } from './physics.js';
 import { wallThickness } from './sceneballsx.js';
 
-export function generateRandomSize() {
-    // Random size from 1 to 5 as specified
-    return Math.floor(Math.random() * 5) + 1;
-}
-
 export class Ball {
-    constructor(sceneManager, x, y) {
-        this.sceneManager = sceneManager;
-        this.size = generateRandomSize();
+    constructor(objectManager, x, y, size) {
+        this.objectManager = objectManager;
+        this.sceneManager = objectManager.get('SceneManager');
+        this.sceneBallsX = objectManager.get('SceneBallsX');
+
+        this.combining = false;
+        this.size = size;
         this.radius = this.calculateRadius(this.size);
         this.color = this.getColorForSize(this.size);
 
@@ -43,7 +42,7 @@ export class Ball {
         this.physicsBody.setStatic(true);
 
         // Add to scene
-        this.sceneManager.addBody(this.physicsBody);
+        this.sceneBallsX.addBody(this.physicsBody);
     }
 
     getBallStateHtml() {
@@ -76,7 +75,7 @@ export class Ball {
     }
 
     calculateRadius(size) {
-        return 25 + (size - 1) * 5;
+        return 25 + (size - 1) * 10;
     }
 
     getColorForSize(size) {
@@ -112,29 +111,55 @@ export class Ball {
 
     // Release ball from static state (when dropped)
     release() {
+        if (!this.physicsBody) {
+            alert('Error: Ball physics body is null in release()');
+            return;
+        }
         this.physicsBody.setStatic(false);
         this.physicsBody.setAngularVelocity(0);
         this.physicsBody.setVelocity(0, 0);
-
-        const pos = this.physicsBody.getPosition();
     }
 
     destroy() {
-        this.sceneManager.removeBody(this.physicsBody);
+        // Defensive: scene or physics may already be torn down
+        try {
+            if (this.sceneBallsX && this.sceneBallsX.physics) {
+                this.sceneBallsX.removeBody(this.physicsBody);
+            }
+        } catch (ex) {
+            // ignore errors during teardown
+        }
+
+        this.physicsBody = null;
+        this.objectManager = null;
+        this.sceneManager = null;
+        this.combining = false;
     }
 }
 
 export class BallManager {
-    constructor(sceneManager) {
-        this.sceneManager = sceneManager;
+    constructor(objectManager) {
+        this.objectManager = objectManager;
+        this.sceneManager = objectManager.get('SceneManager');
+        this.sceneBallsX = objectManager.get('SceneBallsX');
+        this.audioHandler = objectManager.get('AudioHandler');
+
+        this.canvasHeight = this.sceneManager.canvas.height;
+        this.canvasWidth = this.sceneManager.canvas.width;
+
         this.currentBall = null;
         this.lastCleanupTime = 0;
         this.lastDropTime = 0;
-        this.lastCurrentBallPosition = this.sceneManager.canvas.width / 2;
+        this.lastCurrentBallPosition = this.canvasWidth / 2;
+        // In-memory queue for pairing balls to be combined.
+        // Each entry is an object: { ballA: Ball, ballB: Ball }
+        this.combineQueue = [];
     }
 
     getBallBodies() {
-        return this.sceneManager.physics.getBodiesByLabel('ball');
+        // Defensive: scene or physics may have been destroyed during scene exit.
+        if (!this.sceneBallsX || !this.sceneBallsX.physics) return [];
+        return this.sceneBallsX.physics.getBodiesByLabel('ball') || [];
     }
 
     getBallsStateHtml() {
@@ -154,8 +179,8 @@ export class BallManager {
 
     keepXWithinBounds(x, ball) {
         const ballRadius = ball.radius;
-        const minX = wallThickness + ballRadius;
-        const maxX = this.sceneManager.canvas.width - wallThickness - ballRadius;
+        const minX = wallThickness + ballRadius + 2;
+        const maxX = this.canvasWidth - wallThickness - ballRadius - 2;
         let newX = Math.max(minX, Math.min(maxX, x));
         return newX;
     }
@@ -172,11 +197,11 @@ export class BallManager {
         const x = 512;
         const y = -100;
 
-        this.currentBall = new Ball(this.sceneManager, x, y);
+        this.currentBall = new Ball(this.objectManager, x, y, Math.floor(Math.random() * 5) + 1);
 
         let newX = this.keepXWithinBounds(this.lastCurrentBallPosition, this.currentBall);
 
-        this.currentBall.setPosition(newX, 50);
+        this.currentBall.setPosition(newX, 72);
     }
 
     dropCurrentBall() {
@@ -206,9 +231,71 @@ export class BallManager {
         this.lastCurrentBallPosition = newX;
     }
 
+    queueCombine(ballA, ballB) {
+        if (!ballA || !ballB) return false;
+        // store the Ball objects directly
+        this.combineQueue.push({ ballA, ballB });
+        return true;
+    }
+
+    dequeueCombine() {
+        if (this.combineQueue.length === 0) return null;
+        return this.combineQueue.shift();
+    }
+
+    processCombineQueue() {
+        while (this.combineQueue.length > 0) {
+            const entry = this.dequeueCombine();
+            if (!entry) break;
+            const { ballA, ballB } = entry;
+            if (!ballA || !ballB) continue;
+
+            this.combineBallsMerge(ballA, ballB);
+        }
+    }
+
+    combineBallsMerge(ballA, ballB) {
+        const newSize = ballA.size < 15 ? ballA.size + 1 : 15;
+
+        const posA = ballA.getPosition();
+        const posB = ballB.getPosition();
+        const newX = (posA.x + posB.x) / 2;
+        const newY = (posA.y + posB.y) / 2;
+
+        const velA = ballA.physicsBody.getVelocity();
+        const velB = ballB.physicsBody.getVelocity();
+        const newVelX = (velA.x + velB.x) / 2;
+        const newVelY = (velA.y + velB.y) / 2;
+
+        const newBall = new Ball(this.objectManager, newX, newY, newSize);
+
+        newBall.physicsBody.setVelocity(newVelX, newVelY);
+        newBall.physicsBody.setStatic(false);
+
+        let rnd = Math.floor(Math.random() * 6) + 1;
+        this.audioHandler.playSFX(`Combine${rnd}`);
+
+        ballA.destroy();
+        ballB.destroy();
+        ballA = null;
+        ballB = null;
+    }
+
+    combineBalls(ballA, ballB) {
+        if (ballA.combining || ballB.combining) {
+            return false;
+        }
+
+        ballA.combining = true;
+        ballB.combining = true;
+
+        this.queueCombine(ballA, ballB);
+    }
+
     updateFrame() {
         this.spawnBall();
         this.updateBallStates();
+        this.processCombineQueue();
     }
 
     updateBallStates() {
@@ -226,11 +313,6 @@ export class BallManager {
         }
         this.lastCleanupTime = now;
 
-        console.log('Cleaning up balls... ' + now);
-
-        //      const canvasWidth = this.sceneManager.canvas.width;
-        const canvasHeight = this.sceneManager.canvas.height;
-
         let ballBodies = this.getBallBodies();
 
         ballBodies.forEach((ballBody) => {
@@ -238,7 +320,7 @@ export class BallManager {
             if (ball) {
                 const pos = ball.getPosition();
                 //               const isOffScreen = pos.x < 0 || pos.x > canvasWidth || pos.y < 0 || pos.y > canvasHeight;
-                const isOffScreen = pos.y > canvasHeight + 100; // Allow some space below the canvas
+                const isOffScreen = pos.y > this.canvasHeight + 100; // Allow some space below the canvas
 
                 if (isOffScreen) {
                     ball.destroy();
@@ -247,16 +329,19 @@ export class BallManager {
         });
     }
 
-    testBalls() {
+    destroy() {
         let ballBodies = this.getBallBodies();
-        let sizeZap = generateRandomSize();
-
         ballBodies.forEach((ballBody) => {
-            const ball = ballBody.getUserData()?.ball;
-            if (ball && ball.size == sizeZap && !ball.physicsBody.isStatic()) {
-                const pos = ball.getPosition();
-                ball.setPosition(pos.x - 2000, pos.y);
+            let ball = ballBody.getUserData()?.ball;
+            if (ball) {
+                ball.destroy();
+                ball = null;
             }
         });
+
+        this.sceneManager = null;
+        this.sceneBallsX = null;
+        this.objectManager = null;
+        this.audioHandler = null;
     }
 }
