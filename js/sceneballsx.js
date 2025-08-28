@@ -2,7 +2,6 @@ import { SceneBase } from './scenebase.js';
 import { BallManager } from './ball.js';
 import { PhysicsEngine, PhysicsBodyFactory, PhysicsUtils, metersToPixels } from './physics.js';
 import { LaserEffect } from './lasereffect.js';
-import { createLineOverlapDetector } from './lineoverlap.js';
 // import { wallThickness } from './constants.js';
 // import { fixedTimeStep } from './constants.js';
 
@@ -44,9 +43,6 @@ export class SceneBallsX extends SceneBase {
 
         // Initialize laser effect
         this.laserEffect = new LaserEffect(this.canvas, this.ctx);
-
-        // Initialize line overlap detector for spatial queries
-        this.lineOverlapDetector = createLineOverlapDetector(this.physics);
     }
 
     getSceneStateHtml() {
@@ -388,122 +384,6 @@ export class SceneBallsX extends SceneBase {
         this.laserEffect.update(this.clock.deltaTime);
 
         this.renderScene();
-
-        // Example: Check if any balls are crossing a horizontal line
-        this.checkLineOverlapExample();
-    }
-
-    /**
-     * Example method showing how to use line-body overlap detection
-     * This demonstrates checking if any balls cross a horizontal line
-     */
-    checkLineOverlapExample() {
-        // Define a horizontal line across the middle of the screen
-        const lineStart = { x: wallThickness, y: this.canvas.height / 2 };
-        const lineEnd = { x: this.canvas.width - wallThickness, y: this.canvas.height / 2 };
-
-        // Check if any balls overlap with this line
-        const ballOverlaps = this.lineOverlapDetector.checkLineOverlapWithBalls(lineStart, lineEnd);
-
-        if (ballOverlaps.length > 0) {
-            // Log information about overlapping balls
-            ballOverlaps.forEach((overlap) => {
-                const ball = overlap.userData?.ball;
-                if (ball) {
-                    console.log(`Ball size ${ball.size} crossing line at point:`, overlap.point);
-                }
-            });
-        }
-    }
-
-    /**
-     * Check if there's a clear path between two points (no walls in the way)
-     * @param {number} startX - Start X coordinate in pixels
-     * @param {number} startY - Start Y coordinate in pixels
-     * @param {number} endX - End X coordinate in pixels
-     * @param {number} endY - End Y coordinate in pixels
-     * @returns {boolean} True if path is clear
-     */
-    isPathClear(startX, startY, endX, endY) {
-        return !this.lineOverlapDetector.hasLineOverlap({ x: startX, y: startY }, { x: endX, y: endY }, (body) => {
-            const label = body.getUserData()?.label;
-            // Only walls block the path, not balls
-            return ['leftwall', 'rightwall', 'ground'].includes(label);
-        });
-    }
-
-    /**
-     * Find all balls that would be hit by a laser from a point in a direction
-     * @param {number} startX - Laser start X coordinate
-     * @param {number} startY - Laser start Y coordinate
-     * @param {number} angle - Laser angle in radians
-     * @param {number} maxDistance - Maximum laser distance
-     * @returns {Array} Array of balls that would be hit
-     */
-    getLaserTargets(startX, startY, angle, maxDistance = 1000) {
-        const endX = startX + Math.cos(angle) * maxDistance;
-        const endY = startY + Math.sin(angle) * maxDistance;
-
-        return this.lineOverlapDetector.checkLineOverlapWithBalls({ x: startX, y: startY }, { x: endX, y: endY });
-    }
-
-    /**
-     * Check if any balls are within a scanning line that sweeps across the screen
-     * @param {number} scanY - Y coordinate of the horizontal scan line
-     * @returns {Array} Array of balls crossing the scan line
-     */
-    scanForBalls(scanY) {
-        const lineStart = { x: wallThickness, y: scanY };
-        const lineEnd = { x: this.canvas.width - wallThickness, y: scanY };
-
-        return this.lineOverlapDetector.checkLineOverlapWithBalls(lineStart, lineEnd);
-    }
-
-    /**
-     * Get all bodies that overlap with a specific line
-     * @param {Object} lineStart - {x, y} start point
-     * @param {Object} lineEnd - {x, y} end point
-     * @param {Array} filterLabels - Optional array of labels to filter by
-     * @returns {Array} Array of overlapping bodies
-     */
-    getBodiesOnLine(lineStart, lineEnd, filterLabels = null) {
-        if (filterLabels) {
-            return this.lineOverlapDetector.checkLineOverlapByLabel(lineStart, lineEnd, filterLabels);
-        } else {
-            return this.lineOverlapDetector.checkLineOverlap(lineStart, lineEnd);
-        }
-    }
-
-    /**
-     * Find the closest ball to a given point using line casting in multiple directions
-     * @param {number} centerX - Center X coordinate
-     * @param {number} centerY - Center Y coordinate
-     * @param {number} maxDistance - Maximum search distance
-     * @returns {Object|null} Closest ball information or null
-     */
-    findClosestBall(centerX, centerY, maxDistance = 500) {
-        let closestBall = null;
-        let closestDistance = Infinity;
-
-        // Cast rays in 8 directions to find the closest ball
-        for (let i = 0; i < 8; i++) {
-            const angle = (i / 8) * 2 * Math.PI;
-            const endX = centerX + Math.cos(angle) * maxDistance;
-            const endY = centerY + Math.sin(angle) * maxDistance;
-
-            const closest = this.lineOverlapDetector.getClosestLineOverlap(
-                { x: centerX, y: centerY },
-                { x: endX, y: endY },
-                (body) => body.getUserData()?.label === 'ball'
-            );
-
-            if (closest && closest.fraction < closestDistance) {
-                closestDistance = closest.fraction;
-                closestBall = closest;
-            }
-        }
-
-        return closestBall;
 
         return null; // Stay in this scene
     }
