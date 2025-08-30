@@ -42,7 +42,7 @@ export class SceneBallsX extends SceneBase {
         this._physicsAccumulator = 0;
         ``;
         this.laserBeam = new Laserbeam(this.canvas, {
-            beamStyle: 'solid',
+            beamStyle: 'disruptor',
             startCoords: [wallThickness, 150],
             endCoords: [this.canvas.width - wallThickness, 150],
         });

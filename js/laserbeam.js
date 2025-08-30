@@ -92,6 +92,18 @@ export class Laserbeam {
             ctx.lineTo(tipX, tipY);
             ctx.stroke();
             ctx.setLineDash([]);
+        } else if (this.beamStyle === 'crackling') {
+            this._drawCracklingBeam(ctx, x0, y0, tipX, tipY);
+        } else if (this.beamStyle === 'lightning') {
+            this._drawLightningBeam(ctx, x0, y0, tipX, tipY);
+        } else if (this.beamStyle === 'pulsing') {
+            this._drawPulsingBeam(ctx, x0, y0, tipX, tipY);
+        } else if (this.beamStyle === 'charged') {
+            this._drawChargedBeam(ctx, x0, y0, tipX, tipY);
+        } else if (this.beamStyle === 'plasma') {
+            this._drawPlasmaBeam(ctx, x0, y0, tipX, tipY);
+        } else if (this.beamStyle === 'disruptor') {
+            this._drawDisruptorBeam(ctx, x0, y0, tipX, tipY);
         }
         ctx.shadowBlur = 0;
 
@@ -125,6 +137,170 @@ export class Laserbeam {
         // Draw particles
         this._renderParticles(ctx);
         ctx.restore();
+    }
+
+    _drawCracklingBeam(ctx, x0, y0, x1, y1) {
+        // Create jagged/crackling electric effect
+        const distance = Math.sqrt((x1 - x0) ** 2 + (y1 - y0) ** 2);
+        const segments = Math.floor(distance / 8); // Segment every 8 pixels
+        const crackleAmount = this.beamWidth * 1.5; // How much the beam can deviate
+
+        ctx.beginPath();
+        ctx.moveTo(x0, y0);
+
+        for (let i = 1; i <= segments; i++) {
+            const t = i / segments;
+            const baseX = x0 + (x1 - x0) * t;
+            const baseY = y0 + (y1 - y0) * t;
+
+            // Add random crackling offset
+            const offsetX = (Math.random() - 0.5) * crackleAmount;
+            const offsetY = (Math.random() - 0.5) * crackleAmount;
+
+            ctx.lineTo(baseX + offsetX, baseY + offsetY);
+        }
+
+        // Always end at the exact tip position
+        ctx.lineTo(x1, y1);
+        ctx.stroke();
+    }
+
+    _drawLightningBeam(ctx, x0, y0, x1, y1) {
+        // Create sharp zigzag lightning effect
+        const distance = Math.sqrt((x1 - x0) ** 2 + (y1 - y0) ** 2);
+        const segments = Math.floor(distance / 12); // Fewer, longer segments for sharper zigzags
+        const lightningAmount = this.beamWidth * 4; // Much larger deviations than crackling
+
+        ctx.beginPath();
+        ctx.moveTo(x0, y0);
+
+        for (let i = 1; i <= segments; i++) {
+            const t = i / segments;
+            const baseX = x0 + (x1 - x0) * t;
+            const baseY = y0 + (y1 - y0) * t;
+
+            // Create sharp zigzag pattern - alternate between high and low offsets
+            const zigzag = i % 2 === 0 ? 1 : -1;
+            const offsetX = (Math.random() - 0.5) * lightningAmount + zigzag * lightningAmount * 0.3;
+            const offsetY = (Math.random() - 0.5) * lightningAmount + zigzag * lightningAmount * 0.3;
+
+            ctx.lineTo(baseX + offsetX, baseY + offsetY);
+        }
+
+        // Always end at the exact tip position
+        ctx.lineTo(x1, y1);
+        ctx.stroke();
+    }
+
+    _drawPulsingBeam(ctx, x0, y0, x1, y1) {
+        // Beam width pulses/throbs as it travels
+        const pulseSpeed = 3; // How fast the pulse cycles
+        const pulseAmount = 0.6; // How much the width varies (0.6 = ±60%)
+        const pulse = Math.sin(this.timer * pulseSpeed * 0.01) * pulseAmount + 1;
+
+        ctx.lineWidth = this.beamWidth * pulse;
+        ctx.beginPath();
+        ctx.moveTo(x0, y0);
+        ctx.lineTo(x1, y1);
+        ctx.stroke();
+    }
+
+    _drawChargedBeam(ctx, x0, y0, x1, y1) {
+        // Multiple thin beams bundled together
+        const beamCount = 4;
+        const spread = this.beamWidth * 0.8;
+
+        ctx.lineWidth = this.beamWidth * 0.3; // Thinner individual beams
+
+        for (let i = 0; i < beamCount; i++) {
+            const angle = (i / beamCount) * Math.PI * 2;
+            const offsetX = Math.cos(angle) * spread;
+            const offsetY = Math.sin(angle) * spread;
+
+            ctx.beginPath();
+            ctx.moveTo(x0 + offsetX, y0 + offsetY);
+            ctx.lineTo(x1 + offsetX, y1 + offsetY);
+            ctx.stroke();
+        }
+    }
+
+    _drawPlasmaBeam(ctx, x0, y0, x1, y1) {
+        // Wider beam with inner core and outer glow
+        // Draw outer glow first (wider, more transparent)
+        ctx.save();
+        ctx.lineWidth = this.beamWidth * 3;
+        ctx.globalAlpha = this.opacity * 0.3;
+        ctx.beginPath();
+        ctx.moveTo(x0, y0);
+        ctx.lineTo(x1, y1);
+        ctx.stroke();
+
+        // Draw middle layer
+        ctx.lineWidth = this.beamWidth * 1.8;
+        ctx.globalAlpha = this.opacity * 0.6;
+        ctx.beginPath();
+        ctx.moveTo(x0, y0);
+        ctx.lineTo(x1, y1);
+        ctx.stroke();
+
+        // Draw inner core (brightest)
+        ctx.lineWidth = this.beamWidth * 0.8;
+        ctx.globalAlpha = this.opacity;
+        ctx.strokeStyle = '#ffffff'; // Bright white core
+        ctx.beginPath();
+        ctx.moveTo(x0, y0);
+        ctx.lineTo(x1, y1);
+        ctx.stroke();
+        ctx.restore();
+    }
+
+    _drawDisruptorBeam(ctx, x0, y0, x1, y1) {
+        // Fragmenting beam that splits into multiple beams and merges back
+        const fragments = 3; // Number of fragment beams
+        const fragmentSeparation = this.beamWidth * 2; // How far apart fragments are
+        const mergeChance = 0.3; // 30% chance fragments merge at any point
+
+        // Calculate beam direction for perpendicular offset
+        const dx = x1 - x0;
+        const dy = y1 - y0;
+        const length = Math.sqrt(dx * dx + dy * dy);
+        const perpX = -dy / length; // Perpendicular X
+        const perpY = dx / length; // Perpendicular Y
+
+        ctx.lineWidth = this.beamWidth / fragments; // Thinner individual fragments
+
+        for (let i = 0; i < fragments; i++) {
+            // Offset each fragment perpendicular to beam direction
+            const offset = (i - (fragments - 1) / 2) * fragmentSeparation;
+            const startX = x0 + perpX * offset;
+            const startY = y0 + perpY * offset;
+            const endX = x1 + perpX * offset;
+            const endY = y1 + perpY * offset;
+
+            // Occasionally merge fragments back toward center
+            const segments = 8;
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+
+            for (let j = 1; j <= segments; j++) {
+                const t = j / segments;
+                let targetX = startX + (endX - startX) * t;
+                let targetY = startY + (endY - startY) * t;
+
+                // Sometimes pull fragment toward center (merging effect)
+                if (Math.random() < mergeChance) {
+                    const centerX = x0 + (x1 - x0) * t;
+                    const centerY = y0 + (y1 - y0) * t;
+                    const pullStrength = 0.7;
+                    targetX = targetX * (1 - pullStrength) + centerX * pullStrength;
+                    targetY = targetY * (1 - pullStrength) + centerY * pullStrength;
+                }
+
+                ctx.lineTo(targetX, targetY);
+            }
+
+            ctx.stroke();
+        }
     }
 
     _emitParticles(x, y) {
