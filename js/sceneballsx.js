@@ -1,7 +1,7 @@
 import { SceneBase } from './scenebase.js';
 import { BallManager } from './ball.js';
 import { PhysicsEngine, PhysicsBodyFactory, PhysicsUtils, metersToPixels } from './physics.js';
-import { LaserEffect } from './lasereffect.js';
+import { Laserbeam } from './laserbeam.js';
 // import { wallThickness } from './constants.js';
 // import { fixedTimeStep } from './constants.js';
 
@@ -40,9 +40,12 @@ export class SceneBallsX extends SceneBase {
         this.setupEventHandlers();
 
         this._physicsAccumulator = 0;
-
-        // Initialize laser effect
-        this.laserEffect = new LaserEffect(this.canvas, this.ctx);
+        ``;
+        this.laserBeam = new Laserbeam(this.canvas, {
+            beamStyle: 'solid',
+            startCoords: [wallThickness, 150],
+            endCoords: [this.canvas.width - wallThickness, 150],
+        });
     }
 
     getSceneStateHtml() {
@@ -273,14 +276,11 @@ export class SceneBallsX extends SceneBase {
         }
 
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
         this.ctx.fillStyle = '#111111';
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-        // Render laser effect
-        this.laserEffect.render();
+        this.laserBeam.render();
 
-        // Get all bodies and render them
         const bodies = this.physics.getAllBodies();
 
         bodies.forEach((body) => {
@@ -324,7 +324,7 @@ export class SceneBallsX extends SceneBase {
                 break;
             case 'KeyL':
                 // Manual laser trigger for testing
-                this.laserEffect.triggerLaser();
+                this.laserBeam.fire();
                 break;
             default:
                 break;
@@ -356,10 +356,10 @@ export class SceneBallsX extends SceneBase {
             this.objectManager.deregister('PhysicsEngine');
         }
 
-        // Clean up laser effect
-        if (this.laserEffect) {
-            this.laserEffect.destroy();
-            this.laserEffect = null;
+        // Clean up visual effect
+        if (this.visualEffect) {
+            this.visualEffect.destroy();
+            this.visualEffect = null;
         }
     }
 
@@ -380,8 +380,7 @@ export class SceneBallsX extends SceneBase {
         this.updatePhysics(this.clock.deltaTime);
         this.ballManager.updateFrame();
 
-        // Update laser effect
-        this.laserEffect.update(this.clock.deltaTime);
+        this.laserBeam.update(this.clock.deltaTime);
 
         this.renderScene();
 

@@ -36,9 +36,6 @@ export class InputHandler {
             if (!this.keyState[keyId]) {
                 this.keyState[keyId] = true;
                 this.sceneManager.inputKeyPressed(combo);
-                // if (this.sceneManager && typeof this.sceneManager.inputKeyPressed === 'function') {
-                //     this.sceneManager.inputKeyPressed(combo);
-                // }
             }
         }
     }

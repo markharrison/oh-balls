@@ -113,6 +113,7 @@ export class Ball {
     release() {
         if (!this.physicsBody) {
             alert('Error: Ball physics body is null in release()');
+            this.destroy();
             return;
         }
         this.physicsBody.setStatic(false);
