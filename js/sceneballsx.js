@@ -1,7 +1,7 @@
 import { SceneBase } from './scenebase.js';
 import { BallManager } from './ball.js';
 import { PhysicsEngine, PhysicsBodyFactory, PhysicsUtils, metersToPixels } from './physics.js';
-import { Laserbeam } from './laserbeam.js';
+import { LaserbeamMark } from '../lib/laserbeammark.js';
 // import { wallThickness } from './constants.js';
 // import { fixedTimeStep } from './constants.js';
 
@@ -41,10 +41,10 @@ export class SceneBallsX extends SceneBase {
 
         this._physicsAccumulator = 0;
         ``;
-        this.laserBeam = new Laserbeam(this.canvas, {
-            beamStyle: 'disruptor',
-            startCoords: [wallThickness, 150],
-            endCoords: [this.canvas.width - wallThickness, 150],
+        this.laserBeam = new LaserbeamMark(this.canvas, {
+            beamStyle: 'solid',
+            coords1: [wallThickness, 150],
+            coords2: [this.canvas.width - wallThickness, 150],
         });
     }
 
@@ -323,8 +323,9 @@ export class SceneBallsX extends SceneBase {
 
                 break;
             case 'KeyL':
-                // Manual laser trigger for testing
-                this.laserBeam.fire();
+                // Manual laser trigger for testing with random direction
+                const randomDirection = Math.random() < 0.33 ? -1 : Math.random() < 0.5 ? 0 : 1;
+                this.laserBeam.fire(randomDirection);
                 break;
             default:
                 break;
