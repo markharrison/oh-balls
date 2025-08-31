@@ -92,7 +92,7 @@ export class SceneManager {
     }
 
     // renderSceneMain() {
-    //     const ballInfoElement = document.getElementById('currentBallSize');
+    //     const ballInfoElement = document.getElementById('playBallSize');
     //     ballInfoElement.textContent = 'Harrison Digital - Scene Manager';
     // }
 
@@ -107,7 +107,7 @@ export class SceneManager {
         }
 
         switch (comboId) {
-            case 'Control+KeyM':
+            case 'Control+KeyY':
                 this.diagnosticsPanel.toggle();
                 break;
             default:
@@ -119,9 +119,13 @@ export class SceneManager {
     updateFrame() {
         const nextSceneKey = this.currentScene.updateFrame();
 
-        if (nextSceneKey !== null && nextSceneKey !== this.currentSceneKey) {
+        if (nextSceneKey !== null) {
             this.setCurrentScene(nextSceneKey);
         }
+
+        // if (nextSceneKey !== null && nextSceneKey !== this.currentSceneKey) {
+        //     this.setCurrentScene(nextSceneKey);
+        // }
 
         this.diagnosticsPanel.renderPanel();
     }

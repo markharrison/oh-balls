@@ -284,7 +284,7 @@ export class SceneSettingsAudio extends SceneBase {
     setupEventHandlers() {}
 
     getSpecialKeys() {
-        return ['Escape', 'Control+KeyM'];
+        return ['Escape', 'Control+KeyY'];
     }
 
     inputKeyPressedOther(comboId) {
@@ -495,7 +495,7 @@ export class SceneSettingsTheme extends SceneBase {
     setupEventHandlers() {}
 
     getSpecialKeys() {
-        return ['Escape', 'Control+KeyM'];
+        return ['Escape', 'Control+KeyY'];
     }
 
     inputKeyPressedOther(comboId) {

@@ -13,7 +13,6 @@ export class SceneBallsX extends SceneBase {
         super(objectManager);
         this.audioHandler = objectManager.get('AudioHandler');
         this.sceneManager = objectManager.get('SceneManager');
-        // this.ballManager = objectManager.register('BallManager', new BallManager(objectManager));
         this.physics = objectManager.register('PhysicsEngine', new PhysicsEngine());
 
         this.physics.create();
@@ -33,18 +32,24 @@ export class SceneBallsX extends SceneBase {
             cachedStepCount: 0,
         };
 
-        this.showingExitDialog = false;
+        this.showingDialog = false;
         this.exitToMenu = false;
+        this.restartGame = false;
+        this.gameOver = false;
 
         this.setupBoundaries();
+        this.setupZapZone();
         this.setupEventHandlers();
 
         this._physicsAccumulator = 0;
-        ``;
+
+        this.zapStart = [wallThickness, 150];
+        this.zapEnd = [this.canvas.width - wallThickness, 150];
+
         this.laserBeam = new LaserbeamMark(this.canvas, {
             beamStyle: 'solid',
-            coords1: [wallThickness, 150],
-            coords2: [this.canvas.width - wallThickness, 150],
+            coords1: this.zapStart,
+            coords2: this.zapEnd,
         });
     }
 
@@ -92,15 +97,88 @@ export class SceneBallsX extends SceneBase {
                         this.ballManager.combineBalls(ballA, ballB);
                     }
                 }
+
+                // Danger Zone overlap detection
+                if ((ballALabel === 'ball' && ballBLabel === 'zapzone') || (ballALabel === 'zapzone' && ballBLabel === 'ball')) {
+                    // Ball entered Danger Zone
+                    const ballBody = ballALabel === 'ball' ? bodyA : bodyB;
+                    const ball = ballBody.getUserData()?.ball;
+
+                    if (!ball.playBall) {
+                        this.handleZapZone(ball);
+
+                        // ball.enterZapZone();
+
+                        // let TimerID = setTimeout(() => {
+                        //     this.audioHandler.playSFX(`Beep`);
+
+                        //     let TimerID2 = setTimeout(() => {
+                        //         if (ball.isOnZapZone()) {
+                        //             this.laserBeam.fire(1);
+                        //             this.audioHandler.playSFX(`GameOver`);
+                        //             this.audioHandler.stopMusic();
+                        //             let TimerID3 = setTimeout(() => {
+                        //                 this.handleGameOver();
+                        //             }, 4000);
+                        //             ball.setZapZoneTimerId(TimerID3);
+                        //         }
+                        //     }, 2000);
+                        //     ball.setZapZoneTimerId(TimerID2);
+                        // }, 2000);
+
+                        // ball.setZapZoneTimerId(TimerID);
+                    }
+                }
             });
         });
 
         this.physics.on('collisionEnd', (event) => {
-            // const ballGroundCollisions = PhysicsUtils.findCollisionByLabels(event, 'ball', 'ground');
-            // ballGroundCollisions.forEach(({ bodyA, bodyB }) => {
-            //     const ball = bodyA.label === 'ball' ? bodyA : bodyB;
-            // });
+            const collisionPairs = PhysicsUtils.getCollisionPairs(event);
+            collisionPairs.forEach(({ bodyA, bodyB }) => {
+                const ballALabel = bodyA.getUserData().label;
+                const ballBLabel = bodyB.getUserData().label;
+
+                // Danger Zone exit detection
+                if ((ballALabel === 'ball' && ballBLabel === 'zapzone') || (ballALabel === 'zapzone' && ballBLabel === 'ball')) {
+                    // Ball left Danger Zone
+                    const ballBody = ballALabel === 'ball' ? bodyA : bodyB;
+                    const ball = ballBody.getUserData()?.ball;
+
+                    ball.leaveZapZone();
+                }
+            });
         });
+    }
+
+    setupZapZone() {
+        const zapZoneHeight = 200; // px
+        const zapZoneY = 300; // px (same as zapStart/zapEnd)
+        const zapZoneRender = {
+            fillStyle: 'rgba(255,0,0,0.2)',
+            strokeStyle: '#ff0000',
+            lineWidth: 2,
+            width: this.canvas.width - 2 * wallThickness,
+            height: zapZoneHeight,
+        };
+        const zapZoneBody = PhysicsBodyFactory.createRectangle(
+            this.canvas.width / 2,
+            zapZoneY,
+            this.canvas.width - 2 * wallThickness,
+            zapZoneHeight,
+            {
+                isStatic: true,
+                userData: {
+                    label: 'zapzone',
+                    render: zapZoneRender,
+                },
+                isSensor: true,
+            }
+        );
+
+        const fixture = zapZoneBody.body.getFixtureList();
+        if (fixture) fixture.setSensor(true);
+        this.zapZoneBody = zapZoneBody;
+        this.physics.addBody(zapZoneBody);
     }
 
     setupBoundaries() {
@@ -170,7 +248,7 @@ export class SceneBallsX extends SceneBase {
         this.physics.removeBody(body);
     }
 
-    renderWallOrFloor(body) {
+    renderRectBody(body) {
         const ctx = this.ctx;
 
         // Convert position from meters to pixels for rendering
@@ -198,6 +276,29 @@ export class SceneBallsX extends SceneBase {
         ctx.strokeRect(-width / 2, -height / 2, width, height);
 
         ctx.restore();
+    }
+
+    renderZapZone(body) {
+        const ctx = this.ctx;
+
+        ctx.save();
+        ctx.strokeStyle = '#ff0000';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([2, 6]); // Dotted line: 2px dash, 6px gap
+
+        ctx.beginPath();
+        ctx.moveTo(this.zapStart[0], this.zapStart[1]);
+        ctx.lineTo(this.zapEnd[0], this.zapEnd[1]);
+        ctx.stroke();
+
+        ctx.setLineDash([]); // Reset to solid for future drawing
+        ctx.restore();
+
+        this.renderRectBody(body);
+    }
+
+    renderWallOrFloor(body) {
+        this.renderRectBody(body);
     }
 
     renderBall(body) {
@@ -284,11 +385,15 @@ export class SceneBallsX extends SceneBase {
         const bodies = this.physics.getAllBodies();
 
         bodies.forEach((body) => {
-            switch (body.getUserData().label) {
+            const label = body.getUserData().label;
+            switch (label) {
                 case 'leftwall':
                 case 'rightwall':
                 case 'ground':
                     this.renderWallOrFloor(body);
+                    break;
+                case 'zapzone':
+                    this.renderZapZone(body);
                     break;
                 default:
                     this.renderBall(body);
@@ -298,23 +403,25 @@ export class SceneBallsX extends SceneBase {
     }
 
     inputKeyPressed(comboId) {
+        if (this.gameOver) return;
+
         switch (comboId) {
             case 'ArrowLeft':
-                this.ballManager.moveCurrentBall(-1);
+                this.ballManager.movePlayBall(-1);
                 break;
             case 'ArrowRight':
-                this.ballManager.moveCurrentBall(1);
+                this.ballManager.movePlayBall(1);
                 break;
             case 'ArrowDown':
             case 'Space':
-                this.ballManager.dropCurrentBall();
+                this.ballManager.dropPlayBall();
                 break;
             case 'Escape':
                 // Show exit confirmation dialog
                 this.showingExitDialog = true;
 
                 this.sceneManager.doDialog('Exit Game', 'Are you sure you want to exit?', ['Yes', 'No'], (result) => {
-                    this.showingExitDialog = false;
+                    this.showingDialog = false;
                     this.clock.currentTime = performance.now();
                     if (result === 'Yes') {
                         this.exitToMenu = true;
@@ -323,8 +430,7 @@ export class SceneBallsX extends SceneBase {
 
                 break;
             case 'KeyL':
-                // Manual laser trigger for testing with random direction
-                const randomDirection = Math.random() < 0.33 ? -1 : Math.random() < 0.5 ? 0 : 1;
+                const randomDirection = Math.random() < 0.5 ? -1 : 1;
                 this.laserBeam.fire(randomDirection);
                 break;
             default:
@@ -332,9 +438,54 @@ export class SceneBallsX extends SceneBase {
         }
     }
 
+    gameOverStep2() {
+        this.ballManager.gameOverStep2();
+
+        this.showingDialog = true;
+        this.gameOver = true;
+        this.sceneManager.doDialog('Game Over', 'Would you like to restart or exit?', ['Restart', 'Exit'], (result) => {
+            this.showingDialog = false;
+            if (result === 'Exit') {
+                this.exitToMenu = true;
+            } else if (result === 'Restart') {
+                this.restartGame = true;
+            }
+        });
+    }
+
+    gameOverStep1() {
+        this.laserBeam.fire(1);
+        this.audioHandler.playSFX(`GameOver`);
+        this.audioHandler.stopMusic();
+        this.ballManager.gameOverStep1();
+
+        let TimerID3 = setTimeout(() => {
+            this.gameOverStep2();
+        }, 4000);
+    }
+
+    handleZapZone(ball) {
+        ball.enterZapZone();
+
+        let TimerID = setTimeout(() => {
+            this.audioHandler.playSFX(`Beep`);
+
+            let TimerID2 = setTimeout(() => {
+                if (ball.isOnZapZone()) {
+                    this.gameOverStep1();
+                }
+            }, 2000);
+
+            ball.setZapZoneTimerId(TimerID2);
+        }, 2000);
+
+        ball.setZapZoneTimerId(TimerID);
+    }
+
     enter() {
         this.objectManager.get('AudioHandler').transitionMusic('GameMusic');
         this.ballManager = this.objectManager.register('BallManager', new BallManager(this.objectManager));
+        this.gameOver = false;
     }
 
     exit() {
@@ -365,12 +516,16 @@ export class SceneBallsX extends SceneBase {
     }
 
     updateFrame() {
-        if (this.showingExitDialog) {
-            return null;
-        }
-
         if (this.exitToMenu) {
             return SceneBase.GameScenes.mainmenu;
+        }
+
+        if (this.restartGame) {
+            return SceneBase.GameScenes.ballsX;
+        }
+
+        if (this.showingDialog || this.gameOver) {
+            return null;
         }
 
         const currentTime = performance.now();

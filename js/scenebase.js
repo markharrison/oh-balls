@@ -99,7 +99,7 @@ export class SceneBase {
     }
 
     getSpecialKeys() {
-        return ['Escape', 'Enter', 'ArrowUp', 'ArrowDown', 'Control+KeyM'];
+        return ['Escape', 'Enter', 'ArrowUp', 'ArrowDown', 'Control+KeyY'];
     }
 
     inputKeyPressed(comboId) {

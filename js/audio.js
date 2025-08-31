@@ -35,6 +35,8 @@ export class AudioHandler {
         await this.audioMark.loadAudio('Combine4', 'audio/combine4-pixabay.mp3');
         await this.audioMark.loadAudio('Combine5', 'audio/combine5-pixabay.mp3');
         await this.audioMark.loadAudio('Combine6', 'audio/combine6-pixabay.mp3');
+        await this.audioMark.loadAudio('Beep', 'audio/bleep-pixabay.mp3');
+        await this.audioMark.loadAudio('GameOver', 'audio/endgame-pixabay.mp3');
     }
 
     initialize() {
@@ -64,6 +66,11 @@ export class AudioHandler {
 
     stopAll() {
         this.audioMark.stopAll();
+        this.musicPlaying = false;
+    }
+
+    stopMusic() {
+        this.audioMark.stopMusic();
         this.musicPlaying = false;
     }
 

@@ -1,14 +1,17 @@
 // Ball Module for creating and managing balls
-import { PhysicsBodyFactory, PhysicsConstants, pixelsToMeters } from './physics.js';
+import { PhysicsBodyFactory, pixelsToMeters } from './physics.js';
 import { wallThickness } from './sceneballsx.js';
 
 export class Ball {
-    constructor(objectManager, x, y, size) {
+    constructor(objectManager, x, y, size, playBall = false) {
         this.objectManager = objectManager;
         this.sceneManager = objectManager.get('SceneManager');
         this.sceneBallsX = objectManager.get('SceneBallsX');
 
-        this.combining = false;
+        this.playBall = playBall;
+        this.combiningBall = false;
+        this.zapBall = false;
+        this.zapZoneTimerId = null;
         this.size = size;
         this.radius = this.calculateRadius(this.size);
         this.color = this.getColorForSize(this.size);
@@ -68,6 +71,8 @@ export class Ball {
         vHtml += 'Vel:' + vel.x.toFixed(3) + ',' + vel.y.toFixed(3) + '&nbsp;';
         vHtml += 'Ang Vel:' + this.physicsBody.getAngularVelocity().toFixed(3) + '&nbsp;';
         vHtml += this.physicsBody.isSleeping() ? 'S' : '';
+        vHtml += this.playBall ? 'P' : '';
+        vHtml += this.zapBall ? 'Z' : '';
 
         vHtml += '<br/>';
 
@@ -109,7 +114,35 @@ export class Ball {
         this.physicsBody.setPosition(x, y);
     }
 
-    // Release ball from static state (when dropped)
+    setStatic(isStatic) {
+        this.physicsBody.setStatic(isStatic);
+    }
+
+    leaveZapZone() {
+        this.playBall = false;
+        this.zapBall = false;
+        this.cancelZapZoneTimerId();
+    }
+
+    isOnZapZone() {
+        return this.zapBall;
+    }
+
+    enterZapZone() {
+        this.zapBall = true;
+    }
+
+    setZapZoneTimerId(timerId) {
+        this.zapZoneTimerId = timerId;
+    }
+
+    cancelZapZoneTimerId() {
+        if (this.zapZoneTimerId) {
+            clearTimeout(this.zapZoneTimerId);
+            this.zapZoneTimerId = null;
+        }
+    }
+
     release() {
         if (!this.physicsBody) {
             alert('Error: Ball physics body is null in release()');
@@ -119,6 +152,8 @@ export class Ball {
         this.physicsBody.setStatic(false);
         this.physicsBody.setAngularVelocity(0);
         this.physicsBody.setVelocity(0, 0);
+
+        this.playBall = false;
     }
 
     destroy() {
@@ -134,7 +169,7 @@ export class Ball {
         this.physicsBody = null;
         this.objectManager = null;
         this.sceneManager = null;
-        this.combining = false;
+        this.combiningBall = false;
     }
 }
 
@@ -148,10 +183,11 @@ export class BallManager {
         this.canvasHeight = this.sceneManager.canvas.height;
         this.canvasWidth = this.sceneManager.canvas.width;
 
-        this.currentBall = null;
+        this.gaameOver = false;
+        this.playBall = null;
         this.lastCleanupTime = 0;
         this.lastDropTime = 0;
-        this.lastCurrentBallPosition = this.canvasWidth / 2;
+        this.lastPlayBallPosition = this.canvasWidth / 2;
         // In-memory queue for pairing balls to be combined.
         // Each entry is an object: { ballA: Ball, ballB: Ball }
         this.combineQueue = [];
@@ -187,49 +223,47 @@ export class BallManager {
     }
 
     spawnBall() {
-        if (this.currentBall !== null) {
-            return;
-        }
+        if (this.playBall !== null) return;
 
-        if (performance.now() - this.lastDropTime < 1000) {
-            return;
-        }
+        if (this.gameOver) return;
+
+        if (performance.now() - this.lastDropTime < 1000) return;
 
         const x = 512;
         const y = -100;
 
-        this.currentBall = new Ball(this.objectManager, x, y, Math.floor(Math.random() * 5) + 1);
+        this.playBall = new Ball(this.objectManager, x, y, Math.floor(Math.random() * 5) + 1, true);
 
-        let newX = this.keepXWithinBounds(this.lastCurrentBallPosition, this.currentBall);
+        let newX = this.keepXWithinBounds(this.lastPlayBallPosition, this.playBall);
 
-        this.currentBall.setPosition(newX, 72);
+        this.playBall.setPosition(newX, 72);
     }
 
-    dropCurrentBall() {
-        if (this.currentBall === null) {
+    dropPlayBall() {
+        if (this.playBall === null) {
             return;
         }
 
-        this.currentBall.release();
+        this.playBall.release();
         this.lastDropTime = performance.now();
 
-        this.currentBall = null;
+        this.playBall = null;
     }
 
-    moveCurrentBall(direction) {
-        if (this.currentBall === null) {
+    movePlayBall(direction) {
+        if (this.playBall === null) {
             return;
         }
 
-        const currentPos = this.currentBall.getPosition();
+        const currentPos = this.playBall.getPosition();
         const moveDistance = 5; // Distance to move per frame
         let newX = currentPos.x + direction * moveDistance;
 
         // Use keepXWithinBounds, which now uses WALL_THICKNESS
-        newX = this.keepXWithinBounds(newX, this.currentBall);
+        newX = this.keepXWithinBounds(newX, this.playBall);
 
-        this.currentBall.setPosition(newX, currentPos.y);
-        this.lastCurrentBallPosition = newX;
+        this.playBall.setPosition(newX, currentPos.y);
+        this.lastPlayBallPosition = newX;
     }
 
     queueCombine(ballA, ballB) {
@@ -256,6 +290,9 @@ export class BallManager {
     }
 
     combineBallsMerge(ballA, ballB) {
+        ballA.cancelZapZoneTimerId();
+        ballB.cancelZapZoneTimerId();
+
         const newSize = ballA.size < 15 ? ballA.size + 1 : 15;
 
         const posA = ballA.getPosition();
@@ -268,7 +305,7 @@ export class BallManager {
         const newVelX = (velA.x + velB.x) / 2;
         const newVelY = (velA.y + velB.y) / 2;
 
-        const newBall = new Ball(this.objectManager, newX, newY, newSize);
+        const newBall = new Ball(this.objectManager, newX, newY, newSize, false);
 
         newBall.physicsBody.setVelocity(newVelX, newVelY);
         newBall.physicsBody.setStatic(false);
@@ -283,14 +320,55 @@ export class BallManager {
     }
 
     combineBalls(ballA, ballB) {
-        if (ballA.combining || ballB.combining) {
+        if (ballA.combiningBall || ballB.combiningBall) {
             return false;
         }
 
-        ballA.combining = true;
-        ballB.combining = true;
+        if (ballA.playBall || ballB.playBall) {
+            return false;
+        }
+
+        ballA.combiningBall = true;
+        ballB.combiningBall = true;
 
         this.queueCombine(ballA, ballB);
+    }
+
+    handleGameEnd() {}
+
+    gameOverStep1() {
+        this.gameOver = true;
+
+        let ballBodies = this.getBallBodies();
+
+        ballBodies.forEach((ballBody) => {
+            let ball = ballBody.getUserData()?.ball;
+
+            if (ball.isOnZapZone) {
+                // take note to not include in score.
+            }
+
+            if (ball) ball.setStatic(true);
+
+            if (ball.playBall) {
+                ball.cancelZapZoneTimerId();
+                ball.destroy();
+                ball = null;
+            }
+        });
+    }
+
+    gameOverStep2() {
+        let ballBodies = this.getBallBodies();
+
+        ballBodies.forEach((ballBody) => {
+            let ball = ballBody.getUserData()?.ball;
+            if (ball.isOnZapZone()) {
+                ball.cancelZapZoneTimerId();
+                ball.destroy();
+                ball = null;
+            }
+        });
     }
 
     updateFrame() {
@@ -301,8 +379,6 @@ export class BallManager {
 
     updateBallStates() {
         let ballBodies = this.getBallBodies();
-
-        // this.stopJittering();
 
         this.cleanup();
     }
