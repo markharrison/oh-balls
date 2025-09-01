@@ -228,6 +228,16 @@ export class PhysicsBody {
         return !this.body.isAwake();
     }
 
+    setUserData(userData) {
+        this.body.setUserData(userData);
+    }
+
+    set fillStyle(color) {
+        let userData = this.body.getUserData();
+        userData.render.fillStyle = color;
+        this.body.setUserData(userData);
+    }
+
     // Properties
     get id() {
         return this.body.getUserData()?.id || 0;

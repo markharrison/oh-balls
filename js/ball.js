@@ -9,16 +9,17 @@ export class Ball {
         this.sceneBallsX = objectManager.get('SceneBallsX');
 
         this.playBall = playBall;
+        this.deadBall = false;
         this.combiningBall = false;
         this.zapBall = false;
         this.zapZoneTimerId = null;
         this.size = size;
         this.radius = this.calculateRadius(this.size);
-        this.color = this.getColorForSize(this.size);
+        let color = this.getColorForSize(this.size);
 
         const render = {
             radius: this.radius,
-            fillStyle: this.color,
+            fillStyle: color,
             strokeStyle: '#ffffff',
             lineWidth: 3,
             visible: true,
@@ -51,15 +52,18 @@ export class Ball {
     getBallStateHtml() {
         let vHtml = ``;
 
-        // Calculate mass using meter radius for realistic physics mass
-        const meterRadius = pixelsToMeters(this.radius);
-        const density = 1.0; // Default density from physics body factory
+        let userData = this.physicsBody.body.getUserData();
+        let radius = userData.render.radius;
+        let fillStyle = userData.render.fillStyle;
+
+        const meterRadius = pixelsToMeters(radius);
+        const density = 1.0;
         let mass = meterRadius * meterRadius * Math.PI * density;
 
         vHtml += this.physicsBody.id + ':&nbsp;';
         vHtml +=
             '<svg width="12" height="12" style="vertical-align:middle;"><circle cx="6" cy="6" r="6" fill="' +
-            this.color +
+            fillStyle +
             '"/></svg>&nbsp;';
 
         vHtml += 'Size:' + this.size + '&nbsp;';
@@ -73,6 +77,7 @@ export class Ball {
         vHtml += this.physicsBody.isSleeping() ? 'S' : '';
         vHtml += this.playBall ? 'P' : '';
         vHtml += this.zapBall ? 'Z' : '';
+        vHtml += this.deadBall ? 'D' : '';
 
         vHtml += '<br/>';
 
@@ -122,10 +127,6 @@ export class Ball {
         this.playBall = false;
         this.zapBall = false;
         this.cancelZapZoneTimerId();
-    }
-
-    isOnZapZone() {
-        return this.zapBall;
     }
 
     enterZapZone() {
@@ -222,7 +223,7 @@ export class BallManager {
         return newX;
     }
 
-    spawnBall() {
+    spawnPlayBall() {
         if (this.playBall !== null) return;
 
         if (this.gameOver) return;
@@ -236,7 +237,7 @@ export class BallManager {
 
         let newX = this.keepXWithinBounds(this.lastPlayBallPosition, this.playBall);
 
-        this.playBall.setPosition(newX, 72);
+        this.playBall.setPosition(newX, 102);
     }
 
     dropPlayBall() {
@@ -293,6 +294,8 @@ export class BallManager {
         ballA.cancelZapZoneTimerId();
         ballB.cancelZapZoneTimerId();
 
+        this.sceneBallsX.score += ballA.size * ballA.size * 2;
+
         const newSize = ballA.size < 15 ? ballA.size + 1 : 15;
 
         const posA = ballA.getPosition();
@@ -334,45 +337,102 @@ export class BallManager {
         this.queueCombine(ballA, ballB);
     }
 
-    handleGameEnd() {}
-
-    gameOverStep1() {
-        this.gameOver = true;
-
+    gameOver_BonusBalls() {
         let ballBodies = this.getBallBodies();
+
+        let vHTML = 'Bonus Balls: ';
 
         ballBodies.forEach((ballBody) => {
             let ball = ballBody.getUserData()?.ball;
 
-            if (ball.isOnZapZone) {
-                // take note to not include in score.
-            }
+            if (!ball.playBall && !ball.deadBallBall) {
+                vHTML += ball.physicsBody.id + ' ';
+                vHTML += '; ';
 
-            if (ball) ball.setStatic(true);
+                setTimeout(() => {
+                    ball.destroy();
+                    ball = null;
+                }, 2000);
+            }
+        });
+
+        this.sceneManager.doToast('gameOver_BonusBalls', vHTML);
+        console.log('gameOver_BonusBalls', vHTML);
+    }
+
+    gameOver_DeadBalls() {
+        if (this.gameOver) return;
+
+        this.gameOver = true;
+
+        let ballBodies = this.getBallBodies();
+
+        let vHTML = 'Ball Left: ';
+
+        ballBodies.forEach((ballBody) => {
+            let ball = ballBody.getUserData()?.ball;
+
+            vHTML += ball.physicsBody.id + ' ';
 
             if (ball.playBall) {
                 ball.cancelZapZoneTimerId();
                 ball.destroy();
                 ball = null;
+                vHTML += 'PlayBall ';
+            } else if (ball.zapBall) {
+                ball.deadBall = true;
+                ball.physicsBody.fillStyle = '#000000';
+                vHTML += 'Dead ';
+                ball.cancelZapZoneTimerId();
+
+                setTimeout(() => {
+                    ball.destroy();
+                    ball = null;
+                }, 2000);
             }
+
+            vHTML += '; ';
+
+            if (ball) ball.setStatic(true);
         });
+
+        this.sceneManager.doToast('gameOver_DeadBalls', vHTML);
+        console.log('gameOver_DeadBalls', vHTML);
     }
 
     gameOverStep2() {
         let ballBodies = this.getBallBodies();
 
+        let vHTML = '';
+
         ballBodies.forEach((ballBody) => {
             let ball = ballBody.getUserData()?.ball;
-            if (ball.isOnZapZone()) {
+
+            vHTML += ball.physicsBody.id + '; ';
+
+            if (ball.deadBall) {
                 ball.cancelZapZoneTimerId();
                 ball.destroy();
                 ball = null;
             }
         });
+
+        this.sceneManager.doToast('gameOverStep2', vHTML);
+        console.log('gameOverStep2', vHTML);
+        // let ballBodies = this.getBallBodies();
+
+        // ballBodies.forEach((ballBody) => {
+        //     let ball = ballBody.getUserData()?.ball;
+        //     if (ball.isOnZapZone()) {
+        //         ball.cancelZapZoneTimerId();
+        //         ball.destroy();
+        //         ball = null;
+        //     }
+        // });
     }
 
     updateFrame() {
-        this.spawnBall();
+        this.spawnPlayBall();
         this.updateBallStates();
         this.processCombineQueue();
     }
