@@ -177,7 +177,7 @@ export class SceneManager {
         }
         if (text) {
             const p = document.createElement('p');
-            p.textContent = text;
+            p.innerHTML = text;
             dialog.appendChild(p);
         }
         const btnContainer = document.createElement('div');

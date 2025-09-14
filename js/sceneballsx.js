@@ -13,6 +13,7 @@ export class SceneBallsX extends SceneBase {
         super(objectManager);
         this.audioHandler = objectManager.get('AudioHandler');
         this.sceneManager = objectManager.get('SceneManager');
+        this.configManager = objectManager.get('ConfigManager');
         this.physics = objectManager.register('PhysicsEngine', new PhysicsEngine());
 
         this.physics.create();
@@ -35,6 +36,7 @@ export class SceneBallsX extends SceneBase {
         this.showingDialog = false;
         this.exitToMenu = false;
         this.restartGame = false;
+        this.scoreHighest = this.configManager.getHighestScore('BallsX') || 0;
         this.score = 0;
 
         this.setupBoundaries();
@@ -324,10 +326,22 @@ export class SceneBallsX extends SceneBase {
         const renderRadius = physicsRadius - strokeWidth / 2;
 
         if (renderRadius > 0) {
+            // --- Begin Gradient to Black Center Effect ---
+            ctx.save();
+            ctx.shadowColor = 'rgba(255,255,255,0.7)'; // Glow color
+            ctx.shadowBlur = 30; // Consistent blur
+            // Create radial gradient (black center, color edge)
+            const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, renderRadius);
+            gradient.addColorStop(0, '#000');
+            gradient.addColorStop(1, render.fillStyle);
+            ctx.fillStyle = gradient;
             ctx.beginPath();
             ctx.arc(0, 0, renderRadius, 0, 6.28);
             ctx.fill();
+            ctx.restore();
+            // --- End Gradient to Black Center Effect ---
 
+            // Draw stroke as before
             if (ctx.strokeStyle && strokeWidth > 0) {
                 ctx.stroke();
             }
@@ -337,11 +351,11 @@ export class SceneBallsX extends SceneBase {
 
                 const fontSize = Math.max(24, renderRadius * 0.8);
                 ctx.font = `bold ${fontSize}px Arial`;
-                ctx.fillStyle = '#000000';
+                ctx.fillStyle = '#ffffff'; // White text
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
 
-                ctx.strokeStyle = '#ffffff';
+                ctx.strokeStyle = '#000000'; // Black outline for contrast
                 ctx.lineWidth = 2;
                 ctx.strokeText(render.size.toString(), 0, 0);
 
@@ -373,7 +387,7 @@ export class SceneBallsX extends SceneBase {
         this.ctx.font = 'bold 20px Arial';
         this.ctx.textAlign = 'left';
         this.ctx.textBaseline = 'top';
-        this.ctx.fillText(`Score: ${this.score}`, 25, 10);
+        this.ctx.fillText(`Highest: ${this.scoreHighest}  Score: ${this.score}`, 25, 10);
         this.ctx.restore();
     }
 
@@ -458,9 +472,15 @@ export class SceneBallsX extends SceneBase {
     }
 
     gameOverStep3() {
+        let vMsg = '';
+        if (this.score > this.scoreHighest) {
+            vMsg = `New High Score! ${this.score} (Previous: ${this.scoreHighest}) <br /><br />`;
+            this.configManager.setHighestScore('BallsX', this.score);
+            this.configManager.saveToLocalStorage();
+        }
+
         this.showingDialog = true;
-        this.gameOver = true;
-        this.sceneManager.doDialog('Game Over', 'Would you like to restart or exit?', ['Restart', 'Exit'], (result) => {
+        this.sceneManager.doDialog('Game Over', vMsg + 'Would you like to restart or exit?', ['Restart', 'Exit'], (result) => {
             this.showingDialog = false;
             if (result === 'Exit') {
                 this.exitToMenu = true;

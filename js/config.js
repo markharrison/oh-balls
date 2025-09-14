@@ -9,12 +9,30 @@ export class ConfigManager {
             theme: 'default',
             userName: '',
             userId: '',
+            HighestScores: [], // Array of { GameType, Score }
         };
 
         this.objectHandler = objectHandler;
         this.loadFromLocalStorage();
     }
 
+    // HighestScores methods
+    setHighestScore(gameType, score) {
+        if (!gameType) return;
+        score = Number(score) || 0;
+        const idx = this._config.HighestScores.findIndex((hs) => hs.GameType === gameType);
+        if (idx >= 0) {
+            this._config.HighestScores[idx].Score = score;
+        } else {
+            this._config.HighestScores.push({ GameType: gameType, Score: score });
+        }
+    }
+
+    getHighestScore(gameType) {
+        if (!gameType) return 0;
+        const found = this._config.HighestScores.find((hs) => hs.GameType === gameType);
+        return found ? found.Score : 0;
+    }
     // Audio getter/setter
     get audioEnabled() {
         return this._config.audioEnabled;
@@ -90,7 +108,7 @@ export class ConfigManager {
             const data = JSON.parse(jsonString);
 
             // Validate and set each property using setters for validation
-            if (data.hasOwnProperty('audio')) {
+            if (data.hasOwnProperty('audioEnabled')) {
                 this.audioEnabled = data.audioEnabled;
             }
             if (data.hasOwnProperty('masterVolume')) {
@@ -110,6 +128,12 @@ export class ConfigManager {
             }
             if (data.hasOwnProperty('userId')) {
                 this.userId = data.userId;
+            }
+            if (Array.isArray(data.HighestScores)) {
+                this._config.HighestScores = data.HighestScores.map((hs) => ({
+                    GameType: String(hs.GameType),
+                    Score: Number(hs.Score) || 0,
+                }));
             }
         } catch (error) {
             throw new Error('Invalid JSON string provided for deserialization: ' + error.message);
@@ -131,6 +155,7 @@ export class ConfigManager {
             theme: 'default',
             userName: '',
             userId: '',
+            HighestScores: [],
         };
     }
 

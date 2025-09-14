@@ -1,4 +1,6 @@
 {
+    "liveServer.settings.port": 5500,
+    "liveServer.settings.wait": 500,
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "[javascript]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode",

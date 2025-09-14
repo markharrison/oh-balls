@@ -349,6 +349,8 @@ export class BallManager {
                 vHTML += ball.physicsBody.id + ' ';
                 vHTML += '; ';
 
+                this.sceneBallsX.score += ball.size * ball.size;
+
                 setTimeout(() => {
                     ball.destroy();
                     ball = null;
@@ -400,36 +402,27 @@ export class BallManager {
         console.log('gameOver_DeadBalls', vHTML);
     }
 
-    gameOverStep2() {
-        let ballBodies = this.getBallBodies();
+    // gameOverStep2() {
+    //     let ballBodies = this.getBallBodies();
 
-        let vHTML = '';
+    //     let vHTML = '';
 
-        ballBodies.forEach((ballBody) => {
-            let ball = ballBody.getUserData()?.ball;
+    //     ballBodies.forEach((ballBody) => {
+    //         let ball = ballBody.getUserData()?.ball;
 
-            vHTML += ball.physicsBody.id + '; ';
+    //         vHTML += ball.physicsBody.id + '; ';
 
-            if (ball.deadBall) {
-                ball.cancelZapZoneTimerId();
-                ball.destroy();
-                ball = null;
-            }
-        });
+    //         if (ball.deadBall) {
+    //             ball.cancelZapZoneTimerId();
+    //             ball.destroy();
+    //             ball = null;
+    //         }
+    //     });
 
-        this.sceneManager.doToast('gameOverStep2', vHTML);
-        console.log('gameOverStep2', vHTML);
-        // let ballBodies = this.getBallBodies();
+    //     this.sceneManager.doToast('gameOverStep2', vHTML);
+    //     console.log('gameOverStep2', vHTML);
 
-        // ballBodies.forEach((ballBody) => {
-        //     let ball = ballBody.getUserData()?.ball;
-        //     if (ball.isOnZapZone()) {
-        //         ball.cancelZapZoneTimerId();
-        //         ball.destroy();
-        //         ball = null;
-        //     }
-        // });
-    }
+    // }
 
     updateFrame() {
         this.spawnPlayBall();
