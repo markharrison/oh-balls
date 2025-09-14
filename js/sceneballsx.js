@@ -1,9 +1,8 @@
 import { SceneBase } from './scenebase.js';
 import { BallManager } from './ball.js';
 import { PhysicsEngine, PhysicsBodyFactory, PhysicsUtils, metersToPixels } from './physics.js';
-import { LaserbeamMark } from '../lib/laserbeammark.js';
-// import { wallThickness } from './constants.js';
-// import { fixedTimeStep } from './constants.js';
+import { LaserbeamHandler } from './laserbeam.js';
+import { ParticlesHandler } from './particles.js';
 
 export const wallThickness = 16;
 export const fixedTimeStep = 1000 / 60; // ms per physics step (16.666...)
@@ -15,9 +14,11 @@ export class SceneBallsX extends SceneBase {
         this.sceneManager = objectManager.get('SceneManager');
         this.configManager = objectManager.get('ConfigManager');
         this.physics = objectManager.register('PhysicsEngine', new PhysicsEngine());
+        this.laserbeamHandler = this.objectManager.register('LaserbeamHandler', new LaserbeamHandler(this.objectManager));
+        this.particlesHandler = this.objectManager.register('ParticlesHandler', new ParticlesHandler(this.objectManager));
 
         this.physics.create();
-        this.physics.setGravity(0, 300); // Gentler gravity for relaxed gameplay
+        this.physics.setGravity(0, 300);
         this.physics.setTimeScale(1);
 
         // Set world reference in factory
@@ -47,12 +48,6 @@ export class SceneBallsX extends SceneBase {
 
         this.zapStart = [wallThickness, 180];
         this.zapEnd = [this.canvas.width - wallThickness, 180];
-
-        this.laserBeam = new LaserbeamMark(this.canvas, {
-            beamStyle: 'solid',
-            coords1: this.zapStart,
-            coords2: this.zapEnd,
-        });
     }
 
     getSceneStateHtml() {
@@ -97,6 +92,8 @@ export class SceneBallsX extends SceneBase {
                         const ballB = bodyB.getUserData()?.ball;
 
                         this.ballManager.combineBalls(ballA, ballB);
+
+                        this;
                     }
                 }
 
@@ -108,27 +105,6 @@ export class SceneBallsX extends SceneBase {
 
                     if (!ball.playBall) {
                         this.handleZapZone(ball);
-
-                        // ball.enterZapZone();
-
-                        // let TimerID = setTimeout(() => {
-                        //     this.audioHandler.playSFX(`Beep`);
-
-                        //     let TimerID2 = setTimeout(() => {
-                        //         if (ball.isOnZapZone()) {
-                        //             this.laserBeam.fire(1);
-                        //             this.audioHandler.playSFX(`GameOver`);
-                        //             this.audioHandler.stopMusic();
-                        //             let TimerID3 = setTimeout(() => {
-                        //                 this.handleGameOver();
-                        //             }, 4000);
-                        //             ball.setZapZoneTimerId(TimerID3);
-                        //         }
-                        //     }, 2000);
-                        //     ball.setZapZoneTimerId(TimerID2);
-                        // }, 2000);
-
-                        // ball.setZapZoneTimerId(TimerID);
                     }
                 }
             });
@@ -401,7 +377,7 @@ export class SceneBallsX extends SceneBase {
         this.ctx.fillStyle = '#111111';
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-        this.laserBeam.render();
+        this.laserbeamHandler.render();
 
         const bodies = this.physics.getAllBodies();
 
@@ -431,6 +407,8 @@ export class SceneBallsX extends SceneBase {
                     break;
             }
         });
+
+        this.particlesHandler.render();
 
         this.renderStatusLine();
     }
@@ -464,7 +442,7 @@ export class SceneBallsX extends SceneBase {
                 break;
             case 'KeyL':
                 const randomDirection = Math.random() < 0.5 ? -1 : 1;
-                this.laserBeam.fire(randomDirection);
+                this.laserbeamHandler.fire(randomDirection);
                 break;
             default:
                 break;
@@ -502,7 +480,7 @@ export class SceneBallsX extends SceneBase {
         if (this.gameOver) return;
         this.gameOver = true;
 
-        this.laserBeam.fire(1);
+        this.laserbeamHandler.fire(1);
         this.audioHandler.stopMusic();
         this.audioHandler.playSFX(`GameOver`);
 
@@ -558,9 +536,16 @@ export class SceneBallsX extends SceneBase {
         }
 
         // Clean up visual effect
-        if (this.visualEffect) {
-            this.visualEffect.destroy();
-            this.visualEffect = null;
+        if (this.laserbeamHandler) {
+            this.laserbeamHandler.destroy();
+            this.laserbeamHandler = null;
+            this.objectManager.deregister('LaserbeamHandler');
+        }
+
+        if (this.particlesHandler) {
+            this.particlesHandler.destroy();
+            this.particlesHandler = null;
+            this.objectManager.deregister('ParticlesHandler');
         }
     }
 
@@ -585,7 +570,9 @@ export class SceneBallsX extends SceneBase {
         this.updatePhysics(this.clock.deltaTime);
         this.ballManager.updateFrame();
 
-        this.laserBeam.update(this.clock.deltaTime);
+        this.particlesHandler.update(this.clock.deltaTime);
+
+        this.laserbeamHandler.update(this.clock.deltaTime);
 
         this.renderScene();
 

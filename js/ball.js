@@ -1,4 +1,3 @@
-// Ball Module for creating and managing balls
 import { PhysicsBodyFactory, pixelsToMeters } from './physics.js';
 import { wallThickness } from './sceneballsx.js';
 
@@ -180,6 +179,7 @@ export class BallManager {
         this.sceneManager = objectManager.get('SceneManager');
         this.sceneBallsX = objectManager.get('SceneBallsX');
         this.audioHandler = objectManager.get('AudioHandler');
+        this.particlesHandler = objectManager.get('ParticlesHandler');
 
         this.canvasHeight = this.sceneManager.canvas.height;
         this.canvasWidth = this.sceneManager.canvas.width;
@@ -310,8 +310,12 @@ export class BallManager {
 
         const newBall = new Ball(this.objectManager, newX, newY, newSize, false);
 
+        const newColor = ballA.getColorForSize(newSize);
+
         newBall.physicsBody.setVelocity(newVelX, newVelY);
         newBall.physicsBody.setStatic(false);
+
+        this.particlesHandler.combineEffect([newX, newY], newColor);
 
         let rnd = Math.floor(Math.random() * 6) + 1;
         this.audioHandler.playSFX(`Combine${rnd}`);
