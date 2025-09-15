@@ -17,7 +17,8 @@ export class LaserbeamHandler {
 
     // Example method to fire a laser
     fire(direction) {
-        this.LaserbeamMark.fire(direction);
+        this.laserId = this.LaserbeamMark.addLaser(direction);
+        this.laserId = this.LaserbeamMark.addLaser(-direction);
     }
 
     render() {
@@ -30,7 +31,7 @@ export class LaserbeamHandler {
 
     destroy() {
         if (this.LaserbeamMark) {
-            //         this.laserbeam1.destroy();
+            this.LaserbeamMark.destroy();
             this.LaserbeamMark = null;
             this.objectManager.deregister('LaserbeamMark');
         }

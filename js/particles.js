@@ -57,7 +57,7 @@ export class ParticlesHandler {
 
     destroy() {
         if (this.particlesMark) {
-            //         this.particlesMark.destroy();
+            this.particlesMark.destroy();
             this.particlesMark = null;
             this.objectManager.deregister('ParticlesMark');
         }
