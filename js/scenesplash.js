@@ -15,20 +15,20 @@ export class SceneSplash extends SceneBase {
         if (footerElement) {
             footerElement.textContent = 'Harrison Digital - Splash Screen';
         }
+
+        this.audio = this.objectManager.get('AudioHandler');
+
+        this.audio.initialize();
     }
 
     exit() {
         this.hideOverlay();
     }
 
-    initAudio() {
-        let audio = this.objectManager.get('AudioHandler');
-        audio?.initialize();
-    }
-
     updateFrame(dt) {
         if (this.exitFlag) {
-            this.initAudio();
+            this.audio.setVolume(this.configManager.masterVolume, this.configManager.musicVolume, this.configManager.sfxVolume);
+            this.audio.playMusic('MenuMusic');
 
             return SceneBase.GameScenes.mainmenu;
         }

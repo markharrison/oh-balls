@@ -29,7 +29,10 @@ export class SceneSettings extends SceneBase {
                 this.nextScene = SceneBase.GameScenes.settingsaudio;
                 break;
             case 3:
-                this.nextScene = SceneBase.GameScenes.settingstheme;
+                this.nextScene = SceneBase.GameScenes.settingsgameplay;
+                break;
+            case 4:
+                this.nextScene = SceneBase.GameScenes.settingsdeveloper;
                 break;
             default:
                 break;
@@ -52,7 +55,11 @@ export class SceneSettings extends SceneBase {
 
         overlay.innerHTML = vHtml;
 
-        this.addMenuButtons(['Home', 'Audio', 'Theme']);
+        const buttons = ['Home', 'Audio', 'Gameplay'];
+        if (this.configManager.dev) {
+            buttons.push('Developer');
+        }
+        this.addMenuButtons(buttons);
     }
 
     updateFrame() {
@@ -284,7 +291,7 @@ export class SceneSettingsAudio extends SceneBase {
     setupEventHandlers() {}
 
     getSpecialKeys() {
-        return ['Escape', 'Control+KeyY'];
+        return ['Escape', 'ArrowUp', 'ArrowDown', 'Control+KeyY', 'Control+KeyV'];
     }
 
     inputKeyPressedOther(comboId) {
@@ -316,9 +323,9 @@ export class SceneSettingsAudio extends SceneBase {
     }
 }
 
-// ------------ Theme -------------------
+// ------------ Gameplay -------------------
 
-export class SceneSettingsTheme extends SceneBase {
+export class SceneSettingsGameplay extends SceneBase {
     constructor(objectManager) {
         super(objectManager);
 
@@ -330,7 +337,7 @@ export class SceneSettingsTheme extends SceneBase {
 
         const footerElement = document.getElementById('idFooterInfo');
         if (footerElement) {
-            footerElement.textContent = 'Harrison Digital - Settings Theme';
+            footerElement.textContent = 'Harrison Digital - Settings Gameplay';
         }
     }
 
@@ -371,14 +378,18 @@ export class SceneSettingsTheme extends SceneBase {
 
     handleLeft() {
         const activeElementId = document.activeElement.id;
+        let idx = 0;
 
         switch (activeElementId) {
-            case 'idTheme':
-                let idx = document.getElementById('idTheme').selectedIndex;
+            case 'idGameplay':
+                idx = document.getElementById('idGameplay').selectedIndex;
                 idx = Math.max(0, idx - 1);
-                document.getElementById('idTheme').selectedIndex = idx;
+                document.getElementById('idGameplay').selectedIndex = idx;
                 break;
-
+            case 'idGameSize':
+                idx = document.getElementById('idGameSize').selectedIndex;
+                idx = Math.max(0, idx - 1);
+                document.getElementById('idGameSize').selectedIndex = idx;
             default:
                 break;
         }
@@ -386,14 +397,21 @@ export class SceneSettingsTheme extends SceneBase {
 
     handleRight() {
         const activeElementId = document.activeElement.id;
+        let idx = 0;
+        let maxItems = 0;
 
         switch (activeElementId) {
-            case 'idTheme':
-                const select = document.getElementById('idTheme');
-                const maxItems = select.options.length;
-                let idx = document.getElementById('idTheme').selectedIndex;
+            case 'idGameplay':
+                maxItems = document.getElementById('idGameplay').options.length;
+                idx = document.getElementById('idGameplay').selectedIndex;
                 idx = Math.min(maxItems - 1, idx + 1);
-                document.getElementById('idTheme').selectedIndex = idx;
+                document.getElementById('idGameplay').selectedIndex = idx;
+                break;
+            case 'idGameSize':
+                maxItems = document.getElementById('idGameSize').options.length;
+                idx = document.getElementById('idGameSize').selectedIndex;
+                idx = Math.min(maxItems - 1, idx + 1);
+                document.getElementById('idGameSize').selectedIndex = idx;
                 break;
 
             default:
@@ -407,7 +425,7 @@ export class SceneSettingsTheme extends SceneBase {
         let vHtml = '';
 
         vHtml += '<div class="canvas-overlay-page">';
-        vHtml += '<div><h3 class="overlay-title">Theme Settings</h3></div><div>&nbsp;</div>';
+        vHtml += '<div><h3 class="overlay-title">Gameplay Settings</h3></div><div>&nbsp;</div>';
         vHtml += '<div id="idButtonContainer" class="d-grid gap-2">';
 
         vHtml += '</div>';
@@ -423,17 +441,27 @@ export class SceneSettingsTheme extends SceneBase {
         // Get current config values
 
         const initTheme = this.configManager.theme;
+        const initGameSize = this.configManager.gameSize;
 
         vHtml = '';
         vHtml = `
             <form>
                 <div class="mb-3">
-                    <label for="idTheme" class="form-label">Theme: </label>
-                    <select class="form-select" id="idTheme">
+                    <label for="idGameplay" class="form-label">Theme: </label>
+                    <select class="form-select" id="idGameplay">
                         <option value="Default">Default</option>
                         <option value="One">One</option>
                         <option value="Two">Two</option>
                         <option value="Three">Three</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="idGameSize" class="form-label">Game Size: </label>
+                    <select class="form-select" id="idGameSize">
+                        <option value="Large">Large</option>
+                        <option value="Medium">Medium</option>
+                        <option value="Small">Small</option>
                     </select>
                 </div>
 
@@ -446,7 +474,7 @@ export class SceneSettingsTheme extends SceneBase {
             this._boundSaveSettings = this.saveSettings.bind(this);
             document.getElementById('idSaveSettings').addEventListener('click', this._boundSaveSettings);
 
-            const themeControl = document.getElementById('idTheme');
+            const themeControl = document.getElementById('idGameplay');
             if (themeControl) {
                 // Set selected option to match initTheme
                 for (let i = 0; i < themeControl.options.length; i++) {
@@ -458,6 +486,17 @@ export class SceneSettingsTheme extends SceneBase {
                 themeControl.focus();
             }
 
+            const gameSizeControl = document.getElementById('idGameSize');
+            if (gameSizeControl) {
+                // Set selected option to match initGameSize
+                for (let i = 0; i < gameSizeControl.options.length; i++) {
+                    if (gameSizeControl.options[i].value === initGameSize) {
+                        gameSizeControl.selectedIndex = i;
+                        break;
+                    }
+                }
+            }
+
             const panelControls = panel.querySelectorAll('input, select, textarea, button');
             this._settingsFocusable = Array.from(panelControls);
         }, 5);
@@ -465,11 +504,13 @@ export class SceneSettingsTheme extends SceneBase {
 
     saveSettings(e) {
         e.preventDefault();
-        const theme = document.getElementById('idTheme').value;
+        const theme = document.getElementById('idGameplay').value;
         this.configManager.theme = theme;
+        const gameSize = document.getElementById('idGameSize').value;
+        this.configManager.GameSize = gameSize;
 
         this.configManager.saveToLocalStorage();
-        this.sceneManager.doToast('Theme Settings', 'Updated. Theme: ' + theme);
+        this.sceneManager.doToast('Theme Settings', 'Settings updated.');
         this.nextScene = SceneBase.GameScenes.settings;
     }
 
@@ -487,7 +528,7 @@ export class SceneSettingsTheme extends SceneBase {
 
     getSceneStateHtml() {
         const vHtml = `
-            <strong>Scene: Theme Settings</strong><br>
+            <strong>Scene: Gameplay Settings</strong><br>
         `;
         return vHtml;
     }
@@ -495,7 +536,218 @@ export class SceneSettingsTheme extends SceneBase {
     setupEventHandlers() {}
 
     getSpecialKeys() {
-        return ['Escape', 'Control+KeyY'];
+        return ['Escape', 'ArrowUp', 'ArrowDown', 'Control+KeyY', 'Control+KeyV'];
+    }
+
+    inputKeyPressedOther(comboId) {
+        switch (comboId) {
+            case 'Escape':
+                this.nextScene = SceneBase.GameScenes.settings;
+                break;
+            case 'ArrowDown':
+                this.focusNext();
+                break;
+            case 'ArrowUp':
+                this.focusPrev();
+                break;
+            case 'ArrowLeft':
+                this.handleLeft();
+                break;
+            case 'ArrowRight':
+                this.handleRight();
+                break;
+            case 'Enter':
+                let ele = document.activeElement;
+                if (ele) {
+                    ele.click();
+                }
+                break;
+            default:
+                break;
+        }
+    }
+}
+
+// ------------ Developer -------------------
+
+export class SceneSettingsDeveloper extends SceneBase {
+    constructor(objectManager) {
+        super(objectManager);
+
+        this.nextScene = null;
+    }
+
+    enter() {
+        this.showOverlay();
+
+        const footerElement = document.getElementById('idFooterInfo');
+        if (footerElement) {
+            footerElement.textContent = 'Harrison Digital - Settings Developer';
+        }
+    }
+
+    exit() {
+        this.deleteEventListeners();
+        this.hideOverlay();
+    }
+
+    doMenuHandler(sel) {
+        switch (sel) {
+            case 1:
+                this.nextScene = SceneBase.GameScenes.settings;
+                break;
+            default:
+                break;
+        }
+    }
+
+    focusNext() {
+        const arr = this._settingsFocusable || [];
+        const idx = arr.indexOf(document.activeElement);
+        if (idx < 0 || idx === arr.length - 1) {
+            if (arr[idx]) arr[idx].focus();
+            return;
+        }
+        arr[idx + 1].focus();
+    }
+
+    focusPrev() {
+        const arr = this._settingsFocusable || [];
+        const idx = arr.indexOf(document.activeElement);
+        if (idx <= 0) {
+            if (arr[idx]) arr[idx].focus();
+            return;
+        }
+        arr[idx - 1].focus();
+    }
+
+    handleLeft() {
+        // const activeElementId = document.activeElement.id;
+        // switch (activeElementId) {
+        //     case 'idGameplay':
+        //         let idx = document.getElementById('idGameplay').selectedIndex;
+        //         idx = Math.max(0, idx - 1);
+        //         document.getElementById('idGameplay').selectedIndex = idx;
+        //         break;
+        //     default:
+        //         break;
+        // }
+    }
+
+    handleRight() {
+        // const activeElementId = document.activeElement.id;
+        // switch (activeElementId) {
+        //     case 'idGameplay':
+        //         const select = document.getElementById('idGameplay');
+        //         const maxItems = select.options.length;
+        //         let idx = document.getElementById('idGameplay').selectedIndex;
+        //         idx = Math.min(maxItems - 1, idx + 1);
+        //         document.getElementById('idGameplay').selectedIndex = idx;
+        //         break;
+        //     default:
+        //         break;
+        // }
+    }
+
+    insertHTMLOverlayContent() {
+        const overlay = document.getElementById('idCanvasOverlay');
+        if (!overlay) return;
+        let vHtml = '';
+
+        vHtml += '<div class="canvas-overlay-page">';
+        vHtml += '<div><h3 class="overlay-title">Developer Settings</h3></div><div>&nbsp;</div>';
+        vHtml += '<div id="idButtonContainer" class="d-grid gap-2">';
+
+        vHtml += '</div>';
+        vHtml += '<div id="idSettingsPanel" class="settings-panel" role="region">';
+        vHtml += '</div>';
+        vHtml += '</div>';
+
+        overlay.innerHTML = vHtml;
+
+        const panel = document.getElementById('idSettingsPanel');
+        if (!panel) return;
+
+        // Get current config values
+
+        const initTheme = this.configManager.theme;
+        const initGameSize = this.configManager.GameSize;
+
+        vHtml = '';
+        vHtml = `
+            <form>
+                <button id="idSaveSettings" type="button" class="btn btn-primary">Save</button>
+            </form>
+        `;
+        panel.innerHTML = vHtml;
+
+        setTimeout(() => {
+            this._boundSaveSettings = this.saveSettings.bind(this);
+            document.getElementById('idSaveSettings').addEventListener('click', this._boundSaveSettings);
+
+            // const themeControl = document.getElementById('idGameplay');
+            // if (themeControl) {
+            //     // Set selected option to match initTheme
+            //     for (let i = 0; i < themeControl.options.length; i++) {
+            //         if (themeControl.options[i].value === initTheme) {
+            //             themeControl.selectedIndex = i;
+            //             break;
+            //         }
+            //     }
+            //     themeControl.focus();
+            // }
+
+            // const gameSizeControl = document.getElementById('idGameSize');
+            // if (gameSizeControl) {
+            //     // Set selected option to match initGameSize
+            //     for (let i = 0; i < gameSizeControl.options.length; i++) {
+            //         if (gameSizeControl.options[i].value === initGameSize) {
+            //             gameSizeControl.selectedIndex = i;
+            //             break;
+            //         }
+            //     }
+            // }
+
+            const panelControls = panel.querySelectorAll('input, select, textarea, button');
+            this._settingsFocusable = Array.from(panelControls);
+        }, 5);
+    }
+
+    saveSettings(e) {
+        e.preventDefault();
+        // const theme = document.getElementById('idGameplay').value;
+        // this.configManager.theme = theme;
+        // const gameSize = document.getElementById('idGameSize').value;
+        // this.configManager.GameSize = gameSize;
+
+        this.configManager.saveToLocalStorage();
+        this.sceneManager.doToast('Developer Settings', 'Settings updated.');
+        this.nextScene = SceneBase.GameScenes.settings;
+    }
+
+    deleteEventListeners() {
+        const saveBtn = document.getElementById('idSaveSettings');
+        if (saveBtn && this._boundSaveSettings) {
+            saveBtn.removeEventListener('click', this._boundSaveSettings);
+            this._boundSaveSettings = null;
+        }
+    }
+
+    updateFrame() {
+        return this.nextScene;
+    }
+
+    getSceneStateHtml() {
+        const vHtml = `
+            <strong>Scene: Developer Settings</strong><br>
+        `;
+        return vHtml;
+    }
+
+    setupEventHandlers() {}
+
+    getSpecialKeys() {
+        return ['Escape', 'Control+KeyY', 'Control+KeyV'];
     }
 
     inputKeyPressedOther(comboId) {

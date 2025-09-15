@@ -18,14 +18,10 @@ export class AudioHandler {
         this.sceneManager.doToast(vText1, vText2);
     }
 
-    async initialize2() {
+    async loadAudioFiles() {
         await this.audioMark.initialize();
 
         await this.audioMark.loadAudio('MenuMusic', 'audio/calm-background-pixabay.mp3');
-
-        this.setVolume(this.configManager.masterVolume, this.configManager.musicVolume, this.configManager.sfxVolume);
-
-        this.playMusic('MenuMusic');
 
         await this.audioMark.loadAudio('GameMusic', 'audio/BounceXJimHall.mp3');
 
@@ -42,7 +38,9 @@ export class AudioHandler {
     initialize() {
         this.doToast('Initialize audio ...');
 
-        this.initialize2();
+        this.loadAudioFiles();
+
+        this.doToast('Initialize audio completed ...');
     }
 
     playSFX(sound) {

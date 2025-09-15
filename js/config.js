@@ -2,13 +2,15 @@ export class ConfigManager {
     constructor(objectHandler) {
         // Default configuration values
         this._config = {
-            audioEnabled: true,
-            masterVolume: 80,
-            musicVolume: 80,
-            sfxVolume: 80,
-            theme: 'default',
-            userName: '',
-            userId: '',
+            AudioEnabled: true,
+            MasterVolume: 80,
+            MusicVolume: 80,
+            SfxVolume: 80,
+            Theme: 'default',
+            UserName: '',
+            UserId: '',
+            GameSize: 'Large',
+            Dev: false,
             HighestScores: [], // Array of { GameType, Score }
         };
 
@@ -35,99 +37,124 @@ export class ConfigManager {
     }
     // Audio getter/setter
     get audioEnabled() {
-        return this._config.audioEnabled;
+        return this._config.AudioEnabled;
     }
 
     set audioEnabled(value) {
-        this._config.audioEnabled = Boolean(value);
+        this._config.AudioEnabled = Boolean(value);
     }
 
     // Master/Music/SFX volume getters/setters (0-100)
     get masterVolume() {
-        return this._config.masterVolume;
+        return this._config.MasterVolume;
     }
 
     set masterVolume(value) {
         const numValue = Math.max(0, Math.min(100, parseInt(value, 10) || 0));
-        this._config.masterVolume = numValue;
+        this._config.MasterVolume = numValue;
     }
 
     get musicVolume() {
-        return this._config.musicVolume;
+        return this._config.MusicVolume;
     }
 
     set musicVolume(value) {
         const numValue = Math.max(0, Math.min(100, parseInt(value, 10) || 0));
-        this._config.musicVolume = numValue;
+        this._config.MusicVolume = numValue;
     }
 
     get sfxVolume() {
-        return this._config.sfxVolume;
+        return this._config.SfxVolume;
     }
 
     set sfxVolume(value) {
         const numValue = Math.max(0, Math.min(100, parseInt(value, 10) || 0));
-        this._config.sfxVolume = numValue;
+        this._config.SfxVolume = numValue;
     }
 
     // Theme getter/setter
     get theme() {
-        return this._config.theme;
+        return this._config.Theme;
     }
 
     set theme(value) {
-        this._config.theme = String(value);
+        this._config.Theme = String(value);
     }
 
     // User Name getter/setter
     get userName() {
-        return this._config.userName;
+        return this._config.UserName;
     }
 
     set userName(value) {
-        this._config.userName = String(value);
+        this._config.UserName = String(value);
     }
 
     // User ID getter/setter
     get userId() {
-        return this._config.userId;
+        return this._config.UserId;
     }
 
     set userId(value) {
-        this._config.userId = String(value);
+        this._config.UserId = String(value);
     }
 
-    // Serialize all configuration to JSON string
+    // gameSize getter/setter
+    get gameSize() {
+        return this._config.GameSize;
+    }
+
+    set gameSize(value) {
+        const validSizes = ['Small', 'Medium', 'Large'];
+        if (validSizes.includes(value)) {
+            this._config.GameSize = value;
+        } else {
+            this._config.GameSize = 'Large';
+        }
+    }
+
+    get dev() {
+        return this._config.Dev;
+    }
+
+    set dev(value) {
+        this._config.Dev = Boolean(value);
+    }
+
     serialize() {
         return JSON.stringify(this._config);
     }
 
-    // Deserialize JSON string and update configuration
     deserialize(jsonString) {
         try {
             const data = JSON.parse(jsonString);
 
-            // Validate and set each property using setters for validation
-            if (data.hasOwnProperty('audioEnabled')) {
-                this.audioEnabled = data.audioEnabled;
+            if (data.hasOwnProperty('AudioEnabled')) {
+                this.audioEnabled = data.AudioEnabled;
             }
-            if (data.hasOwnProperty('masterVolume')) {
-                this.masterVolume = data.masterVolume;
+            if (data.hasOwnProperty('MasterVolume')) {
+                this.masterVolume = data.MasterVolume;
             }
-            if (data.hasOwnProperty('musicVolume')) {
-                this.musicVolume = data.musicVolume;
+            if (data.hasOwnProperty('MusicVolume')) {
+                this.musicVolume = data.MusicVolume;
             }
-            if (data.hasOwnProperty('sfxVolume')) {
-                this.sfxVolume = data.sfxVolume;
+            if (data.hasOwnProperty('SfxVolume')) {
+                this.sfxVolume = data.SfxVolume;
             }
-            if (data.hasOwnProperty('theme')) {
-                this.theme = data.theme;
+            if (data.hasOwnProperty('Theme')) {
+                this.theme = data.Theme;
             }
-            if (data.hasOwnProperty('userName')) {
-                this.userName = data.userName;
+            if (data.hasOwnProperty('UserName')) {
+                this.userName = data.UserName;
             }
-            if (data.hasOwnProperty('userId')) {
-                this.userId = data.userId;
+            if (data.hasOwnProperty('UserId')) {
+                this.userId = data.UserId;
+            }
+            if (data.hasOwnProperty('GameSize')) {
+                this.gameSize = data.GameSize;
+            }
+            if (data.hasOwnProperty('Dev')) {
+                this.dev = data.Dev;
             }
             if (Array.isArray(data.HighestScores)) {
                 this._config.HighestScores = data.HighestScores.map((hs) => ({
@@ -148,13 +175,15 @@ export class ConfigManager {
     // Reset to default values
     reset() {
         this._config = {
-            audioEnabled: true,
-            masterVolume: 80,
-            musicVolume: 80,
-            sfxVolume: 80,
-            theme: 'default',
-            userName: '',
-            userId: '',
+            AudioEnabled: true,
+            MasterVolume: 80,
+            MusicVolume: 80,
+            SfxVolume: 80,
+            Theme: 'default',
+            UserName: '',
+            UserId: '',
+            GameSize: 'Large',
+            Dev: false,
             HighestScores: [],
         };
     }

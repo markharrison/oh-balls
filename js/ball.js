@@ -341,6 +341,13 @@ export class BallManager {
         this.queueCombine(ballA, ballB);
     }
 
+    avoidPlayballCollision(ballX) {
+        if (ballX.playBall) {
+            let coord = ballX.getPosition();
+            this.movePlayBall((coord.x < this.canvasWidth / 2 ? 1 : -1) * 20);
+        }
+    }
+
     gameOver_BonusBalls() {
         let ballBodies = this.getBallBodies();
 

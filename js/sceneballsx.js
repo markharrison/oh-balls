@@ -45,9 +45,6 @@ export class SceneBallsX extends SceneBase {
         this.setupEventHandlers();
 
         this._physicsAccumulator = 0;
-
-        this.zapStart = [wallThickness, 180];
-        this.zapEnd = [this.canvas.width - wallThickness, 180];
     }
 
     getSceneStateHtml() {
@@ -87,13 +84,17 @@ export class SceneBallsX extends SceneBase {
                     const ballASize = bodyA.getUserData().render.size;
                     const ballBSize = bodyB.getUserData().render.size;
 
-                    if (ballASize === ballBSize) {
-                        const ballA = bodyA.getUserData()?.ball;
-                        const ballB = bodyB.getUserData()?.ball;
+                    const ballA = bodyA.getUserData()?.ball;
+                    const ballB = bodyB.getUserData()?.ball;
 
-                        this.ballManager.combineBalls(ballA, ballB);
-
-                        this;
+                    if (ballA.playBall) {
+                        this.ballManager.avoidPlayballCollision(ballA);
+                    } else if (ballB.playBall) {
+                        this.ballManager.avoidPlayballCollision(ballB);
+                    } else {
+                        if (ballASize === ballBSize) {
+                            this.ballManager.combineBalls(ballA, ballB);
+                        }
                     }
                 }
 
@@ -132,16 +133,15 @@ export class SceneBallsX extends SceneBase {
         const zoneHeight = 400;
         const zoneWidth = this.canvas.width - 2 * wallThickness;
 
-        // const zapZoneHeight = 200; // px
-        // const zapZoneY = 300; // px (same as zapStart/zapEnd)
         const zapZoneRender = {
-            fillStyle: 'rgba(255,0,0,0.2)',
+            fillStyle: `rgba(255,0,0,${this.configManager.dev ? 0.2 : 0})`,
             strokeStyle: '#ff0000',
-            lineWidth: 2,
+            lineWidth: 0,
             width: zoneWidth,
             height: zoneHeight,
         };
-        const zapZoneBody = PhysicsBodyFactory.createRectangle(this.canvas.width / 2, zoneHeight / 2, zoneWidth, zoneHeight, {
+        //                const zapZoneBody = PhysicsBodyFactory.createRectangle(this.canvas.width / 2, zoneHeight / 2, zoneWidth, zoneHeight, {
+        const zapZoneBody = PhysicsBodyFactory.createRectangle(this.canvas.width / 2, -20, zoneWidth, zoneHeight, {
             isStatic: true,
             userData: {
                 label: 'zapzone',
@@ -262,8 +262,8 @@ export class SceneBallsX extends SceneBase {
         ctx.setLineDash([2, 6]); // Dotted line: 2px dash, 6px gap
 
         ctx.beginPath();
-        ctx.moveTo(this.zapStart[0], this.zapStart[1]);
-        ctx.lineTo(this.zapEnd[0], this.zapEnd[1]);
+        ctx.moveTo(wallThickness, 180);
+        ctx.lineTo(this.canvas.width - wallThickness, 180);
         ctx.stroke();
 
         ctx.setLineDash([]); // Reset to solid for future drawing

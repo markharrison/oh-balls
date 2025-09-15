@@ -6,7 +6,8 @@ import { SceneSplash } from './scenesplash.js';
 import { SceneMainmenu } from './scenemainmenu.js';
 import { SceneSettings } from './scenesettings.js';
 import { SceneSettingsAudio } from './scenesettings.js';
-import { SceneSettingsTheme } from './scenesettings.js';
+import { SceneSettingsGameplay } from './scenesettings.js';
+import { SceneSettingsDeveloper } from './scenesettings.js';
 
 export class SceneManager {
     constructor(objectManager) {
@@ -23,6 +24,7 @@ export class SceneManager {
 
         this.currentSceneKey = null;
         this.currentScene = null;
+        this.devcnt = 0;
     }
 
     setCurrentScene(sceneKey) {
@@ -48,8 +50,17 @@ export class SceneManager {
             case SceneBase.GameScenes.settingsaudio:
                 this.currentScene = this.objectManager.register('SceneSettingsAudio', new SceneSettingsAudio(this.objectManager));
                 break;
-            case SceneBase.GameScenes.settingstheme:
-                this.currentScene = this.objectManager.register('SceneSettingsTheme', new SceneSettingsTheme(this.objectManager));
+            case SceneBase.GameScenes.settingsgameplay:
+                this.currentScene = this.objectManager.register(
+                    'SceneSettingsGameplay',
+                    new SceneSettingsGameplay(this.objectManager)
+                );
+                break;
+            case SceneBase.GameScenes.settingsdeveloper:
+                this.currentScene = this.objectManager.register(
+                    'SceneSettingsDeveloper',
+                    new SceneSettingsDeveloper(this.objectManager)
+                );
                 break;
             default:
                 alert('Unknown scene key: ' + sceneKey);
@@ -108,7 +119,18 @@ export class SceneManager {
 
         switch (comboId) {
             case 'Control+KeyY':
-                this.diagnosticsPanel.toggle();
+                if (this.configManager.dev) {
+                    this.diagnosticsPanel.toggle();
+                }
+                break;
+            case 'Control+KeyV':
+                this.devcnt += 1;
+                if (this.devcnt === 3) {
+                    this.configManager.dev = !this.configManager.dev;
+                    this.configManager.saveToLocalStorage();
+                    this.devcnt = 0;
+                    this.doToast('Developer Mode: ', this.configManager.dev ? 'Enabled' : 'Disabled');
+                }
                 break;
             default:
                 this.currentScene.inputKeyPressed(comboId);

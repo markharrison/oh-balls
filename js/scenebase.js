@@ -5,7 +5,8 @@ export class SceneBase {
         ballsX: 'ballsX',
         settings: 'settings',
         settingsaudio: 'settingsaudio',
-        settingstheme: 'settingstheme',
+        settingsgameplay: 'settingsgameplay',
+        settingsdeveloper: 'settingsdeveloper',
     });
     constructor(objectManager) {
         this.objectManager = objectManager;
@@ -99,7 +100,7 @@ export class SceneBase {
     }
 
     getSpecialKeys() {
-        return ['Escape', 'Enter', 'ArrowUp', 'ArrowDown', 'Control+KeyY'];
+        return ['Escape', 'Enter', 'ArrowUp', 'ArrowDown', 'Control+KeyY', 'Control+KeyV'];
     }
 
     inputKeyPressed(comboId) {
