@@ -84,21 +84,13 @@ export class SceneBallsX extends SceneBase {
                     const ballASize = bodyA.getUserData().render.size;
                     const ballBSize = bodyB.getUserData().render.size;
 
-                    const ballA = bodyA.getUserData()?.ball;
-                    const ballB = bodyB.getUserData()?.ball;
-
-                    if (ballA.playBall) {
-                        this.ballManager.avoidPlayballCollision(ballA);
-                    } else if (ballB.playBall) {
-                        this.ballManager.avoidPlayballCollision(ballB);
-                    } else {
-                        if (ballASize === ballBSize) {
-                            this.ballManager.combineBalls(ballA, ballB);
-                        }
+                    if (ballASize === ballBSize) {
+                        const ballA = bodyA.getUserData()?.ball;
+                        const ballB = bodyB.getUserData()?.ball;
+                        this.ballManager.combineBalls(ballA, ballB);
                     }
                 }
 
-                // Danger Zone overlap detection
                 if ((ballALabel === 'ball' && ballBLabel === 'zapzone') || (ballALabel === 'zapzone' && ballBLabel === 'ball')) {
                     // Ball entered Danger Zone
                     const ballBody = ballALabel === 'ball' ? bodyA : bodyB;
@@ -172,7 +164,17 @@ export class SceneBallsX extends SceneBase {
             height: wallThickness,
         };
 
-        const ground = PhysicsBodyFactory.createRectangle(width / 2, height - wallThickness / 2, width, wallThickness, {
+        // Create ground as a polygon (rectangle shape)
+        const groundY = height - wallThickness / 2;
+        const halfWidth = width / 2;
+        const halfHeight = wallThickness / 2;
+        const groundVertices = [
+            { x: halfWidth - width / 2, y: groundY - halfHeight }, // Top-left
+            { x: halfWidth + width / 2, y: groundY - halfHeight }, // Top-right
+            { x: halfWidth + width / 2, y: groundY + halfHeight }, // Bottom-right
+            { x: halfWidth - width / 2, y: groundY + halfHeight }, // Bottom-left
+        ];
+        const ground = PhysicsBodyFactory.createPolygon(groundVertices, {
             isStatic: true,
             friction: friction,
             restitution: restitution,
@@ -440,9 +442,11 @@ export class SceneBallsX extends SceneBase {
                 });
 
                 break;
-            case 'KeyL':
-                const randomDirection = Math.random() < 0.5 ? -1 : 1;
-                this.laserbeamHandler.fire(randomDirection);
+            case 'Control+KeyX':
+                if (this.configManager.dev) {
+                    const randomDirection = Math.random() < 0.5 ? -1 : 1;
+                    this.laserbeamHandler.fire(randomDirection);
+                }
                 break;
             default:
                 break;
@@ -452,9 +456,11 @@ export class SceneBallsX extends SceneBase {
     gameOverStep3() {
         let vMsg = '';
         if (this.score > this.scoreHighest) {
-            vMsg = `New High Score! ${this.score} (Previous: ${this.scoreHighest}) <br /><br />`;
+            vMsg = `New High Score! ${this.score}  (Previous: ${this.scoreHighest}) <br /><br />`;
             this.configManager.setHighestScore('BallsX', this.score);
             this.configManager.saveToLocalStorage();
+        } else {
+            vMsg = `Your Score: ${this.score}  (High Score to beat: ${this.scoreHighest}) <br /><br />`;
         }
 
         this.showingDialog = true;
@@ -471,9 +477,17 @@ export class SceneBallsX extends SceneBase {
     gameOverStep2() {
         this.ballManager.gameOver_BonusBalls();
 
-        let TimerID = setTimeout(() => {
-            this.gameOverStep3();
-        }, 10000);
+        const waitForBallsToClear = () => {
+            let ballBodies = this.ballManager.getBallBodies();
+            if (ballBodies.length === 0) {
+                setTimeout(() => {
+                    this.gameOverStep3();
+                }, 1000);
+            } else {
+                setTimeout(waitForBallsToClear, 200);
+            }
+        };
+        waitForBallsToClear();
     }
 
     gameOverStep1() {

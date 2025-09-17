@@ -223,12 +223,25 @@ export class BallManager {
         return newX;
     }
 
+    ballInZapZone() {
+        let ballBodies = this.getBallBodies();
+        for (const ballBody of ballBodies) {
+            const ball = ballBody.getUserData()?.ball;
+            if (ball && ball.zapBall) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     spawnPlayBall() {
         if (this.playBall !== null) return;
 
         if (this.gameOver) return;
 
         if (performance.now() - this.lastDropTime < 1000) return;
+
+        if (this.ballInZapZone()) return;
 
         const x = 512;
         const y = -100;
@@ -341,36 +354,32 @@ export class BallManager {
         this.queueCombine(ballA, ballB);
     }
 
-    avoidPlayballCollision(ballX) {
-        if (ballX.playBall) {
-            let coord = ballX.getPosition();
-            this.movePlayBall((coord.x < this.canvasWidth / 2 ? 1 : -1) * 20);
-        }
-    }
-
     gameOver_BonusBalls() {
         let ballBodies = this.getBallBodies();
 
         let vHTML = 'Bonus Balls: ';
-
+        let timer = 0;
         ballBodies.forEach((ballBody) => {
             let ball = ballBody.getUserData()?.ball;
 
-            if (!ball.playBall && !ball.deadBallBall) {
+            if (!ball.playBall && !ball.deadBall) {
+                timer += 500;
                 vHTML += ball.physicsBody.id + ' ';
                 vHTML += '; ';
 
-                this.sceneBallsX.score += ball.size * ball.size;
-
                 setTimeout(() => {
+                    this.sceneBallsX.score += ball.size * ball.size;
+                    let rnd = Math.floor(Math.random() * 6) + 1;
+                    this.audioHandler.playSFX(`Combine${rnd}`);
+
+                    let coord = ball.getPosition();
+                    const color = ball.getColorForSize(ball.size);
+                    this.particlesHandler.combineEffect([coord.x, coord.y], color);
                     ball.destroy();
                     ball = null;
-                }, 2000);
+                }, timer);
             }
         });
-
-        this.sceneManager.doToast('gameOver_BonusBalls', vHTML);
-        console.log('gameOver_BonusBalls', vHTML);
     }
 
     gameOver_DeadBalls() {
@@ -384,7 +393,7 @@ export class BallManager {
 
         ballBodies.forEach((ballBody) => {
             let ball = ballBody.getUserData()?.ball;
-
+            let timer = 500;
             vHTML += ball.physicsBody.id + ' ';
 
             if (ball.playBall) {
@@ -398,42 +407,22 @@ export class BallManager {
                 vHTML += 'Dead ';
                 ball.cancelZapZoneTimerId();
 
+                timer += 250;
+
                 setTimeout(() => {
+                    let coord = ball.getPosition();
+                    this.particlesHandler.combineEffect([coord.x, coord.y], '#FFFFFF');
+
                     ball.destroy();
                     ball = null;
-                }, 2000);
+                }, timer);
             }
 
             vHTML += '; ';
 
             if (ball) ball.setStatic(true);
         });
-
-        this.sceneManager.doToast('gameOver_DeadBalls', vHTML);
-        console.log('gameOver_DeadBalls', vHTML);
     }
-
-    // gameOverStep2() {
-    //     let ballBodies = this.getBallBodies();
-
-    //     let vHTML = '';
-
-    //     ballBodies.forEach((ballBody) => {
-    //         let ball = ballBody.getUserData()?.ball;
-
-    //         vHTML += ball.physicsBody.id + '; ';
-
-    //         if (ball.deadBall) {
-    //             ball.cancelZapZoneTimerId();
-    //             ball.destroy();
-    //             ball = null;
-    //         }
-    //     });
-
-    //     this.sceneManager.doToast('gameOverStep2', vHTML);
-    //     console.log('gameOverStep2', vHTML);
-
-    // }
 
     updateFrame() {
         this.spawnPlayBall();
@@ -460,8 +449,7 @@ export class BallManager {
             const ball = ballBody.getUserData()?.ball;
             if (ball) {
                 const pos = ball.getPosition();
-                //               const isOffScreen = pos.x < 0 || pos.x > canvasWidth || pos.y < 0 || pos.y > canvasHeight;
-                const isOffScreen = pos.y > this.canvasHeight + 100; // Allow some space below the canvas
+                const isOffScreen = pos.y > this.canvasHeight + 100;
 
                 if (isOffScreen) {
                     ball.destroy();

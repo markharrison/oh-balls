@@ -388,6 +388,57 @@ export class PhysicsBodyFactory {
         return new PhysicsBody(body);
     }
 
+    // Create polygon body - accepts pixel coordinates for vertices
+    static createPolygon(pixelVertices, options = {}) {
+        if (!PhysicsBodyFactory.world) {
+            throw new Error('World not set. Call PhysicsBodyFactory.setWorld(world) first.');
+        }
+
+        // Convert pixel vertices to meter vertices
+        const meterVertices = pixelVertices.map((v) => planck.Vec2(pixelsToMeters(v.x), pixelsToMeters(v.y)));
+
+        // Compute centroid for body position (average of vertices)
+        let centroid = { x: 0, y: 0 };
+        meterVertices.forEach((v) => {
+            centroid.x += v.x;
+            centroid.y += v.y;
+        });
+        centroid.x /= meterVertices.length;
+        centroid.y /= meterVertices.length;
+
+        // Shift vertices so centroid is at (0,0) for local shape
+        const localVertices = meterVertices.map((v) => planck.Vec2(v.x - centroid.x, v.y - centroid.y));
+
+        // Create body definition
+        const bodyDef = {
+            type: options.isStatic ? 'static' : 'dynamic',
+            position: { x: centroid.x, y: centroid.y },
+            linearDamping: options.linearDamping ?? 0,
+            angularDamping: options.angularDamping ?? 0,
+        };
+
+        const body = PhysicsBodyFactory.world.createBody(bodyDef);
+
+        // Create fixture definition with polygon shape
+        const fixtureDef = {
+            shape: new planck.Polygon(localVertices),
+            density: options.density || 1,
+            friction: options.friction || 0.3,
+            restitution: options.restitution || 0.1,
+        };
+
+        body.createFixture(fixtureDef);
+
+        const userData = {
+            id: PhysicsBodyFactory.generateId(),
+            ...options.userData,
+        };
+
+        body.setUserData(userData);
+
+        return new PhysicsBody(body);
+    }
+
     // Generate unique ID for bodies
     static idCounter = 1;
     static generateId() {

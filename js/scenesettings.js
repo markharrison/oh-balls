@@ -291,7 +291,7 @@ export class SceneSettingsAudio extends SceneBase {
     setupEventHandlers() {}
 
     getSpecialKeys() {
-        return ['Escape', 'ArrowUp', 'ArrowDown', 'Control+KeyY', 'Control+KeyV'];
+        return ['Escape', 'ArrowUp', 'ArrowDown', 'Control+KeyD', 'Control+KeyP'];
     }
 
     inputKeyPressedOther(comboId) {
@@ -507,7 +507,7 @@ export class SceneSettingsGameplay extends SceneBase {
         const theme = document.getElementById('idGameplay').value;
         this.configManager.theme = theme;
         const gameSize = document.getElementById('idGameSize').value;
-        this.configManager.GameSize = gameSize;
+        this.configManager.gameSize = gameSize;
 
         this.configManager.saveToLocalStorage();
         this.sceneManager.doToast('Theme Settings', 'Settings updated.');
@@ -536,7 +536,7 @@ export class SceneSettingsGameplay extends SceneBase {
     setupEventHandlers() {}
 
     getSpecialKeys() {
-        return ['Escape', 'ArrowUp', 'ArrowDown', 'Control+KeyY', 'Control+KeyV'];
+        return ['Escape', 'ArrowUp', 'ArrowDown', 'Control+KeyD', 'Control+KeyP'];
     }
 
     inputKeyPressedOther(comboId) {
@@ -747,7 +747,7 @@ export class SceneSettingsDeveloper extends SceneBase {
     setupEventHandlers() {}
 
     getSpecialKeys() {
-        return ['Escape', 'Control+KeyY', 'Control+KeyV'];
+        return ['Escape', 'Control+KeyP', 'Control+KeyD'];
     }
 
     inputKeyPressedOther(comboId) {

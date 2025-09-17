@@ -68,7 +68,8 @@ export class InputHandler {
                 'Enter',
                 'Escape',
                 'Control+KeyD',
-                'Control+KeyA',
+                'Control+KeyP',
+                'Control+KeyX',
             ].includes(combo)
         ) {
             event.preventDefault();

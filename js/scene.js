@@ -118,12 +118,12 @@ export class SceneManager {
         }
 
         switch (comboId) {
-            case 'Control+KeyY':
+            case 'Control+KeyP':
                 if (this.configManager.dev) {
                     this.diagnosticsPanel.toggle();
                 }
                 break;
-            case 'Control+KeyV':
+            case 'Control+KeyD':
                 this.devcnt += 1;
                 if (this.devcnt === 3) {
                     this.configManager.dev = !this.configManager.dev;

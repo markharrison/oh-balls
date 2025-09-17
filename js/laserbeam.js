@@ -9,16 +9,19 @@ export class LaserbeamHandler {
             'LaserbeamMark',
             new LaserbeamMark(this.canvas, {
                 beamStyle: 'solid',
-                coords1: this.zapStart,
-                coords2: this.zapEnd,
             })
         );
     }
 
     // Example method to fire a laser
     fire(direction) {
-        this.laserId = this.LaserbeamMark.addLaser(direction);
-        this.laserId = this.LaserbeamMark.addLaser(-direction);
+        let options = {
+            coords1: [0, 180],
+            coords2: [this.canvas.width, 180],
+            beamStyle: 'solid',
+        };
+        this.laserId = this.LaserbeamMark.addLaser(direction, options);
+        this.laserId = this.LaserbeamMark.addLaser(-direction, options);
     }
 
     render() {

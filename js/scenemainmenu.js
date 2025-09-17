@@ -64,6 +64,6 @@ export class SceneMainmenu extends SceneBase {
     }
 
     getSpecialKeys() {
-        return ['Enter', 'ArrowUp', 'ArrowDown', 'Control+KeyY', 'Control+KeyV'];
+        return ['Enter', 'ArrowUp', 'ArrowDown', 'Control+KeyP', 'Control+KeyD'];
     }
 }

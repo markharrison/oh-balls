@@ -100,7 +100,7 @@ export class SceneBase {
     }
 
     getSpecialKeys() {
-        return ['Escape', 'Enter', 'ArrowUp', 'ArrowDown', 'Control+KeyY', 'Control+KeyV'];
+        return ['Escape', 'Enter', 'ArrowUp', 'ArrowDown', 'Control+KeyP', 'Control+KeyD'];
     }
 
     inputKeyPressed(comboId) {
