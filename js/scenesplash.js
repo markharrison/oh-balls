@@ -17,8 +17,6 @@ export class SceneSplash extends SceneBase {
         }
 
         this.audio = this.objectManager.get('AudioHandler');
-
-        this.audio.initialize();
     }
 
     exit() {
@@ -63,7 +61,11 @@ export class SceneSplash extends SceneBase {
         const btnEnter = document.getElementById('idButtonEnter');
 
         btnEnter.onclick = () => {
-            this.exitFlag = true;
+            this.audio.initialize();
+
+            setTimeout(() => {
+                this.exitFlag = true;
+            }, 1000);
         };
     }
 

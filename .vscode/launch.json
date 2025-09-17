@@ -5,7 +5,7 @@
             "type": "msedge",
             "request": "launch",
             "name": "Launch Oh Balls",
-            "url": "http://localhost:5500/index.html"
+            "url": "http://localhost:8080/index.html"
         }
     ]
 }

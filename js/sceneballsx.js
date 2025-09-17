@@ -34,13 +34,22 @@ export class SceneBallsX extends SceneBase {
             cachedStepCount: 0,
         };
 
+        // Load ground image
+        this.groundImage = new window.Image();
+        this.groundImageLoaded = false;
+        this.groundImage.onload = () => {
+            this.groundImageLoaded = true;
+        };
+        this.groundImage.src = '/images/large.png';
+
         this.showingDialog = false;
         this.exitToMenu = false;
         this.restartGame = false;
         this.scoreHighest = this.configManager.getHighestScore('BallsX') || 0;
         this.score = 0;
 
-        this.setupBoundaries();
+        this.setupWallBoundaries();
+        this.setupGroundBoundaries();
         this.setupZapZone();
         this.setupEventHandlers();
 
@@ -148,41 +157,12 @@ export class SceneBallsX extends SceneBase {
         this.physics.addBody(zapZoneBody);
     }
 
-    setupBoundaries() {
+    setupWallBoundaries() {
         // Use shared wallThickness constant
         const width = this.canvas.width;
         const height = this.canvas.height;
         const restitution = 0.7;
         const friction = 0.5;
-
-        const renderGround = {
-            fillStyle: '#0080ff',
-            strokeStyle: '#0080ff',
-
-            lineWidth: 3,
-            width: width,
-            height: wallThickness,
-        };
-
-        // Create ground as a polygon (rectangle shape)
-        const groundY = height - wallThickness / 2;
-        const halfWidth = width / 2;
-        const halfHeight = wallThickness / 2;
-        const groundVertices = [
-            { x: halfWidth - width / 2, y: groundY - halfHeight }, // Top-left
-            { x: halfWidth + width / 2, y: groundY - halfHeight }, // Top-right
-            { x: halfWidth + width / 2, y: groundY + halfHeight }, // Bottom-right
-            { x: halfWidth - width / 2, y: groundY + halfHeight }, // Bottom-left
-        ];
-        const ground = PhysicsBodyFactory.createPolygon(groundVertices, {
-            isStatic: true,
-            friction: friction,
-            restitution: restitution,
-            userData: {
-                label: 'ground',
-                render: renderGround,
-            },
-        });
 
         const renderWall = {
             fillStyle: '#0080ff',
@@ -212,9 +192,48 @@ export class SceneBallsX extends SceneBase {
             },
         });
 
-        this.physics.addBody(ground);
         this.physics.addBody(leftWall);
         this.physics.addBody(rightWall);
+    }
+
+    setupGroundBoundaries() {
+        // Use shared wallThickness constant
+        const width = this.canvas.width;
+        const height = this.canvas.height;
+        const restitution = 0.7;
+        const friction = 0.5;
+
+        const renderGround = {
+            fillStyle: '#0080ff',
+            strokeStyle: '#0080ff',
+
+            lineWidth: 3,
+            width: width,
+            height: wallThickness,
+        };
+
+        // Create ground as a polygon (rectangle shape)
+        const groundY = height - wallThickness / 2;
+        const halfWidth = width / 2;
+        const halfHeight = wallThickness / 2;
+        const groundVertices = [
+            { x: 1280, y: 720 },
+            { x: 0, y: 720 },
+            { x: 0, y: 704 },
+            { x: 640, y: 500 },
+            { x: 1280, y: 704 },
+        ];
+        const ground = PhysicsBodyFactory.createPolygon(groundVertices, {
+            isStatic: true,
+            friction: friction,
+            restitution: restitution,
+            userData: {
+                label: 'ground',
+                render: renderGround,
+            },
+        });
+
+        this.physics.addBody(ground);
     }
 
     addBody(body) {
@@ -226,6 +245,36 @@ export class SceneBallsX extends SceneBase {
     }
 
     renderRectBody(body) {
+        const ctx = this.ctx;
+
+        // Convert position from meters to pixels for rendering
+        const meterPosition = body.getPosition();
+        const position = {
+            x: metersToPixels(meterPosition.x),
+            y: metersToPixels(meterPosition.y),
+        };
+        const angle = body.getAngle();
+
+        ctx.save();
+        ctx.translate(position.x, position.y);
+        ctx.rotate(angle);
+
+        let render = body.getUserData().render;
+
+        ctx.fillStyle = render.fillStyle;
+        ctx.strokeStyle = render.strokeStyle;
+        ctx.lineWidth = render.lineWidth;
+
+        const width = render.width;
+        const height = render.height;
+
+        ctx.fillRect(-width / 2, -height / 2, width, height);
+        ctx.strokeRect(-width / 2, -height / 2, width, height);
+
+        ctx.restore();
+    }
+
+    renderGround(body) {
         const ctx = this.ctx;
 
         // Convert position from meters to pixels for rendering
@@ -271,10 +320,6 @@ export class SceneBallsX extends SceneBase {
         ctx.setLineDash([]); // Reset to solid for future drawing
         ctx.restore();
 
-        this.renderRectBody(body);
-    }
-
-    renderWallOrFloor(body) {
         this.renderRectBody(body);
     }
 
@@ -376,8 +421,13 @@ export class SceneBallsX extends SceneBase {
         }
 
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        this.ctx.fillStyle = '#111111';
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        // Draw background image if loaded
+        if (this.groundImageLoaded) {
+            this.ctx.drawImage(this.groundImage, 0, 0, this.canvas.width, this.canvas.height);
+        } else {
+            this.ctx.fillStyle = '#111111';
+            this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        }
 
         this.laserbeamHandler.render();
 
@@ -388,8 +438,10 @@ export class SceneBallsX extends SceneBase {
             switch (label) {
                 case 'leftwall':
                 case 'rightwall':
+                    this.renderRectBody(body);
+                    break;
                 case 'ground':
-                    this.renderWallOrFloor(body);
+                    this.renderGround(body);
                     break;
                 case 'zapzone':
                     this.renderZapZone(body);
