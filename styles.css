@@ -86,7 +86,7 @@ body::before {
 
 /* Canvas styles - responsive while keeping a visual max width */
 .canvas {
-    border: 2px solid rgba(100, 181, 246, 1);
+    border: 2px solid rgb(0, 0, 0, 1);
     border-radius: 12px;
     width: min(100%, 1284px);
     max-width: 100%;

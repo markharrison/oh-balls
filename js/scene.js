@@ -25,6 +25,13 @@ export class SceneManager {
         this.currentSceneKey = null;
         this.currentScene = null;
         this.devcnt = 0;
+
+        this.groundImage = new window.Image();
+        this.groundImageLoaded = false;
+        this.groundImage.onload = () => {
+            this.groundImageLoaded = true;
+        };
+        this.groundImage.src = `/images/ground.png`;
     }
 
     setCurrentScene(sceneKey) {
@@ -70,13 +77,6 @@ export class SceneManager {
         this.currentSceneKey = sceneKey;
         this.currentScene.enter();
     }
-
-    // getSceneMainStateHtml() {
-    //     const vHtml = `
-    //         <strong>Scene: Main</strong><br>
-    //     `;
-    //     return vHtml;
-    // }
 
     getSceneStateHtml() {
         let vHtml = '';

@@ -10,6 +10,7 @@ export const fixedTimeStep = 1000 / 60; // ms per physics step (16.666...)
 export class SceneBallsX extends SceneBase {
     constructor(objectManager) {
         super(objectManager);
+
         this.audioHandler = objectManager.get('AudioHandler');
         this.sceneManager = objectManager.get('SceneManager');
         this.configManager = objectManager.get('ConfigManager');
@@ -34,18 +35,10 @@ export class SceneBallsX extends SceneBase {
             cachedStepCount: 0,
         };
 
-        // Load ground image
-        this.groundImage = new window.Image();
-        this.groundImageLoaded = false;
-        this.groundImage.onload = () => {
-            this.groundImageLoaded = true;
-        };
-        this.groundImage.src = `/images/${this.configManager.gameSize}.png`;
-
         this.showingDialog = false;
         this.exitToMenu = false;
         this.restartGame = false;
-        this.scoreHighest = this.configManager.getHighestScore('BallsX') || 0;
+        this.scoreHighest = this.configManager.getHighestScore(`BallsX-${this.configManager.gameSize}`) || 0;
         this.score = 0;
         this.clickedCoord = null;
 
@@ -175,8 +168,8 @@ export class SceneBallsX extends SceneBase {
         const friction = 0.5;
 
         const renderWall = {
-            fillStyle: '#0080ff',
-            strokeStyle: '#0080ff',
+            fillStyle: '#000000',
+            strokeStyle: '#000000',
             lineWidth: 3,
             width: wallThickness,
             height: height,
@@ -316,8 +309,23 @@ export class SceneBallsX extends SceneBase {
     renderGround(body) {
         const ctx = this.ctx;
 
-        if (this.groundImageLoaded) {
-            this.ctx.drawImage(this.groundImage, 0, 0, this.canvas.width, this.canvas.height);
+        let yPos = 0;
+        switch (this.configManager.gameSize) {
+            case 'Large':
+                yPos = 144;
+                break;
+            case 'Medium':
+                yPos = 72;
+                break;
+            case 'Small':
+                yPos = 0;
+                break;
+            default:
+                break;
+        }
+
+        if (this.sceneManager.groundImageLoaded) {
+            this.ctx.drawImage(this.sceneManager.groundImage, 0, yPos, this.canvas.width, this.canvas.height);
         }
 
         let dev = false;
@@ -476,11 +484,15 @@ export class SceneBallsX extends SceneBase {
 
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-        this.ctx.fillStyle = '#444444';
+        const gradient = this.ctx.createLinearGradient(0, 0, 0, this.canvas.height);
+        gradient.addColorStop(0, '#00008B'); // Dark blue at top
+        gradient.addColorStop(1, '#0000FF'); // Blue at bottom
+        this.ctx.fillStyle = gradient;
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-        const bodies = this.physics.getAllBodies();
+        this.laserbeamHandler.render();
 
+        const bodies = this.physics.getAllBodies();
         bodies.forEach((body) => {
             const label = body.getUserData().label;
             switch (label) {
@@ -509,8 +521,6 @@ export class SceneBallsX extends SceneBase {
                     break;
             }
         });
-
-        this.laserbeamHandler.render();
 
         this.particlesHandler.render();
 
@@ -573,7 +583,7 @@ export class SceneBallsX extends SceneBase {
         let vMsg = '';
         if (this.score > this.scoreHighest) {
             vMsg = `New High Score! ${this.score}  (Previous: ${this.scoreHighest}) <br /><br />`;
-            this.configManager.setHighestScore('BallsX', this.score);
+            this.configManager.setHighestScore(`BallsX-${this.configManager.gameSize}`, this.score);
             this.configManager.saveToLocalStorage();
         } else {
             vMsg = `Your Score: ${this.score}  (High Score to beat: ${this.scoreHighest}) <br /><br />`;
@@ -652,7 +662,6 @@ export class SceneBallsX extends SceneBase {
         this.ctx.fillStyle = '#111111';
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-        // Destroy BallManager first so it doesn't attempt to access physics during its teardown
         if (this.ballManager) {
             this.ballManager.destroy();
             this.ballManager = null;
@@ -665,7 +674,6 @@ export class SceneBallsX extends SceneBase {
             this.objectManager.deregister('PhysicsEngine');
         }
 
-        // Clean up visual effect
         if (this.laserbeamHandler) {
             this.laserbeamHandler.destroy();
             this.laserbeamHandler = null;
@@ -676,6 +684,11 @@ export class SceneBallsX extends SceneBase {
             this.particlesHandler.destroy();
             this.particlesHandler = null;
             this.objectManager.deregister('ParticlesHandler');
+        }
+
+        if (this.groundImage) {
+            this.groundImage.src = '';
+            this.groundImage = null;
         }
     }
 
