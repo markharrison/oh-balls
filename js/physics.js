@@ -394,9 +394,54 @@ export class PhysicsBodyFactory {
             throw new Error('World not set. Call PhysicsBodyFactory.setWorld(world) first.');
         }
 
+        // --- BEGIN: Relative/local vertices support (revert to below block for old behavior) ---
+        let meterVertices = pixelVertices.map((v) => planck.Vec2(pixelsToMeters(v.x), pixelsToMeters(v.y)));
+        let bodyPosition;
+        let localVertices;
+        if (options.position) {
+            // Use explicit position, treat vertices as relative/local
+            bodyPosition = {
+                x: pixelsToMeters(options.position.x),
+                y: pixelsToMeters(options.position.y),
+            };
+            localVertices = meterVertices;
+        } else {
+            // Default: use centroid of absolute vertices
+            let centroid = { x: 0, y: 0 };
+            meterVertices.forEach((v) => {
+                centroid.x += v.x;
+                centroid.y += v.y;
+            });
+            centroid.x /= meterVertices.length;
+            centroid.y /= meterVertices.length;
+            localVertices = meterVertices.map((v) => planck.Vec2(v.x - centroid.x, v.y - centroid.y));
+            bodyPosition = { x: centroid.x, y: centroid.y };
+        }
+        const bodyDef = {
+            type: options.isStatic ? 'static' : 'dynamic',
+            position: bodyPosition,
+            linearDamping: options.linearDamping ?? 0,
+            angularDamping: options.angularDamping ?? 0,
+        };
+        const body = PhysicsBodyFactory.world.createBody(bodyDef);
+        const fixtureDef = {
+            shape: new planck.Polygon(localVertices),
+            density: options.density || 1,
+            friction: options.friction || 0.3,
+            restitution: options.restitution || 0.1,
+        };
+        body.createFixture(fixtureDef);
+        const userData = {
+            id: PhysicsBodyFactory.generateId(),
+            ...options.userData,
+        };
+        body.setUserData(userData);
+        return new PhysicsBody(body);
+        // --- END: Relative/local vertices support ---
+        /*
+        // --- REVERT TO THIS BLOCK FOR OLD BEHAVIOR ---
         // Convert pixel vertices to meter vertices
         const meterVertices = pixelVertices.map((v) => planck.Vec2(pixelsToMeters(v.x), pixelsToMeters(v.y)));
-
         // Compute centroid for body position (average of vertices)
         let centroid = { x: 0, y: 0 };
         meterVertices.forEach((v) => {
@@ -405,10 +450,8 @@ export class PhysicsBodyFactory {
         });
         centroid.x /= meterVertices.length;
         centroid.y /= meterVertices.length;
-
         // Shift vertices so centroid is at (0,0) for local shape
         const localVertices = meterVertices.map((v) => planck.Vec2(v.x - centroid.x, v.y - centroid.y));
-
         // Create body definition
         const bodyDef = {
             type: options.isStatic ? 'static' : 'dynamic',
@@ -416,9 +459,7 @@ export class PhysicsBodyFactory {
             linearDamping: options.linearDamping ?? 0,
             angularDamping: options.angularDamping ?? 0,
         };
-
         const body = PhysicsBodyFactory.world.createBody(bodyDef);
-
         // Create fixture definition with polygon shape
         const fixtureDef = {
             shape: new planck.Polygon(localVertices),
@@ -426,17 +467,15 @@ export class PhysicsBodyFactory {
             friction: options.friction || 0.3,
             restitution: options.restitution || 0.1,
         };
-
         body.createFixture(fixtureDef);
-
         const userData = {
             id: PhysicsBodyFactory.generateId(),
             ...options.userData,
         };
-
         body.setUserData(userData);
-
         return new PhysicsBody(body);
+        // --- END REVERT BLOCK ---
+        */
     }
 
     // Generate unique ID for bodies

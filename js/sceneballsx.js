@@ -204,35 +204,38 @@ export class SceneBallsX extends SceneBase {
         const friction = 0.5;
 
         const renderGround = {
-            fillStyle: '#0080ff',
-            strokeStyle: '#0080ff',
-
-            lineWidth: 3,
+            fillStyle: 'rgba(255, 0, 0, 0.5)',
+            strokeStyle: '#ff0000',
+            lineWidth: 2,
             width: width,
             height: wallThickness,
         };
 
-        // Create ground as a polygon (rectangle shape)
-        const groundY = height - wallThickness / 2;
-        const halfWidth = width / 2;
-        const halfHeight = wallThickness / 2;
+        // Vertices relative to (0,0)
         const groundVertices = [
-            { x: 1280, y: 720 },
-            { x: 0, y: 720 },
-            { x: 0, y: 704 },
-            { x: 640, y: 500 },
-            { x: 1280, y: 704 },
+            { x: 640, y: 20 },
+            { x: -640, y: 20 },
+            { x: -640, y: 0 },
+            { x: 0, y: -200 },
+            { x: 640, y: 0 },
         ];
+        const groundPosition = { x: width / 2, y: height - 20 };
+
+        renderGround.polygon = {
+            vertices: groundVertices,
+            position: groundPosition,
+        };
+
         const ground = PhysicsBodyFactory.createPolygon(groundVertices, {
             isStatic: true,
             friction: friction,
             restitution: restitution,
+            position: groundPosition,
             userData: {
                 label: 'ground',
                 render: renderGround,
             },
         });
-
         this.physics.addBody(ground);
     }
 
@@ -295,11 +298,24 @@ export class SceneBallsX extends SceneBase {
         ctx.strokeStyle = render.strokeStyle;
         ctx.lineWidth = render.lineWidth;
 
-        const width = render.width;
-        const height = render.height;
-
-        ctx.fillRect(-width / 2, -height / 2, width, height);
-        ctx.strokeRect(-width / 2, -height / 2, width, height);
+        // Render polygon if defined
+        if (render.polygon) {
+            const vertices = render.polygon.vertices;
+            ctx.beginPath();
+            ctx.moveTo(vertices[0].x, vertices[0].y);
+            for (let i = 1; i < vertices.length; i++) {
+                ctx.lineTo(vertices[i].x, vertices[i].y);
+            }
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+        } else {
+            // Fallback to rectangle
+            const width = render.width;
+            const height = render.height;
+            ctx.fillRect(-width / 2, -height / 2, width, height);
+            ctx.strokeRect(-width / 2, -height / 2, width, height);
+        }
 
         ctx.restore();
     }
