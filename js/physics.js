@@ -424,58 +424,52 @@ export class PhysicsBodyFactory {
             angularDamping: options.angularDamping ?? 0,
         };
         const body = PhysicsBodyFactory.world.createBody(bodyDef);
-        const fixtureDef = {
-            shape: new planck.Polygon(localVertices),
-            density: options.density || 1,
-            friction: options.friction || 0.3,
-            restitution: options.restitution || 0.1,
-        };
-        body.createFixture(fixtureDef);
+        // Choose shape type:
+        // - For static ground-like bodies (possibly concave), use a Chain shape so
+        //   Planck/Box2D will treat the vertices as an edge loop (non-filled) which
+        //   supports concave shapes composed of segments.
+        // - For dynamic bodies or simple convex polygons, use a Polygon shape.
+        let shape;
+        if (options.isStatic && localVertices.length > 1) {
+            // Create individual edge fixtures for each segment — more robust than Chain
+            for (let i = 0; i < localVertices.length - 1; i++) {
+                const vA = localVertices[i];
+                const vB = localVertices[i + 1];
+                const fixtureDef = {
+                    shape: new planck.Edge(vA, vB),
+                    density: options.density || 1,
+                    friction: options.friction || 0.3,
+                    restitution: options.restitution || 0.1,
+                };
+                body.createFixture(fixtureDef);
+            }
+            // Close loop if more than two vertices
+            if (localVertices.length > 2) {
+                const vA = localVertices[localVertices.length - 1];
+                const vB = localVertices[0];
+                const fixtureDef = {
+                    shape: new planck.Edge(vA, vB),
+                    density: options.density || 1,
+                    friction: options.friction || 0.3,
+                    restitution: options.restitution || 0.1,
+                };
+                body.createFixture(fixtureDef);
+            }
+        } else {
+            const fixtureDef = {
+                shape: new planck.Polygon(localVertices),
+                density: options.density || 1,
+                friction: options.friction || 0.3,
+                restitution: options.restitution || 0.1,
+            };
+            body.createFixture(fixtureDef);
+        }
         const userData = {
             id: PhysicsBodyFactory.generateId(),
             ...options.userData,
         };
         body.setUserData(userData);
         return new PhysicsBody(body);
-        // --- END: Relative/local vertices support ---
-        /*
-        // --- REVERT TO THIS BLOCK FOR OLD BEHAVIOR ---
-        // Convert pixel vertices to meter vertices
-        const meterVertices = pixelVertices.map((v) => planck.Vec2(pixelsToMeters(v.x), pixelsToMeters(v.y)));
-        // Compute centroid for body position (average of vertices)
-        let centroid = { x: 0, y: 0 };
-        meterVertices.forEach((v) => {
-            centroid.x += v.x;
-            centroid.y += v.y;
-        });
-        centroid.x /= meterVertices.length;
-        centroid.y /= meterVertices.length;
-        // Shift vertices so centroid is at (0,0) for local shape
-        const localVertices = meterVertices.map((v) => planck.Vec2(v.x - centroid.x, v.y - centroid.y));
-        // Create body definition
-        const bodyDef = {
-            type: options.isStatic ? 'static' : 'dynamic',
-            position: { x: centroid.x, y: centroid.y },
-            linearDamping: options.linearDamping ?? 0,
-            angularDamping: options.angularDamping ?? 0,
-        };
-        const body = PhysicsBodyFactory.world.createBody(bodyDef);
-        // Create fixture definition with polygon shape
-        const fixtureDef = {
-            shape: new planck.Polygon(localVertices),
-            density: options.density || 1,
-            friction: options.friction || 0.3,
-            restitution: options.restitution || 0.1,
-        };
-        body.createFixture(fixtureDef);
-        const userData = {
-            id: PhysicsBodyFactory.generateId(),
-            ...options.userData,
-        };
-        body.setUserData(userData);
-        return new PhysicsBody(body);
-        // --- END REVERT BLOCK ---
-        */
     }
 
     // Generate unique ID for bodies

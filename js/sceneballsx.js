@@ -213,13 +213,15 @@ export class SceneBallsX extends SceneBase {
 
         // Vertices relative to (0,0)
         const groundVertices = [
-            { x: 640, y: 20 },
-            { x: -640, y: 20 },
-            { x: -640, y: 0 },
-            { x: 0, y: -200 },
-            { x: 640, y: 0 },
+            { x: 624, y: 100 },
+            { x: -624, y: 100 },
+            { x: -624, y: -200 },
+            { x: -100, y: -60 },
+            { x: 0, y: -60 },
+            { x: 100, y: -60 },
+            { x: 624, y: -200 },
         ];
-        const groundPosition = { x: width / 2, y: height - 20 };
+        const groundPosition = { x: width / 2, y: 720 };
 
         renderGround.polygon = {
             vertices: groundVertices,
@@ -301,20 +303,15 @@ export class SceneBallsX extends SceneBase {
         // Render polygon if defined
         if (render.polygon) {
             const vertices = render.polygon.vertices;
+            const polyPos = render.polygon.position || { x: 0, y: 0 };
             ctx.beginPath();
-            ctx.moveTo(vertices[0].x, vertices[0].y);
+            ctx.moveTo(vertices[0].x + polyPos.x - position.x, vertices[0].y + polyPos.y - position.y);
             for (let i = 1; i < vertices.length; i++) {
-                ctx.lineTo(vertices[i].x, vertices[i].y);
+                ctx.lineTo(vertices[i].x + polyPos.x - position.x, vertices[i].y + polyPos.y - position.y);
             }
             ctx.closePath();
             ctx.fill();
             ctx.stroke();
-        } else {
-            // Fallback to rectangle
-            const width = render.width;
-            const height = render.height;
-            ctx.fillRect(-width / 2, -height / 2, width, height);
-            ctx.strokeRect(-width / 2, -height / 2, width, height);
         }
 
         ctx.restore();
