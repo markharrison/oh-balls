@@ -40,13 +40,14 @@ export class SceneBallsX extends SceneBase {
         this.groundImage.onload = () => {
             this.groundImageLoaded = true;
         };
-        this.groundImage.src = '/images/large.png';
+        this.groundImage.src = `/images/${this.configManager.gameSize}.png`;
 
         this.showingDialog = false;
         this.exitToMenu = false;
         this.restartGame = false;
         this.scoreHighest = this.configManager.getHighestScore('BallsX') || 0;
         this.score = 0;
+        this.clickedCoord = null;
 
         this.setupWallBoundaries();
         this.setupGroundBoundaries();
@@ -128,6 +129,15 @@ export class SceneBallsX extends SceneBase {
                 }
             });
         });
+
+        this.canvas.addEventListener('click', (event) => {
+            const rect = this.canvas.getBoundingClientRect();
+            const canvasX = event.clientX - rect.left + 3;
+            const canvasY = event.clientY - rect.top + 3;
+            const coordX = canvasX - this.canvas.width / 2;
+            const coordY = canvasY - this.canvas.height;
+            this.clickedCoord = { x: coordX, y: coordY, canvasX: canvasX, canvasY: canvasY };
+        });
     }
 
     setupZapZone() {
@@ -206,22 +216,46 @@ export class SceneBallsX extends SceneBase {
         const renderGround = {
             fillStyle: 'rgba(255, 0, 0, 0.5)',
             strokeStyle: '#ff0000',
-            lineWidth: 2,
+            lineWidth: 1,
             width: width,
             height: wallThickness,
         };
 
         // Vertices relative to (0,0)
         const groundVertices = [
-            { x: 624, y: 100 },
-            { x: -624, y: 100 },
-            { x: -624, y: -200 },
-            { x: -100, y: -60 },
-            { x: 0, y: -60 },
-            { x: 100, y: -60 },
-            { x: 624, y: -200 },
+            { x: 625, y: 100 },
+            { x: -625, y: 100 },
+            { x: -625, y: -195 },
+            { x: -455, y: -101.5 },
+            { x: -390, y: -134 },
+            { x: -195, y: -30 },
+            { x: -130, y: -62.5 },
+            { x: -65, y: -30 },
+            { x: 0, y: -62.5 },
+            { x: 65, y: -30 },
+            { x: 130, y: -62.5 },
+            { x: 195, y: -30 },
+            { x: 390, y: -134 },
+            { x: 455, y: -101.5 },
+            { x: 625, y: -195 },
         ];
-        const groundPosition = { x: width / 2, y: 720 };
+
+        let yPos = 0;
+        switch (this.configManager.gameSize) {
+            case 'Large':
+                yPos = 720;
+                break;
+            case 'Medium':
+                yPos = 648;
+                break;
+            case 'Small':
+                yPos = 576;
+                break;
+            default:
+                break;
+        }
+
+        const groundPosition = { x: width / 2, y: yPos };
 
         renderGround.polygon = {
             vertices: groundVertices,
@@ -282,39 +316,46 @@ export class SceneBallsX extends SceneBase {
     renderGround(body) {
         const ctx = this.ctx;
 
-        // Convert position from meters to pixels for rendering
-        const meterPosition = body.getPosition();
-        const position = {
-            x: metersToPixels(meterPosition.x),
-            y: metersToPixels(meterPosition.y),
-        };
-        const angle = body.getAngle();
-
-        ctx.save();
-        ctx.translate(position.x, position.y);
-        ctx.rotate(angle);
-
-        let render = body.getUserData().render;
-
-        ctx.fillStyle = render.fillStyle;
-        ctx.strokeStyle = render.strokeStyle;
-        ctx.lineWidth = render.lineWidth;
-
-        // Render polygon if defined
-        if (render.polygon) {
-            const vertices = render.polygon.vertices;
-            const polyPos = render.polygon.position || { x: 0, y: 0 };
-            ctx.beginPath();
-            ctx.moveTo(vertices[0].x + polyPos.x - position.x, vertices[0].y + polyPos.y - position.y);
-            for (let i = 1; i < vertices.length; i++) {
-                ctx.lineTo(vertices[i].x + polyPos.x - position.x, vertices[i].y + polyPos.y - position.y);
-            }
-            ctx.closePath();
-            ctx.fill();
-            ctx.stroke();
+        if (this.groundImageLoaded) {
+            this.ctx.drawImage(this.groundImage, 0, 0, this.canvas.width, this.canvas.height);
         }
 
-        ctx.restore();
+        let dev = false;
+
+        if (dev) {
+            const meterPosition = body.getPosition();
+            const position = {
+                x: metersToPixels(meterPosition.x),
+                y: metersToPixels(meterPosition.y),
+            };
+            const angle = body.getAngle();
+
+            ctx.save();
+            ctx.translate(position.x, position.y);
+            ctx.rotate(angle);
+
+            let render = body.getUserData().render;
+
+            ctx.fillStyle = render.fillStyle;
+            ctx.strokeStyle = render.strokeStyle;
+            ctx.lineWidth = render.lineWidth;
+
+            // Render polygon if defined
+            if (render.polygon) {
+                const vertices = render.polygon.vertices;
+                const polyPos = render.polygon.position || { x: 0, y: 0 };
+                ctx.beginPath();
+                ctx.moveTo(vertices[0].x + polyPos.x - position.x, vertices[0].y + polyPos.y - position.y);
+                for (let i = 1; i < vertices.length; i++) {
+                    ctx.lineTo(vertices[i].x + polyPos.x - position.x, vertices[i].y + polyPos.y - position.y);
+                }
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+            }
+
+            ctx.restore();
+        }
     }
 
     renderZapZone(body) {
@@ -434,15 +475,9 @@ export class SceneBallsX extends SceneBase {
         }
 
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        // Draw background image if loaded
-        if (this.groundImageLoaded) {
-            this.ctx.drawImage(this.groundImage, 0, 0, this.canvas.width, this.canvas.height);
-        } else {
-            this.ctx.fillStyle = '#111111';
-            this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-        }
 
-        this.laserbeamHandler.render();
+        this.ctx.fillStyle = '#444444';
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
         const bodies = this.physics.getAllBodies();
 
@@ -475,9 +510,25 @@ export class SceneBallsX extends SceneBase {
             }
         });
 
+        this.laserbeamHandler.render();
+
         this.particlesHandler.render();
 
         this.renderStatusLine();
+
+        if (this.clickedCoord) {
+            this.ctx.save();
+            this.ctx.fillStyle = '#ffffff';
+            this.ctx.font = 'bold 16px Arial';
+            this.ctx.textAlign = 'center';
+            this.ctx.textBaseline = 'middle';
+            this.ctx.fillText(
+                `(${Math.round(this.clickedCoord.x)}, ${Math.round(this.clickedCoord.y)})`,
+                this.clickedCoord.canvasX,
+                this.clickedCoord.canvasY
+            );
+            this.ctx.restore();
+        }
     }
 
     inputKeyPressed(comboId) {
