@@ -58,7 +58,8 @@ class Main {
 
         this.objectManager.register('ConfigManager', new ConfigManager(this.objectManager));
 
-        this.objectManager.register('AudioHandler', new AudioHandler(this.objectManager));
+        this.audioHandler = this.objectManager.register('AudioHandler', new AudioHandler(this.objectManager));
+        this.audioHandler.preloadAudio();
 
         this.sceneManager = this.objectManager.register('SceneManager', new SceneManager(this.objectManager));
 

@@ -16,7 +16,7 @@ export class SceneSplash extends SceneBase {
             footerElement.textContent = 'Harrison Digital - Splash Screen';
         }
 
-        this.audio = this.objectManager.get('AudioHandler');
+        this.audioHandler = this.objectManager.get('AudioHandler');
     }
 
     exit() {
@@ -25,8 +25,12 @@ export class SceneSplash extends SceneBase {
 
     updateFrame(dt) {
         if (this.exitFlag) {
-            this.audio.setVolume(this.configManager.masterVolume, this.configManager.musicVolume, this.configManager.sfxVolume);
-            this.audio.playMusic('MenuMusic');
+            this.audioHandler.setVolume(
+                this.configManager.masterVolume,
+                this.configManager.musicVolume,
+                this.configManager.sfxVolume
+            );
+            this.audioHandler.playMusic('MenuMusic');
 
             return SceneBase.GameScenes.mainmenu;
         }
@@ -60,12 +64,10 @@ export class SceneSplash extends SceneBase {
 
         const btnEnter = document.getElementById('idButtonEnter');
 
-        btnEnter.onclick = () => {
-            this.audio.initialize();
-
-            setTimeout(() => {
-                this.exitFlag = true;
-            }, 1000);
+        btnEnter.onclick = async () => {
+            await this.audioHandler.waitForPreload();
+            await this.audioHandler.initialize();
+            this.exitFlag = true;
         };
     }
 

@@ -8,7 +8,14 @@ export class AudioHandler {
         this.audioMark = this.objectManager.register('AudioMark', new AudioMark());
         this.audioEnabled = this.configManager.audioEnabled;
         this.musicPlaying = false;
+        this._preloadPromise = null;
+        this.audioPreloaded = false;
     }
+
+    //     document.getElementById('start-audio').addEventListener('click', async () => {
+    //   await audioHandler.waitForPreload();
+    //   await audioHandler.initialize();
+    // });
 
     doToast(vText1, vText2 = '') {
         if (!this.sceneManager) {
@@ -18,27 +25,44 @@ export class AudioHandler {
         this.sceneManager.doToast(vText1, vText2);
     }
 
-    async loadAudioFiles() {
-        await this.audioMark.initialize();
+    async preloadAudio() {
+        if (!this._preloadPromise) {
+            const tasks = [
+                this.audioMark.preloadAudio('MenuMusic', 'audio/calm-background-pixabay.mp3'),
+                this.audioMark.preloadAudio('GameMusic', 'audio/BounceXJimHall.mp3'),
+                this.audioMark.preloadAudio('Combine1', 'audio/combine1-pixabay.mp3'),
+                this.audioMark.preloadAudio('Combine2', 'audio/combine2-pixabay.mp3'),
+                this.audioMark.preloadAudio('Combine3', 'audio/combine3-pixabay.mp3'),
+                this.audioMark.preloadAudio('Combine4', 'audio/combine4-pixabay.mp3'),
+                this.audioMark.preloadAudio('Combine5', 'audio/combine5-pixabay.mp3'),
+                this.audioMark.preloadAudio('Combine6', 'audio/combine6-pixabay.mp3'),
+                this.audioMark.preloadAudio('Beep', 'audio/bleep-pixabay.mp3'),
+                this.audioMark.preloadAudio('GameOver', 'audio/endgame-pixabay.mp3'),
+            ];
 
-        await this.audioMark.loadAudio('MenuMusic', 'audio/calm-background-pixabay.mp3');
+            this._preloadPromise = Promise.all(tasks)
+                .then(() => {
+                    this.audioPreloaded = true;
+                    this.doToast('Preload audio complete...');
+                })
+                .catch((err) => {
+                    this.audioPreloaded = true; // still mark as done, caller can inspect errors/logs
+                    this.doToast('Preload audio encountered errors', err.message || '');
+                });
+        }
 
-        await this.audioMark.loadAudio('GameMusic', 'audio/BounceXJimHall.mp3');
-
-        await this.audioMark.loadAudio('Combine1', 'audio/combine1-pixabay.mp3');
-        await this.audioMark.loadAudio('Combine2', 'audio/combine2-pixabay.mp3');
-        await this.audioMark.loadAudio('Combine3', 'audio/combine3-pixabay.mp3');
-        await this.audioMark.loadAudio('Combine4', 'audio/combine4-pixabay.mp3');
-        await this.audioMark.loadAudio('Combine5', 'audio/combine5-pixabay.mp3');
-        await this.audioMark.loadAudio('Combine6', 'audio/combine6-pixabay.mp3');
-        await this.audioMark.loadAudio('Beep', 'audio/bleep-pixabay.mp3');
-        await this.audioMark.loadAudio('GameOver', 'audio/endgame-pixabay.mp3');
+        return this._preloadPromise;
     }
 
-    initialize() {
-        this.doToast('Initialize audio ...');
+    waitForPreload() {
+        return this._preloadPromise || Promise.resolve(this.audioPreloaded);
+    }
 
-        this.loadAudioFiles();
+    async initialize() {
+        this.doToast('Initialize audio started ...');
+
+        await this.audioMark.initialize();
+        await this.audioMark.processAllPreloadedAudio();
 
         this.doToast('Initialize audio completed ...');
     }
