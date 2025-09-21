@@ -5,6 +5,7 @@ export class SceneSplash extends SceneBase {
         super(sceneManager);
 
         this.startTime = null;
+        this.imageHandler = this.objectManager.get('ImageHandler');
     }
 
     enter() {
@@ -45,37 +46,56 @@ export class SceneSplash extends SceneBase {
         return vHtml;
     }
 
-    insertHTMLOverlayContent() {
+    async insertHTMLOverlayContent() {
+        let smilesImage = await this.imageHandler.loadImage('images/smiles.png', 'smiles');
+        console.log('Smiles image loaded:', smilesImage);
+
         const overlay = document.getElementById('idCanvasOverlay');
         if (!overlay) return;
         overlay.innerHTML = `
-                <div >
-                    <br /><br /><br /><br /><br />
-                    <div style="text-align: center;">
-                        <h1 style="font-size: 72px; font-weight: bold; color: #ffffff;">OH BALLS MERGE</h1>
-                        <h2 style="font-size: 32px; color: #cccccc;">Physics Game</h2>
-                        <p style="font-size: 24px; color: #999999;">Loading...</p>
-                        <br /><br /><br /><br />
-                        <button id="idButtonEnter" class="btn btn-primary  btn-lg ">Enter</button>
-
-                    </div>
+            <div >
+                <br /><br /><br /><br /><br />
+                <div style="text-align: center;">
+                                    <img src="${smilesImage.src}" alt="Smiles" style="width: 400px; height: auto; margin-top: 20px;"/>
+                    <br />
+                    <h1 style="font-size: 72px; font-weight: bold; color: #ffffff;">OH BALLS MERGE</h1>
+                    <p id="idLoadingText" style="font-size: 24px; color: #999999; display: none;">Loading...</p>
+                    <br />
+                    <button id="idButtonEnter" class="btn btn-primary  btn-lg ">Enter</button>
                 </div>
-            `;
+            </div>
+        `;
 
         const btnEnter = document.getElementById('idButtonEnter');
 
         btnEnter.onclick = async () => {
-            await this.audioHandler.waitForPreload();
-            await this.audioHandler.initialize();
-            this.exitFlag = true;
+            await this.doPostUserInteraction();
         };
+    }
+
+    async doPostUserInteraction() {
+        const btnEnter = document.getElementById('idButtonEnter');
+        btnEnter.style.display = 'none';
+
+        const loadingText = document.getElementById('idLoadingText');
+        loadingText.style.display = 'block';
+
+        await this.audioHandler.waitForPreload();
+        await this.audioHandler.initialize();
+
+        setTimeout(() => {
+            this.exitFlag = true;
+        }, 1000);
     }
 
     inputKeyPressed(comboId) {
         switch (comboId) {
             case 'Escape':
             case 'Enter':
-                this.exitFlag = true;
+                const btnEnter = document.getElementById('idButtonEnter');
+                if (btnEnter) {
+                    btnEnter.click();
+                }
                 break;
         }
     }

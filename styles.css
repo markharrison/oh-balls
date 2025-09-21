@@ -84,51 +84,18 @@ body::before {
     text-shadow: 0 0 12px rgba(139, 195, 74, 0.25);
 }
 
-/* Canvas styles - responsive while keeping a visual max width */
-.canvas {
-    border: 2px solid rgb(0, 0, 0, 1);
+/* Canvas styles - simplified */
+.canvas canvas {
+    border: 2px solid black;
     border-radius: 12px;
-    width: min(100%, 1284px);
-    max-width: 100%;
+    width: 1280px;
+    height: 720px;
     display: block;
-    min-width: 1280px;
-    min-height: 720px;
-    overflow: hidden; /* Ensure canvas fits exactly within rounded borders */
-}
-
-.canvas canvas {
-    width: 100%;
-    height: auto;
-    display: block;
-    border-radius: 10px; /* Slightly smaller radius to fit within parent border */
 }
 
 .canvas-overlay {
-    background: rgba(42, 42, 42, 0.9);
-    display: none;
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 5;
-    border: none; /* remove overlay border to avoid double-thickness */
-    border-radius: 10px; /* match inner content radius so corners align */
-    box-sizing: border-box;
-    pointer-events: auto; /* allow clicks on overlay content (buttons) */
-}
+    background: rgba(42, 42, 42, 1);
 
-/* the actual <canvas> should have inner radius = outer radius - border */
-.canvas canvas {
-    width: 100%;
-    height: auto;
-    display: block;
-    border-radius: 10px; /* 12 - 2 (border) = 10 to avoid corner gaps */
-    box-sizing: border-box;
-}
-
-.canvas-overlay {
-    background: rgba(42, 42, 42, 0.9);
     display: none;
     position: absolute;
     top: 0;
@@ -198,7 +165,6 @@ body::before {
     color: #ffffff !important;
     border: 2px solid #ffffff !important;
     border-radius: 10px;
-
     box-shadow: none;
     padding: 24px;
     min-width: 400px;

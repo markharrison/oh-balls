@@ -2,6 +2,7 @@ import { SceneManager } from './scene.js';
 import { InputHandler } from './input.js';
 import { ConfigManager } from './config.js';
 import { AudioHandler } from './audio.js';
+import { ImageHandler } from './image.js';
 
 class ObjectManager {
     // To support Dependency Injection
@@ -57,6 +58,9 @@ class Main {
         this.objectManager.register('Main', this);
 
         this.objectManager.register('ConfigManager', new ConfigManager(this.objectManager));
+
+        this.imageHandler = this.objectManager.register('ImageHandler', new ImageHandler(this.objectManager));
+        this.imageHandler.preloadImages();
 
         this.audioHandler = this.objectManager.register('AudioHandler', new AudioHandler(this.objectManager));
         this.audioHandler.preloadAudio();

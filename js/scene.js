@@ -26,12 +26,12 @@ export class SceneManager {
         this.currentScene = null;
         this.devcnt = 0;
 
-        this.groundImage = new window.Image();
-        this.groundImageLoaded = false;
-        this.groundImage.onload = () => {
-            this.groundImageLoaded = true;
-        };
-        this.groundImage.src = `/images/ground.png`;
+        // this.groundImage = new window.Image();
+        // this.groundImageLoaded = false;
+        // this.groundImage.onload = () => {
+        //     this.groundImageLoaded = true;
+        // };
+        // this.groundImage.src = `/images/ground.png`;
     }
 
     setCurrentScene(sceneKey) {
@@ -152,20 +152,50 @@ export class SceneManager {
         this.diagnosticsPanel.renderPanel();
     }
 
-    doToast(vTitle, vText = '') {
+    doToast(vTitle, vText = '', vType = 'info') {
         var vHtml = '';
         var vId = 'idToast-' + Math.floor(performance.now());
         var vDate = new Date();
         var vTime = vDate.toLocaleTimeString();
 
-        if (typeof vText === 'undefined') {
-            vText = '(No message provided)';
-        }
+        const toastTypes = {
+            success: { icon: '✓', borderColor: '#28a745' },
+            warning: { icon: '⚠', borderColor: '#ffc107' },
+            error: { icon: '✕', borderColor: '#dc3545' },
+            info: { icon: 'i', borderColor: '#17a2b8' },
+        };
 
-        vHtml += "<div id='" + vId + "' class='toast fade hide'><div class='toast-header'>";
-        vHtml += "<strong class='mr-auto'>" + vTitle + "</strong><small class='text-muted'>&nbsp;" + vTime + '</small>';
-        vHtml += "<button type='button' class='btn-close ms-auto mb-1' data-bs-dismiss='toast' ></button>";
-        vHtml += "</div><div class='toast-body' style='color: black;'>" + vText + '</div></div>';
+        const config = toastTypes[vType] || toastTypes.info;
+
+        vHtml +=
+            "<div id='" +
+            vId +
+            "' class='custom-toast' style='background-color: rgba(255, 255, 255, 1) !important;border-left: 6px solid " +
+            config.borderColor +
+            "; border-radius: 8px; box-shadow: none !important; margin-bottom: 10px; max-width: 400px; padding: 16px; display: block !important; visibility: visible !important;'>";
+        vHtml += "<div style='display: flex; align-items: flex-start; gap: 12px;'>";
+        vHtml +=
+            "<div style='display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; background-color: " +
+            config.borderColor +
+            "; color: white; font-weight: bold; font-size: 14px; flex-shrink: 0; margin-top: 2px;'>" +
+            config.icon +
+            '</div>';
+        vHtml += "<div style='flex: 1; min-width: 0;'>";
+        vHtml +=
+            "<div style='font-weight: 600; color: black; font-size: 15px; margin-bottom: " +
+            (vText ? '4px' : '0') +
+            ";'>" +
+            vTitle +
+            '</div>';
+        if (vText) {
+            vHtml += "<div style='color: black; font-size: 14px; line-height: 1.4; opacity: 0.8;'>" + vText + '</div>';
+        }
+        vHtml += '</div>';
+        vHtml += "<div style='display: flex; align-items: flex-start; gap: 8px; flex-shrink: 0;'>";
+        vHtml += "<small style='color: black; opacity: 0.6; font-size: 12px; margin-top: 2px;'>" + vTime + '</small>';
+        vHtml +=
+            "<button type='button' class='btn-close' onclick='this.closest(\".custom-toast\").remove()' style='color: black; opacity: 0.5; font-size: 18px; border: none; background: none; cursor: pointer; padding: 0; width: 16px; height: 16px;'>×</button>";
+        vHtml += '</div></div></div>';
 
         const toasterElement = document.getElementById('idToaster');
         if (toasterElement) {
@@ -182,9 +212,13 @@ export class SceneManager {
                 // Add event listener for when toast is hidden
                 toastElement.addEventListener('hidden.bs.toast', cleanupToast);
 
-                // Initialize and show the toast using Bootstrap's toast API
-                const toast = new bootstrap.Toast(toastElement, { delay: 5000 });
-                toast.show();
+                // Show the toast and auto-hide after 5 seconds
+                toastElement.style.display = 'block';
+                setTimeout(() => {
+                    if (toastElement && toastElement.parentNode) {
+                        toastElement.remove();
+                    }
+                }, 5000);
             }
         }
     }

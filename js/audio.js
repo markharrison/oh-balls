@@ -17,12 +17,12 @@ export class AudioHandler {
     //   await audioHandler.initialize();
     // });
 
-    doToast(vText1, vText2 = '') {
+    doToast(vText1, vText2 = '', vType = 'info') {
         if (!this.sceneManager) {
             this.sceneManager = this.objectManager.get('SceneManager');
         }
 
-        this.sceneManager.doToast(vText1, vText2);
+        this.sceneManager.doToast(vText1, vText2, vType);
     }
 
     async preloadAudio() {
@@ -43,11 +43,11 @@ export class AudioHandler {
             this._preloadPromise = Promise.all(tasks)
                 .then(() => {
                     this.audioPreloaded = true;
-                    this.doToast('Preload audio complete...');
+                    // this.doToast('Preload audio complete...', '', 'success');
                 })
                 .catch((err) => {
                     this.audioPreloaded = true; // still mark as done, caller can inspect errors/logs
-                    this.doToast('Preload audio encountered errors', err.message || '');
+                    this.doToast('Preload audio encountered errors', err.message || '', 'error');
                 });
         }
 
@@ -59,12 +59,23 @@ export class AudioHandler {
     }
 
     async initialize() {
-        this.doToast('Initialize audio started ...');
+        // this.doToast('Initialize audio started...', '', 'info');
 
         await this.audioMark.initialize();
-        await this.audioMark.processAllPreloadedAudio();
+        const processResults = await this.audioMark.processAllPreloadedAudio();
 
-        this.doToast('Initialize audio completed ...');
+        // Check if all audio processing completed successfully
+        if (Array.isArray(processResults)) {
+            const failedItems = processResults.filter((result) => !result.success);
+            if (failedItems.length > 0) {
+                this.doToast('Some audio files failed to process', `Failed: ${failedItems.map((f) => f.name).join(', ')}`, 'error');
+            }
+            // else {
+            //     this.doToast('All audio files processed successfully', `Processed: ${processResults.length} files`, 'success');
+            // }
+        }
+
+        // this.doToast('Initialize audio completed', '', 'success');
     }
 
     playSFX(sound) {
@@ -112,5 +123,30 @@ export class AudioHandler {
                 this.playMusic('MenuMusic');
             }
         }
+    }
+
+    isAudioInitialized() {
+        return this.audioMark.isInitialized;
+    }
+
+    getAudioState() {
+        return this.audioMark.getState();
+    }
+
+    isAllPreloadedAudioProcessed() {
+        const state = this.audioMark.getState();
+        // If there are no preloaded audio items remaining and we have loaded audio, processing is complete
+        return state.preloadedAudio.length === 0 && state.loadedAudio.length > 0;
+    }
+
+    getAudioProcessingStatus() {
+        const state = this.audioMark.getState();
+        return {
+            isProcessingComplete: this.isAllPreloadedAudioProcessed(),
+            preloadedCount: state.preloadedAudio.length,
+            loadedCount: state.loadedAudio.length,
+            preloadedItems: state.preloadedAudio,
+            loadedItems: state.loadedAudio,
+        };
     }
 }

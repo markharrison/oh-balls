@@ -17,6 +17,7 @@ export class SceneBallsX extends SceneBase {
         this.physics = objectManager.register('PhysicsEngine', new PhysicsEngine());
         this.laserbeamHandler = this.objectManager.register('LaserbeamHandler', new LaserbeamHandler(this.objectManager));
         this.particlesHandler = this.objectManager.register('ParticlesHandler', new ParticlesHandler(this.objectManager));
+        this.imageHandler = this.objectManager.get('ImageHandler');
 
         this.physics.create();
         this.physics.setGravity(0, 300);
@@ -27,7 +28,7 @@ export class SceneBallsX extends SceneBase {
 
         this.clock = {
             deltaTime: 0,
-            currentTime: 0,
+            currentTime: performance.now(), // Initialize with current time
             lastStatsUpdate: 0,
             cachedDeltaTime: 0,
             cachedFPS: 0,
@@ -48,6 +49,12 @@ export class SceneBallsX extends SceneBase {
         this.setupEventHandlers();
 
         this._physicsAccumulator = 0;
+
+        this.transitionActive = true;
+        this.transitionRadius = 5;
+        this.transitionCenterX = this.canvas.width / 2;
+        this.transitionCenterY = this.canvas.height / 2;
+        this.transitionSpeed = 1000;
     }
 
     getSceneStateHtml() {
@@ -123,14 +130,14 @@ export class SceneBallsX extends SceneBase {
             });
         });
 
-        this.canvas.addEventListener('click', (event) => {
-            const rect = this.canvas.getBoundingClientRect();
-            const canvasX = event.clientX - rect.left + 3;
-            const canvasY = event.clientY - rect.top + 3;
-            const coordX = canvasX - this.canvas.width / 2;
-            const coordY = canvasY - this.canvas.height;
-            this.clickedCoord = { x: coordX, y: coordY, canvasX: canvasX, canvasY: canvasY };
-        });
+        // this.canvas.addEventListener('click', (event) => {
+        //     const rect = this.canvas.getBoundingClientRect();
+        //     const canvasX = event.clientX - rect.left + 3;
+        //     const canvasY = event.clientY - rect.top + 3;
+        //     const coordX = canvasX - this.canvas.width / 2;
+        //     const coordY = canvasY - this.canvas.height;
+        //     this.clickedCoord = { x: coordX, y: coordY, canvasX: canvasX, canvasY: canvasY };
+        // });
     }
 
     setupZapZone() {
@@ -324,8 +331,9 @@ export class SceneBallsX extends SceneBase {
                 break;
         }
 
-        if (this.sceneManager.groundImageLoaded) {
-            this.ctx.drawImage(this.sceneManager.groundImage, 0, yPos, this.canvas.width, this.canvas.height);
+        let groundImage = this.imageHandler.getImage('ground');
+        if (groundImage != null) {
+            this.ctx.drawImage(groundImage, 0, yPos, this.canvas.width, this.canvas.height);
         }
 
         let dev = false;
@@ -484,6 +492,18 @@ export class SceneBallsX extends SceneBase {
 
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
+        // CLIP
+        if (this.transitionActive) {
+            this.ctx.fillStyle = 'rgb(42,42,42)';
+            this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+            this.ctx.save();
+            this.ctx.beginPath();
+            this.ctx.arc(this.transitionCenterX, this.transitionCenterY, this.transitionRadius, 0, Math.PI * 2);
+            this.ctx.clip(); // THIS IS THE CLIPPING MASK!
+        }
+        // CLIP
+
         const gradient = this.ctx.createLinearGradient(0, 0, 0, this.canvas.height);
         gradient.addColorStop(0, '#00008B'); // Dark blue at top
         gradient.addColorStop(1, '#0000FF'); // Blue at bottom
@@ -537,6 +557,11 @@ export class SceneBallsX extends SceneBase {
                 this.clickedCoord.canvasX,
                 this.clickedCoord.canvasY
             );
+            this.ctx.restore();
+        }
+
+        // At the very end of renderScene(), restore if clipping was applied
+        if (this.transitionActive) {
             this.ctx.restore();
         }
     }
@@ -709,6 +734,17 @@ export class SceneBallsX extends SceneBase {
         const lastTime = this.clock.currentTime;
         this.clock.currentTime = currentTime;
         this.clock.deltaTime = this.clock.currentTime - lastTime;
+
+        if (this.transitionActive) {
+            this.transitionRadius += this.transitionSpeed * (this.clock.deltaTime / 1000);
+
+            // Calculate diagonal to cover entire canvas
+            const maxRadius = Math.sqrt(Math.pow(this.canvas.width / 2, 2) + Math.pow(this.canvas.height / 2, 2));
+
+            if (this.transitionRadius >= maxRadius) {
+                this.transitionActive = false;
+            }
+        }
 
         this.updatePhysics(this.clock.deltaTime);
         this.ballManager.updateFrame();
