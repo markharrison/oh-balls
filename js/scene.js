@@ -111,6 +111,10 @@ export class SceneManager {
         return this.currentScene.getSpecialKeys();
     }
 
+    inputTouchAction(type, x, y, details = {}) {
+        this.currentScene.inputTouchAction(type, x, y, details);
+    }
+
     inputKeyPressed(comboId) {
         if (this.dialogEnabled) {
             this.doDialogInputKeyPressed(comboId);

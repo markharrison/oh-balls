@@ -280,6 +280,23 @@ export class BallManager {
         this.lastPlayBallPosition = newX;
     }
 
+    handleTouchAction(type, x, y, details = {}) {
+        if (this.playBall === null) {
+            return;
+        }
+
+        if (y > 500) return;
+
+        let currentPos = this.playBall.getPosition();
+        let newX = this.keepXWithinBounds(x, this.playBall);
+        this.playBall.setPosition(newX, currentPos.y);
+        this.lastPlayBallPosition = newX;
+
+        if (type === 'touchend') {
+            this.dropPlayBall();
+        }
+    }
+
     queueCombine(ballA, ballB) {
         if (!ballA || !ballB) return false;
         // store the Ball objects directly

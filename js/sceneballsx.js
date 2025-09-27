@@ -565,6 +565,12 @@ export class SceneBallsX extends SceneBase {
         }
     }
 
+    inputTouchAction(type, x, y, details = {}) {
+        if (this.gameOver) return;
+
+        this.ballManager.handleTouchAction(type, x, y, details);
+    }
+
     inputKeyPressed(comboId) {
         if (this.gameOver) return;
 

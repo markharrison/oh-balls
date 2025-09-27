@@ -103,6 +103,10 @@ export class SceneBase {
         return ['Escape', 'Enter', 'ArrowUp', 'ArrowDown', 'Control+KeyP', 'Control+KeyD'];
     }
 
+    inputTouchAction(type, x, y, details = {}) {
+        alert('Touch input not implemented yet :' + JSON.stringify({ type, x, y, details }));
+    }
+
     inputKeyPressed(comboId) {
         if (this.menuOptionsCount > 0) {
             this.selectedOption = this.getFocusedMenuButtonIndex();

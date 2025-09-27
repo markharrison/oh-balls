@@ -6,16 +6,14 @@ export class ImageHandler {
     }
 
     preloadImages() {
-        console.log('🚀 Starting preload - function should return immediately');
-        console.time('preloadImages function');
+        // ...existing code...
 
         this.preload([
             { url: 'images/smiles.png', name: 'smiles' },
             { url: 'images/ground.png', name: 'ground' },
         ]);
 
-        console.timeEnd('preloadImages function');
-        console.log('✅ preloadImages returned - images still loading in background');
+        // ...existing code...
     }
 
     async loadImage(url, name = null) {
@@ -35,7 +33,7 @@ export class ImageHandler {
             const img = new Image();
 
             img.onload = () => {
-                console.log(`📷 Image loaded: ${url}`);
+                // ...existing code...
                 this.images.set(key, img);
                 this.loadingPromises.delete(key);
                 resolve(img);
@@ -97,19 +95,19 @@ export class ImageHandler {
 
     // Test method to prove background loading
     testBackgroundLoading() {
-        console.log('🔄 Before preload:', this.getStats());
+        // ...existing code...
 
         this.preloadImages();
 
-        console.log('🔄 Immediately after preload:', this.getStats());
+        // ...existing code...
 
         // Check status every 100ms
         const checkInterval = setInterval(() => {
             const stats = this.getStats();
-            console.log('🔄 Status check:', stats);
+            // ...existing code...
 
             if (stats.loading === 0 && stats.loaded > 0) {
-                console.log('🎉 All images loaded!');
+                // ...existing code...
                 clearInterval(checkInterval);
             }
         }, 100);

@@ -44,7 +44,7 @@ export class SceneSplash extends SceneBase {
 
     async insertHTMLOverlayContent() {
         let smilesImage = await this.imageHandler.loadImage('images/smiles.png', 'smiles');
-        console.log('Smiles image loaded:', smilesImage);
+        // ...existing code...
 
         const overlay = document.getElementById('idCanvasOverlay');
         if (!overlay) return;

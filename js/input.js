@@ -7,12 +7,102 @@ export class InputHandler {
         this.keyState = {};
         this.gamepadState = {};
 
+        // Track left mouse button state
+        this.leftMouseBut = false;
+
         this.setupEventListeners();
     }
 
     setupEventListeners() {
         document.addEventListener('keyup', (event) => this.handleKeyUp(event));
         document.addEventListener('keydown', (event) => this.handleKeyDown(event));
+
+        // Touch events (on canvas only)
+        const canvas = document.getElementById('idCanvasControl');
+        if (canvas) {
+            canvas.addEventListener('touchstart', (e) => this.handleTouchStart(e), { passive: false });
+            canvas.addEventListener('touchmove', (e) => this.handleTouchMove(e), { passive: false });
+            canvas.addEventListener('touchend', (e) => this.handleTouchEnd(e), { passive: false });
+            canvas.addEventListener('click', (e) => this.handleMouseClick(e), false);
+            canvas.addEventListener('mousemove', (e) => this.handleMouseMove(e), false);
+            canvas.addEventListener('mouseenter', (e) => this.handleMouseEnter(e), false);
+            canvas.addEventListener('mousedown', (e) => this.handleMouseDown(e), false);
+            canvas.addEventListener('mouseup', (e) => this.handleMouseUp(e), false);
+        }
+    }
+
+    handleMouseMove(event) {
+        // Only handle mouseover if not in dialog or overlay mode
+        if (this.sceneManager.dialogEnabled || this.sceneManager.overlayEnabled) return;
+        const rect = event.target.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        if (this.leftMouseBut) {
+            this.sceneManager.inputTouchAction('touchmove', x, y);
+        }
+    }
+
+    handleMouseEnter(event) {
+        this.leftMouseBut = false;
+    }
+
+    handleMouseDown(event) {
+        if (event.button !== 0) return;
+        this.leftMouseBut = true;
+    }
+
+    handleMouseUp(event) {
+        if (event.button !== 0) return;
+        this.leftMouseBut = false;
+    }
+
+    handleMouseClick(event) {
+        // Only handle click if not in dialog or overlay mode
+        if (this.sceneManager.dialogEnabled || this.sceneManager.overlayEnabled) return;
+        const rect = event.target.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+
+        this.sceneManager.inputTouchAction('touchend', x, y);
+    }
+
+    handleTouchStart(event) {
+        if (this.sceneManager.dialogEnabled || this.sceneManager.overlayEnabled) return;
+        event.preventDefault(); // Prevent scrolling/dragging the page
+        if (event.touches && event.touches.length === 1) {
+            const touch = event.touches[0];
+            const rect = event.target.getBoundingClientRect();
+            const x = touch.clientX - rect.left;
+            const y = touch.clientY - rect.top;
+
+            this.sceneManager.inputTouchAction('touchstart', x, y);
+        }
+    }
+
+    handleTouchMove(event) {
+        if (this.sceneManager.dialogEnabled || this.sceneManager.overlayEnabled) return;
+        event.preventDefault(); // Prevent scrolling/dragging the page
+        if (event.touches && event.touches.length === 1) {
+            const touch = event.touches[0];
+            const rect = event.target.getBoundingClientRect();
+            const x = touch.clientX - rect.left;
+            const y = touch.clientY - rect.top;
+
+            this.sceneManager.inputTouchAction('touchmove', x, y);
+        }
+    }
+
+    handleTouchEnd(event) {
+        if (this.sceneManager.dialogEnabled || this.sceneManager.overlayEnabled) return;
+        event.preventDefault(); // Prevent scrolling/dragging the page
+        if (event.changedTouches && event.changedTouches.length === 1) {
+            const touch = event.changedTouches[0];
+            const rect = event.target.getBoundingClientRect();
+            const x = touch.clientX - rect.left;
+            const y = touch.clientY - rect.top;
+
+            this.sceneManager.inputTouchAction('touchend', x, y);
+        }
     }
 
     buildKeyId(event) {
