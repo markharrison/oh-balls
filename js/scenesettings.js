@@ -9,10 +9,6 @@ export class SceneSettings extends SceneBase {
 
     enter() {
         this.showOverlay();
-        const footerElement = document.getElementById('idFooterInfo');
-        if (footerElement) {
-            footerElement.textContent = 'Harrison Digital - Settings';
-        }
     }
 
     exit() {
@@ -87,11 +83,6 @@ export class SceneSettingsAudio extends SceneBase {
 
     enter() {
         this.showOverlay();
-
-        const footerElement = document.getElementById('idFooterInfo');
-        if (footerElement) {
-            footerElement.textContent = 'Harrison Digital - Settings Audio';
-        }
     }
 
     exit() {
@@ -334,11 +325,6 @@ export class SceneSettingsGameplay extends SceneBase {
 
     enter() {
         this.showOverlay();
-
-        const footerElement = document.getElementById('idFooterInfo');
-        if (footerElement) {
-            footerElement.textContent = 'Harrison Digital - Settings Gameplay';
-        }
     }
 
     exit() {
@@ -579,11 +565,6 @@ export class SceneSettingsDeveloper extends SceneBase {
 
     enter() {
         this.showOverlay();
-
-        const footerElement = document.getElementById('idFooterInfo');
-        if (footerElement) {
-            footerElement.textContent = 'Harrison Digital - Settings Developer';
-        }
     }
 
     exit() {

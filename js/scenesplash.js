@@ -12,10 +12,6 @@ export class SceneSplash extends SceneBase {
         this.showOverlay();
         this.startTime = performance.now();
         this.exitFlag = false;
-        const footerElement = document.getElementById('idFooterInfo');
-        if (footerElement) {
-            footerElement.textContent = 'Harrison Digital - Splash Screen';
-        }
 
         this.audioHandler = this.objectManager.get('AudioHandler');
     }

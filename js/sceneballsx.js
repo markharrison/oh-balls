@@ -485,16 +485,15 @@ export class SceneBallsX extends SceneBase {
     }
 
     renderScene() {
-        const footerElement = document.getElementById('idFooterInfo');
-        if (footerElement) {
-            footerElement.textContent = 'Harrison Digital - Oh Balls';
-        }
-
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
         // CLIP
         if (this.transitionActive) {
-            this.ctx.fillStyle = 'rgb(42,42,42)';
+            // Diagonal gradient: -45deg, #007bff to #23d5ab
+            const grad = this.ctx.createLinearGradient(this.canvas.width, 0, 0, this.canvas.height);
+            grad.addColorStop(0, '#007bff');
+            grad.addColorStop(1, '#23d5ab');
+            this.ctx.fillStyle = grad;
             this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
             this.ctx.save();
