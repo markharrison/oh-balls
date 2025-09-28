@@ -4,7 +4,7 @@ import { PhysicsEngine, PhysicsBodyFactory, PhysicsUtils, metersToPixels } from 
 import { LaserbeamHandler } from './laserbeam.js';
 import { ParticlesHandler } from './particles.js';
 
-export const wallThickness = 16;
+export const wallThickness = 8;
 export const fixedTimeStep = 1000 / 60; // ms per physics step (16.666...)
 
 export class SceneBallsX extends SceneBase {
@@ -480,14 +480,14 @@ export class SceneBallsX extends SceneBase {
         this.ctx.font = 'bold 20px Arial';
         this.ctx.textAlign = 'left';
         this.ctx.textBaseline = 'top';
-        this.ctx.fillText(`Highest: ${this.scoreHighest}  Score: ${this.score}`, 25, 6);
+        this.ctx.fillText(`Highest: ${this.scoreHighest}  Score: ${this.score}`, 16, 6);
         this.ctx.restore();
     }
 
     renderIcons() {
         // render cog icon at bottom-right corner
         const iconSize = 32;
-        const startX = this.canvas.width - iconSize - 16;
+        const startX = this.canvas.width - iconSize - 10;
         // const startY = this.canvas.height - iconSize;
         // const startX = 16;
         const startY = 0;
@@ -591,7 +591,55 @@ export class SceneBallsX extends SceneBase {
     inputTouchAction(type, x, y, details = {}) {
         if (this.gameOver) return;
 
-        this.ballManager.handleTouchAction(type, x, y, details);
+        if (y > 50) {
+            this.ballManager.handleTouchAction(type, x, y, details);
+        } else {
+            if (x > this.canvas.width - 42 && y < 42) {
+                if (type === 'touchstart') {
+                    this.doExitDialog();
+                }
+            }
+        }
+    }
+
+    inputMouseAction(type, x, y, details = {}) {
+        if (this.gameOver) return;
+
+        let leftMouseBut = details.leftMouseBut || false;
+        const canvas = document.getElementById('idCanvasControl');
+        canvas.style.cursor = 'default';
+
+        if (y > 50) {
+            if (type === 'mousemove' && leftMouseBut) {
+                this.ballManager.handleTouchAction('touchmove', x, y, details);
+            }
+            if (type === 'click') {
+                this.ballManager.handleTouchAction('touchend', x, y, details);
+            }
+        } else {
+            if (x > this.canvas.width - 42 && y < 42) {
+                if (type === 'mousemove') {
+                    const canvas = document.getElementById('idCanvasControl');
+                    if (canvas) {
+                        canvas.style.cursor = 'pointer';
+                    }
+                } else if ((type = 'click')) {
+                    this.doExitDialog();
+                }
+            }
+        }
+    }
+
+    doExitDialog() {
+        this.showingExitDialog = true;
+
+        this.sceneManager.doDialog('Exit Game', 'Are you sure you want to exit?', ['Yes', 'No'], (result) => {
+            this.showingDialog = false;
+            this.clock.currentTime = performance.now();
+            if (result === 'Yes') {
+                this.exitToMenu = true;
+            }
+        });
     }
 
     inputKeyPressed(comboId) {
@@ -609,17 +657,7 @@ export class SceneBallsX extends SceneBase {
                 this.ballManager.dropPlayBall();
                 break;
             case 'Escape':
-                // Show exit confirmation dialog
-                this.showingExitDialog = true;
-
-                this.sceneManager.doDialog('Exit Game', 'Are you sure you want to exit?', ['Yes', 'No'], (result) => {
-                    this.showingDialog = false;
-                    this.clock.currentTime = performance.now();
-                    if (result === 'Yes') {
-                        this.exitToMenu = true;
-                    }
-                });
-
+                this.doExitDialog();
                 break;
             case 'Control+KeyX':
                 if (this.configManager.dev) {

@@ -108,6 +108,10 @@ export class SceneManager {
         this.currentScene.inputTouchAction(type, x, y, details);
     }
 
+    inputMouseAction(type, x, y, details = {}) {
+        this.currentScene.inputMouseAction(type, x, y, details);
+    }
+
     inputKeyPressed(comboId) {
         if (this.dialogEnabled) {
             this.doDialogInputKeyPressed(comboId);

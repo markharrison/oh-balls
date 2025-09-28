@@ -32,14 +32,12 @@ export class InputHandler {
     }
 
     handleMouseMove(event) {
-        // Only handle mouseover if not in dialog or overlay mode
         if (this.sceneManager.dialogEnabled || this.sceneManager.overlayEnabled) return;
         const rect = event.target.getBoundingClientRect();
         const x = event.clientX - rect.left;
         const y = event.clientY - rect.top;
-        if (this.leftMouseBut) {
-            this.sceneManager.inputTouchAction('touchmove', x, y);
-        }
+
+        this.sceneManager.inputMouseAction('mousemove', x, y, { leftMouseBut: this.leftMouseBut });
     }
 
     handleMouseEnter(event) {
@@ -47,23 +45,20 @@ export class InputHandler {
     }
 
     handleMouseDown(event) {
-        if (event.button !== 0) return;
-        this.leftMouseBut = true;
+        if (event.button === 0) this.leftMouseBut = true;
     }
 
     handleMouseUp(event) {
-        if (event.button !== 0) return;
-        this.leftMouseBut = false;
+        if (event.button === 0) this.leftMouseBut = false;
     }
 
     handleMouseClick(event) {
-        // Only handle click if not in dialog or overlay mode
         if (this.sceneManager.dialogEnabled || this.sceneManager.overlayEnabled) return;
         const rect = event.target.getBoundingClientRect();
         const x = event.clientX - rect.left;
         const y = event.clientY - rect.top;
 
-        this.sceneManager.inputTouchAction('touchend', x, y);
+        this.sceneManager.inputMouseAction('click', x, y, { leftMouseBut: this.leftMouseBut });
     }
 
     handleTouchStart(event) {

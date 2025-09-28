@@ -107,6 +107,10 @@ export class SceneBase {
         alert('Touch input not implemented yet :' + JSON.stringify({ type, x, y, details }));
     }
 
+    inputMouseAction(type, x, y, details = {}) {
+        alert('Mouse input not implemented yet :' + JSON.stringify({ type, x, y, details }));
+    }
+
     inputKeyPressed(comboId) {
         if (this.menuOptionsCount > 0) {
             this.selectedOption = this.getFocusedMenuButtonIndex();

@@ -285,15 +285,22 @@ export class BallManager {
             return;
         }
 
-        if (y > 500) return;
-
         let currentPos = this.playBall.getPosition();
         let newX = this.keepXWithinBounds(x, this.playBall);
         this.playBall.setPosition(newX, currentPos.y);
         this.lastPlayBallPosition = newX;
 
+        const canvas = document.getElementById('idCanvasControl');
+        if (canvas) {
+            canvas.style.cursor = 'move';
+        }
+
         if (type === 'touchend') {
             this.dropPlayBall();
+
+            if (canvas) {
+                canvas.style.cursor = 'default';
+            }
         }
     }
 
