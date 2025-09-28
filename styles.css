@@ -17,11 +17,11 @@ body {
 }
 
 html {
-    background: black;
+    background: #111;
 }
 
 body {
-    background: black;
+    background: #111;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     color: #e3f2fd;
     overflow: auto;

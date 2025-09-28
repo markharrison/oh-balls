@@ -11,6 +11,7 @@ export class ImageHandler {
         this.preload([
             { url: 'images/smiles.png', name: 'smiles' },
             { url: 'images/ground.png', name: 'ground' },
+            { url: 'images/cog.svg', name: 'cog' },
         ]);
 
         // ...existing code...

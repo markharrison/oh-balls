@@ -480,8 +480,29 @@ export class SceneBallsX extends SceneBase {
         this.ctx.font = 'bold 20px Arial';
         this.ctx.textAlign = 'left';
         this.ctx.textBaseline = 'top';
-        this.ctx.fillText(`Highest: ${this.scoreHighest}  Score: ${this.score}`, 25, 10);
+        this.ctx.fillText(`Highest: ${this.scoreHighest}  Score: ${this.score}`, 25, 6);
         this.ctx.restore();
+    }
+
+    renderIcons() {
+        // render cog icon at bottom-right corner
+        const iconSize = 32;
+        const startX = this.canvas.width - iconSize - 16;
+        // const startY = this.canvas.height - iconSize;
+        // const startX = 16;
+        const startY = 0;
+
+        // // Debug: draw bounding box to visualize padding
+        // this.ctx.save();
+        // this.ctx.strokeStyle = 'red';
+        // this.ctx.lineWidth = 2;
+        // this.ctx.strokeRect(startX, startY, iconSize, iconSize);
+        // this.ctx.restore();
+
+        const cogIcon = this.imageHandler.getImage('cog');
+        if (cogIcon) {
+            this.ctx.drawImage(cogIcon, startX, startY, iconSize, iconSize);
+        }
     }
 
     renderScene() {
@@ -545,19 +566,21 @@ export class SceneBallsX extends SceneBase {
 
         this.renderStatusLine();
 
-        if (this.clickedCoord) {
-            this.ctx.save();
-            this.ctx.fillStyle = '#ffffff';
-            this.ctx.font = 'bold 16px Arial';
-            this.ctx.textAlign = 'center';
-            this.ctx.textBaseline = 'middle';
-            this.ctx.fillText(
-                `(${Math.round(this.clickedCoord.x)}, ${Math.round(this.clickedCoord.y)})`,
-                this.clickedCoord.canvasX,
-                this.clickedCoord.canvasY
-            );
-            this.ctx.restore();
-        }
+        this.renderIcons();
+
+        // if (this.clickedCoord) {
+        //     this.ctx.save();
+        //     this.ctx.fillStyle = '#ffffff';
+        //     this.ctx.font = 'bold 16px Arial';
+        //     this.ctx.textAlign = 'center';
+        //     this.ctx.textBaseline = 'middle';
+        //     this.ctx.fillText(
+        //         `(${Math.round(this.clickedCoord.x)}, ${Math.round(this.clickedCoord.y)})`,
+        //         this.clickedCoord.canvasX,
+        //         this.clickedCoord.canvasY
+        //     );
+        //     this.ctx.restore();
+        // }
 
         // At the very end of renderScene(), restore if clipping was applied
         if (this.transitionActive) {
@@ -714,11 +737,6 @@ export class SceneBallsX extends SceneBase {
             this.particlesHandler.destroy();
             this.particlesHandler = null;
             this.objectManager.deregister('ParticlesHandler');
-        }
-
-        if (this.groundImage) {
-            this.groundImage.src = '';
-            this.groundImage = null;
         }
     }
 
