@@ -39,8 +39,13 @@ body {
     }
 }
 
-/* Canvas styles - simplified */
+.canvas {
+    position: relative;
+    display: block;
+}
+
 .canvas canvas {
+    position: relative;
     border: 2px solid black;
     border-radius: 12px;
     width: 1280px;
