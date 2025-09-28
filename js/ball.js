@@ -4,8 +4,8 @@ import { wallThickness } from './sceneballsx.js';
 export class Ball {
     constructor(objectManager, x, y, size, playBall = false) {
         this.objectManager = objectManager;
-        this.sceneManager = objectManager.get('SceneManager');
-        this.sceneBallsX = objectManager.get('SceneBallsX');
+        this.sceneManager = objectManager.getById('SceneManager');
+        this.sceneBallsX = objectManager.getById('SceneBallsX');
 
         this.playBall = playBall;
         this.deadBall = false;
@@ -176,10 +176,10 @@ export class Ball {
 export class BallManager {
     constructor(objectManager) {
         this.objectManager = objectManager;
-        this.sceneManager = objectManager.get('SceneManager');
-        this.sceneBallsX = objectManager.get('SceneBallsX');
-        this.audioHandler = objectManager.get('AudioHandler');
-        this.particlesHandler = objectManager.get('ParticlesHandler');
+        this.sceneManager = objectManager.getById('SceneManager');
+        this.sceneBallsX = objectManager.getById('SceneBallsX');
+        this.audioHandler = objectManager.getById('AudioHandler');
+        this.particlesHandler = objectManager.getById('ParticlesHandler');
 
         this.canvasHeight = this.sceneManager.canvas.height;
         this.canvasWidth = this.sceneManager.canvas.width;

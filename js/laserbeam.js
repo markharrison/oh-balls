@@ -3,7 +3,7 @@ import { LaserbeamMark } from '../lib/laserbeammark.js';
 export class LaserbeamHandler {
     constructor(objectManager) {
         this.objectManager = objectManager;
-        this.canvas = this.objectManager.get('Main').canvas;
+        this.canvas = this.objectManager.getById('Main').canvas;
 
         this.LaserbeamMark = this.objectManager.register(
             'LaserbeamMark',
@@ -35,8 +35,8 @@ export class LaserbeamHandler {
     destroy() {
         if (this.LaserbeamMark) {
             this.LaserbeamMark.destroy();
+            this.objectManager.deregister(this.LaserbeamMark);
             this.LaserbeamMark = null;
-            this.objectManager.deregister('LaserbeamMark');
         }
     }
 }

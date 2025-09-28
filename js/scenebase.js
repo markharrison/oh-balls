@@ -10,9 +10,9 @@ export class SceneBase {
     });
     constructor(objectManager) {
         this.objectManager = objectManager;
-        this.configManager = objectManager.get('ConfigManager');
-        this.sceneManager = objectManager.get('SceneManager');
-        this.canvas = objectManager.get('Main').canvas;
+        this.configManager = objectManager.getById('ConfigManager');
+        this.sceneManager = objectManager.getById('SceneManager');
+        this.canvas = objectManager.getById('Main').canvas;
         this.ctx = this.canvas.getContext('2d');
 
         this.selectedOption = 1;

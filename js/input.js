@@ -2,7 +2,7 @@
 export class InputHandler {
     constructor(objectManager) {
         this.objectManager = objectManager;
-        this.sceneManager = this.objectManager.get('SceneManager');
+        this.sceneManager = this.objectManager.getById('SceneManager');
 
         this.keyState = {};
         this.gamepadState = {};

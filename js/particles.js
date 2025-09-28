@@ -4,7 +4,7 @@ import { ParticlesMark } from '../lib/particlesmark.js';
 export class ParticlesHandler {
     constructor(objectManager) {
         this.objectManager = objectManager;
-        this.canvas = this.objectManager.get('Main').canvas;
+        this.canvas = this.objectManager.getById('Main').canvas;
 
         this.particlesMark = this.objectManager.register('ParticlesMark', new ParticlesMark(this.canvas));
     }
@@ -58,8 +58,8 @@ export class ParticlesHandler {
     destroy() {
         if (this.particlesMark) {
             this.particlesMark.destroy();
+            this.objectManager.deregister(this.particlesMark);
             this.particlesMark = null;
-            this.objectManager.deregister('ParticlesMark');
         }
     }
 }

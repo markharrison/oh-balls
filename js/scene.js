@@ -12,9 +12,9 @@ import { SceneSettingsDeveloper } from './scenesettings.js';
 export class SceneManager {
     constructor(objectManager) {
         this.objectManager = objectManager;
-        this.canvas = objectManager.get('Main').canvas;
-        this.configManager = objectManager.get('ConfigManager');
-        this.audioManager = objectManager.get('AudioHandler');
+        this.canvas = objectManager.getById('Main').canvas;
+        this.configManager = objectManager.getById('ConfigManager');
+        this.audioManager = objectManager.getById('AudioHandler');
 
         this.ctx = this.canvas.getContext('2d');
 
@@ -30,7 +30,7 @@ export class SceneManager {
     setCurrentScene(sceneKey) {
         if (this.currentScene) {
             this.currentScene.exit();
-            this.objectManager.deregister(this.currentScene.constructor.name);
+            this.objectManager.deregister(this.currentScene);
             this.currentScene = null;
         }
 

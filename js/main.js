@@ -12,37 +12,47 @@ class ObjectManager {
     keyExists(key) {
         return this.registry.hasOwnProperty(key);
     }
-    register(key, obj) {
-        if (this.keyExists(key)) {
-            alert(`ObjectManager: key '${key}' is already registered!`);
+
+    register(id, obj) {
+        if (this.keyExists(id)) {
+            alert(`ObjectManager: key id '${id}' is already registered!`);
         }
-        this.registry[key] = obj;
+
+        const objName = obj.constructor.name;
+        this.registry[id] = {
+            key: id,
+            objectName: objName,
+            object: obj,
+        };
 
         return obj;
     }
-    deregister(key) {
-        if (!this.keyExists(key)) {
-            alert(`ObjectManager: key '${key}' does not exist!`);
-            return;
-        }
 
-        delete this.registry[key];
-    }
-
-    get(key) {
-        if (!this.keyExists(key)) {
-            alert(`ObjectManager: key '${key}' does not exist!`);
+    deregister(obj) {
+        const found = Object.entries(this.registry).find(([, registryEntry]) => registryEntry.object === obj);
+        if (!found) {
+            alert(`ObjectManager: object not found in registry!`);
             return null;
         }
-        return this.registry[key];
+
+        const [key, entry] = found;
+        delete this.registry[key];
+        return entry.object;
     }
-    getAll() {
-        return this.registry;
+
+    getById(id) {
+        if (!this.keyExists(id)) {
+            alert(`ObjectManager: key '${id}' does not exist!`);
+            return null;
+        }
+        return this.registry[id].object;
     }
+
     getObjectStateHtml() {
         let vHtml = '<strong>Objects</strong><br/>';
-        Object.entries(this.registry).map(([key, obj]) => {
-            vHtml += `<div>${key}: ${obj?.constructor?.name || typeof obj}</div>`;
+        Object.entries(this.registry).map(([key, entry]) => {
+            const objType = entry.object?.constructor?.name || typeof entry.object;
+            vHtml += `<div>${key}: ${entry.objectName} (${objType})</div>`;
         });
         return vHtml;
     }
@@ -55,19 +65,39 @@ class Main {
         this.rafId = null;
 
         this.objectManager = new ObjectManager();
-        this.objectManager.register('Main', this);
+        this.objectManager.register('Main', this, 'Main game controller and entry point');
 
-        this.objectManager.register('ConfigManager', new ConfigManager(this.objectManager));
+        this.objectManager.register(
+            'ConfigManager',
+            new ConfigManager(this.objectManager),
+            'Manages game configuration and settings'
+        );
 
-        this.imageHandler = this.objectManager.register('ImageHandler', new ImageHandler(this.objectManager));
+        this.imageHandler = this.objectManager.register(
+            'ImageHandler',
+            new ImageHandler(this.objectManager),
+            'Handles image loading and management'
+        );
         this.imageHandler.preloadImages();
 
-        this.audioHandler = this.objectManager.register('AudioHandler', new AudioHandler(this.objectManager));
+        this.audioHandler = this.objectManager.register(
+            'AudioHandler',
+            new AudioHandler(this.objectManager),
+            'Handles audio loading and playback'
+        );
         this.audioHandler.preloadAudio();
 
-        this.sceneManager = this.objectManager.register('SceneManager', new SceneManager(this.objectManager));
+        this.sceneManager = this.objectManager.register(
+            'SceneManager',
+            new SceneManager(this.objectManager),
+            'Manages game scenes and transitions'
+        );
 
-        this.inputHandler = this.objectManager.register('InputHandler', new InputHandler(this.objectManager));
+        this.inputHandler = this.objectManager.register(
+            'InputHandler',
+            new InputHandler(this.objectManager),
+            'Handles user input events'
+        );
     }
 
     gameLoop() {

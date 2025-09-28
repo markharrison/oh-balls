@@ -2,7 +2,7 @@
 export class DiagnosticPanel {
     constructor(objectManager) {
         this.objectManager = objectManager;
-        this.sceneManager = objectManager.get('SceneManager');
+        this.sceneManager = objectManager.getById('SceneManager');
         this.enabled = false;
         this.panel = null;
 

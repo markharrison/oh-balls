@@ -5,7 +5,7 @@ export class SceneSplash extends SceneBase {
         super(sceneManager);
 
         this.startTime = null;
-        this.imageHandler = this.objectManager.get('ImageHandler');
+        this.imageHandler = this.objectManager.getById('ImageHandler');
     }
 
     enter() {
@@ -13,7 +13,7 @@ export class SceneSplash extends SceneBase {
         this.startTime = performance.now();
         this.exitFlag = false;
 
-        this.audioHandler = this.objectManager.get('AudioHandler');
+        this.audioHandler = this.objectManager.getById('AudioHandler');
     }
 
     exit() {

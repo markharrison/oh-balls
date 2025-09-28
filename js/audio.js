@@ -4,7 +4,7 @@ import { AudioMark } from '../lib/audiomark.js';
 export class AudioHandler {
     constructor(objectManager) {
         this.objectManager = objectManager;
-        this.configManager = this.objectManager.get('ConfigManager');
+        this.configManager = this.objectManager.getById('ConfigManager');
         this.audioMark = this.objectManager.register('AudioMark', new AudioMark());
         this.audioEnabled = this.configManager.audioEnabled;
         this.musicPlaying = false;
@@ -19,7 +19,7 @@ export class AudioHandler {
 
     doToast(vText1, vText2 = '', vType = 'info') {
         if (!this.sceneManager) {
-            this.sceneManager = this.objectManager.get('SceneManager');
+            this.sceneManager = this.objectManager.getById('SceneManager');
         }
 
         this.sceneManager.doToast(vText1, vText2, vType);

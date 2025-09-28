@@ -11,13 +11,13 @@ export class SceneBallsX extends SceneBase {
     constructor(objectManager) {
         super(objectManager);
 
-        this.audioHandler = objectManager.get('AudioHandler');
-        this.sceneManager = objectManager.get('SceneManager');
-        this.configManager = objectManager.get('ConfigManager');
+        this.audioHandler = objectManager.getById('AudioHandler');
+        this.sceneManager = objectManager.getById('SceneManager');
+        this.configManager = objectManager.getById('ConfigManager');
         this.physics = objectManager.register('PhysicsEngine', new PhysicsEngine());
         this.laserbeamHandler = this.objectManager.register('LaserbeamHandler', new LaserbeamHandler(this.objectManager));
         this.particlesHandler = this.objectManager.register('ParticlesHandler', new ParticlesHandler(this.objectManager));
-        this.imageHandler = this.objectManager.get('ImageHandler');
+        this.imageHandler = this.objectManager.getById('ImageHandler');
 
         this.physics.create();
         this.physics.setGravity(0, 300);
@@ -741,13 +741,13 @@ export class SceneBallsX extends SceneBase {
     }
 
     enter() {
-        this.objectManager.get('AudioHandler').transitionMusic('GameMusic');
+        this.objectManager.getById('AudioHandler').transitionMusic('GameMusic');
         this.ballManager = this.objectManager.register('BallManager', new BallManager(this.objectManager));
         this.gameOver = false;
     }
 
     exit() {
-        this.objectManager.get('AudioHandler').transitionMusic('MenuMusic');
+        this.objectManager.getById('AudioHandler').transitionMusic('MenuMusic');
 
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.ctx.fillStyle = '#111111';
@@ -755,26 +755,26 @@ export class SceneBallsX extends SceneBase {
 
         if (this.ballManager) {
             this.ballManager.destroy();
+            this.objectManager.deregister(this.ballManager);
             this.ballManager = null;
-            this.objectManager.deregister('BallManager');
         }
 
         if (this.physics) {
             this.physics.destroy();
+            this.objectManager.deregister(this.physics);
             this.physics = null;
-            this.objectManager.deregister('PhysicsEngine');
         }
 
         if (this.laserbeamHandler) {
             this.laserbeamHandler.destroy();
+            this.objectManager.deregister(this.laserbeamHandler);
             this.laserbeamHandler = null;
-            this.objectManager.deregister('LaserbeamHandler');
         }
 
         if (this.particlesHandler) {
             this.particlesHandler.destroy();
+            this.objectManager.deregister(this.particlesHandler);
             this.particlesHandler = null;
-            this.objectManager.deregister('ParticlesHandler');
         }
     }
 

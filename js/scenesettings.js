@@ -77,7 +77,7 @@ export class SceneSettings extends SceneBase {
 export class SceneSettingsAudio extends SceneBase {
     constructor(objectManager) {
         super(objectManager);
-        this.audioHandler = objectManager.get('AudioHandler');
+        this.audioHandler = objectManager.getById('AudioHandler');
         this.nextScene = null;
     }
 
