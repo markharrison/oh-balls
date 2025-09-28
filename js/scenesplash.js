@@ -55,7 +55,8 @@ export class SceneSplash extends SceneBase {
                                     <img src="${smilesImage.src}" alt="Smiles" style="width: 400px; height: auto; margin-top: 20px;"/>
                     <br />
                     <h1 style="font-size: 72px; font-weight: bold; color: #ffffff;">OH BALLS MERGE</h1>
-                    <p id="idLoadingText" style="font-size: 24px; color: #999999; display: none;">Loading...</p>
+                     <p id="idVersionText" style="font-size: 24px; color: #ffffff; display: block;">Version 0.001 - 28 Oct 2025</p>                   
+                    <p id="idLoadingText" style="font-size: 24px; color: #ffffff; display: none;">Loading...</p>
                     <br />
                     <button id="idButtonEnter" class="btn btn-primary  btn-lg ">Enter</button>
                 </div>
@@ -75,6 +76,9 @@ export class SceneSplash extends SceneBase {
 
         const loadingText = document.getElementById('idLoadingText');
         loadingText.style.display = 'block';
+
+        const versionText = document.getElementById('idVersionText');
+        versionText.style.display = 'none';
 
         await this.audioHandler.waitForPreload();
         await this.audioHandler.initialize();
