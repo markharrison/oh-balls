@@ -672,13 +672,13 @@ export class SceneBallsX extends SceneBase {
     });
   }
 
-  resetPressedKeys() {
-    this.pressedKeys = {};
-    this.pressedKeys['Escape'] = true;
-    setTimeout(() => {
-      this.pressedKeys['Escape'] = false;
-    }, 2000);
-  }
+  // resetPressedKeys() {
+  //   this.pressedKeys = {};
+  //   this.pressedKeys['Escape'] = true;
+  //   setTimeout(() => {
+  //     this.pressedKeys['Escape'] = false;
+  //   }, 2000);
+  // }
 
   onKeyDown(e) {
     if (this.singleFireKeys.has(e.code)) {
@@ -760,8 +760,6 @@ export class SceneBallsX extends SceneBase {
       default:
         break;
     }
-
-    console.log(`Gamepad Button: ${buttonIndex}`);
   }
 
   onGamepadAxis(axisData) {
@@ -915,8 +913,11 @@ export class SceneBallsX extends SceneBase {
           callback: () => {
             this.showingDialog = false;
             this.clock.currentTime = performance.now();
-            this.resetPressedKeys();
-            this.canvasInputHandler.subscribe(this);
+            //            this.resetPressedKeys();
+            this.pressedKeys = {};
+            setTimeout(() => {
+              this.canvasInputHandler.subscribe(this);
+            }, 1000);
           },
         },
       ],
@@ -972,9 +973,9 @@ export class SceneBallsX extends SceneBase {
       this.doEndGameDialog();
     }
 
-    if (!this.showingDialog) {
-      this.processInputLoop();
+    this.processInputLoop();
 
+    if (!this.showingDialog) {
       const currentTime = performance.now();
       const lastTime = this.clock.currentTime;
       this.clock.currentTime = currentTime;

@@ -24,12 +24,12 @@
     },
     "homepage": "https://github.com/markharrison/oh-balls#readme",
     "devDependencies": {
-        "terser": "^5.44.0",
+        "terser": "^5.44.1",
         "vite": "^7.2.0"
     },
     "dependencies": {
         "@markharrison/markjsaudio": "^1.20251104.4",
-        "@markharrison/markjscanvasui": "^1.20251105.5",
+        "@markharrison/markjscanvasui": "^1.20251105.6",
         "@markharrison/markjsinput": "^1.20251104.2",
         "@markharrison/markjslaserbeam": "^1.20251104.2",
         "@markharrison/markjsparticles": "^1.20251104.2",

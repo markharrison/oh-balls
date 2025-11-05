@@ -21,7 +21,7 @@ export class SceneSplash extends SceneBase {
 
     this.canvasUIHandler.addImage(smilesImage, 440, 60, 400, 280);
     this.canvasUIHandler.addText('OH BALLS MERGE', 640, 350, { fontSize: 72, fontWeight: 'bold', align: 'center' });
-    this.canvasUIHandler.addText('Version 0.002 - 23 Oct 2025', 640, 430, {
+    this.canvasUIHandler.addText('Version 0.002 - 5 Nov 2025', 640, 430, {
       fontSize: 24,
       align: 'center',
     });

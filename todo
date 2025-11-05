@@ -1,1 +1,1 @@
-x
+    console.log(`Gamepad Button: ${buttonIndex}`); ceneballsx.js:764 Gamepad Button: 0
