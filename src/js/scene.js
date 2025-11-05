@@ -32,26 +32,26 @@ export class SceneManager {
 
     const themes = {
       Theme1: {
-        backgroundColor: '#ff9800',
-        controlColor: '#ff00cc', // neon pink
-        controlSurfaceColor: '#22223b', // deep blue
-        controlTextColor: '#00fff7', // neon cyan
-        controlBorderColor: '#ff00cc', // neon pink
-        controlFocusBorderColor: '#ff9800',
-        menuButtonColor: '#ff00cc',
-        menuButtonActiveColor: '#ff9800',
-        menuButtonClickColor: '#ffea00',
-        menuButtonBorderColor: '#ff00cc',
-        menuButtonFocusBorderColor: '#ff9800',
+        textColor: '#ffffff',
+        controlColor: '#0080FF',
+        controlSurfaceColor: '#22223b',
+        controlTextColor: '#ffffff',
+        controlBorderColor: '#3d5a80',
+        controlFocusBorderColor: '#ffffff',
+        menuButtonColor: '#22223b',
+        menuButtonActiveColor: '#0080ff',
+        menuButtonClickColor: '#0040ff',
+        menuButtonBorderColor: '#3d5a80',
+        menuButtonFocusBorderColor: '#ffffff',
         menuButtonFontSize: 18,
-        modalSurfaceColor: '#22223b',
-        modalBorderColor: '#ff9800',
-        modalTextColor: '#00fff7',
-        modalText2Color: '#ffea00',
+        modalSurfaceColor: '#181818',
+        modalBorderColor: '#ffffff',
+        modalTextColor: '#ffffff',
+        modalText2Color: '#888888',
         modalTextFontSize: 20,
         modalText2FontSize: 16,
-        panelSurfaceColor: '#181820',
-        panelBorderColor: '#ff9800',
+        panelSurfaceColor: '#ff0000',
+        panelBorderColor: '#ffffff',
         borderRadius: 10,
       },
     };
