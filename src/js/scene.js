@@ -56,18 +56,6 @@ export class SceneManager {
       },
     };
 
-    // this.canvasUIHandler.setTheme({
-    //     controlColor: '#4CAF50',
-    //     backgroundColor: '#1e2a47',
-    //     textColor: '#ffffff',
-    //     borderColor: '#3d5a80',
-    //     focusBorderColor: '#ffffff',
-    //     borderRadius: 8,
-    //     borderWidth: 2,
-    //     fontFamily: 'Arial, sans-serif',
-    //     fontSize: 16,
-    // });
-
     this.canvasUIHandler.setTheme(themes['Theme1']);
 
     this.ctx = this.canvas.getContext('2d');
