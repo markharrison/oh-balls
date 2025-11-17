@@ -3,6 +3,12 @@ import { ConfigManager } from './config.js';
 import { AudioHandler } from './audio.js';
 import { ImageHandler } from './image.js';
 
+import { registerSW } from 'virtual:pwa-register';
+
+registerSW({
+  immediate: true,
+});
+
 class ObjectManager {
   // To support Dependency Injection
   constructor() {
@@ -62,6 +68,14 @@ class Main {
     this.canvas = document.getElementById('idCanvasControl');
     this.running = false;
     this.rafId = null;
+    this.deferredPrompt = null;
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      this.deferredPrompt = e;
+
+      window.dispatchEvent(new Event('pwa-installable'));
+    });
 
     this.objectManager = new ObjectManager();
     this.objectManager.register('Main', this);
