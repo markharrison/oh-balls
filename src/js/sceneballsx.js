@@ -75,6 +75,59 @@ export class SceneBallsX extends SceneBase {
     };
 
     this.dialogStateValue = this.dialogState.None;
+
+    // this.ballColors = this.shuffleArray([
+    //   '#ff0000',
+    //   '#ff5500',
+    //   '#ffaa00',
+    //   '#ffff00',
+    //   '#aaff00',
+    //   '#55ff00',
+    //   '#00ff00',
+    //   '#00ff55',
+    //   '#00ffaa',
+    //   '#00ffff',
+    //   '#00aaff',
+    //   '#0055ff',
+    //   '#0000ff',
+    //   '#5500ff',
+    //   '#aa00ff',
+    //   '#ff00ff',
+    //   '#ff00aa',
+    //   '#ff0055',
+    // ]);
+
+    this.ballColors = this.shuffleArray([
+      '#ff00b3', // vivid magenta-pink
+      '#00ffb3', // vivid aqua-green
+      '#ffb300', // vivid orange-yellow
+      '#00b3ff', // vivid sky blue
+      '#b3ff00', // vivid lime
+      '#b300ff', // vivid purple
+      '#b3b3ff', // vivid periwinkle
+      '#ff0033', // vivid red
+      '#00ff33', // vivid green
+      '#ff33b3', // vivid hot pink
+      '#33b3ff', // vivid light blue
+      '#b3ff33', // vivid yellow-green
+      '#ffb333', // vivid orange
+      '#33ff00', // vivid spring green
+      '#b333ff', // vivid violet
+      '#33ffb3', // vivid turquoise
+      '#ff33b3', // vivid pink
+      '#b3ffb3', // vivid mint
+      '#0033ff', // vivid blue
+      '#ffb3ff', // vivid light magenta
+    ]);
+  }
+
+  shuffleArray(array) {
+    const arr = array.slice();
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
   }
 
   getSceneStateHtml() {

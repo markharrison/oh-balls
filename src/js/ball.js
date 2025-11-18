@@ -36,7 +36,7 @@ export class Ball {
       label: 'ball',
       density: 1,
       friction: 0.1,
-      restitution: 0.8,
+      restitution: 0.7,
       linearDamping: 0.1,
       angularDamping: 0.1,
       userData: userData,
@@ -85,26 +85,7 @@ export class Ball {
   }
 
   getColorForSize(size) {
-    // Cyberpunk color palette based on size
-    const colors = [
-      '#ff0080', // Hot pink
-      '#00ff80', // Bright green
-      '#8000ff', // Purple
-      '#ff8000', // Orange
-      '#0080ff', // Blue
-      '#ff0040', // Red-pink
-      '#40ff00', // Lime
-      '#ff4000', // Red-orange
-      '#0040ff', // Deep blue
-      '#ff00c0', // Magenta
-      '#00c0ff', // Cyan
-      '#c000ff', // Violet
-      '#ffc000', // Gold
-      '#00ffc0', // Aqua
-      '#c0ff00', // Yellow-green
-    ];
-
-    return colors[(size - 1) % colors.length];
+    return this.sceneBallsX.ballColors[(size - 1) % this.sceneBallsX.ballColors.length];
   }
 
   getPosition() {
@@ -182,7 +163,7 @@ export class BallManager {
     this.canvasHeight = this.sceneManager.canvas.height;
     this.canvasWidth = this.sceneManager.canvas.width;
 
-    this.gaameOver = false;
+    this.gameOver = false;
     this.playBall = null;
     this.lastCleanupTime = 0;
     this.lastDropTime = 0;
