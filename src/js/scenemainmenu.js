@@ -29,6 +29,7 @@ export class SceneMainmenu extends SceneBase {
 
     let menuItems = [
       { label: 'Start Game', callback: () => (this.nextScene = GameScenes.ballsX) },
+      { label: 'Fireworks', callback: () => (this.nextScene = GameScenes.fireworks) },
       { label: 'Settings', callback: () => (this.nextScene = GameScenes.settings) },
     ];
 

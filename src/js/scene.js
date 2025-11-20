@@ -6,6 +6,7 @@ import { SceneSettings } from './scenesettings.js';
 import { SceneSettingsAudio } from './scenesettings.js';
 import { SceneSettingsGameplay } from './scenesettings.js';
 import { SceneSettingsDeveloper } from './scenesettings.js';
+import { SceneFireworks } from './scenefireworks.js';
 import { CanvasUIHandler } from './canvasui.js';
 import { CanvasInputHandler } from './canvasinput.js';
 
@@ -13,6 +14,7 @@ export const GameScenes = Object.freeze({
   splash: 'splash',
   mainmenu: 'mainmenu',
   ballsX: 'ballsX',
+  fireworks: 'fireworks',
   settings: 'settings',
   settingsaudio: 'settingsaudio',
   settingsgameplay: 'settingsgameplay',
@@ -81,6 +83,9 @@ export class SceneManager {
         break;
       case GameScenes.ballsX:
         this.currentScene = this.objectManager.register('SceneBallsX', new SceneBallsX(this.objectManager));
+        break;
+      case GameScenes.fireworks:
+        this.currentScene = this.objectManager.register('SceneFireworks', new SceneFireworks(this.objectManager));
         break;
       case GameScenes.settings:
         this.currentScene = this.objectManager.register('SceneSettings', new SceneSettings(this.objectManager));
