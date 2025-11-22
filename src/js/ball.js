@@ -22,7 +22,6 @@ export class Ball {
       strokeStyle: '#ffffff',
       lineWidth: 3,
       visible: true,
-      showNumber: true,
       size: this.size,
     };
 

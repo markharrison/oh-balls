@@ -76,58 +76,44 @@ export class SceneBallsX extends SceneBase {
 
     this.dialogStateValue = this.dialogState.None;
 
-    // this.ballColors = this.shuffleArray([
-    //   '#ff0000',
-    //   '#ff5500',
-    //   '#ffaa00',
-    //   '#ffff00',
-    //   '#aaff00',
-    //   '#55ff00',
-    //   '#00ff00',
-    //   '#00ff55',
-    //   '#00ffaa',
-    //   '#00ffff',
-    //   '#00aaff',
-    //   '#0055ff',
-    //   '#0000ff',
-    //   '#5500ff',
-    //   '#aa00ff',
-    //   '#ff00ff',
-    //   '#ff00aa',
-    //   '#ff0055',
-    // ]);
-
     this.ballColors = this.shuffleArray([
-      '#ff00b3', // vivid magenta-pink
-      '#00ffb3', // vivid aqua-green
-      '#ffb300', // vivid orange-yellow
-      '#00b3ff', // vivid sky blue
-      '#b3ff00', // vivid lime
-      '#b300ff', // vivid purple
-      '#b3b3ff', // vivid periwinkle
-      '#ff0033', // vivid red
-      '#00ff33', // vivid green
-      '#ff33b3', // vivid hot pink
-      '#33b3ff', // vivid light blue
-      '#b3ff33', // vivid yellow-green
-      '#ffb333', // vivid orange
-      '#33ff00', // vivid spring green
-      '#b333ff', // vivid violet
-      '#33ffb3', // vivid turquoise
-      '#ff33b3', // vivid pink
-      '#b3ffb3', // vivid mint
-      '#0033ff', // vivid blue
-      '#ffb3ff', // vivid light magenta
+      '#ff5500',
+      '#00ff55',
+      '#0000ff',
+      '#ffb3ff',
+      '#ffff00',
+
+      '#ff0000',
+      '#00ffaa',
+      '#0055ff',
+      '#ffaa00',
+      '#aa00ff',
+
+      '#aaff00',
+      '#740b43',
+      '#0055ff',
+      '#5500ff',
+      '#228B22',
+
+      '#00ffff',
+      '#00aaff',
+      '#ff00aa',
+      '#00ff00',
+      '#b3b3ff',
     ]);
   }
 
   shuffleArray(array) {
     const arr = array.slice();
-    for (let i = arr.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [arr[i], arr[j]] = [arr[j], arr[i]];
+    if (arr.length < 2) return arr;
+    const splitIdx = Math.floor(Math.random() * arr.length);
+    const firstPart = arr.slice(0, splitIdx);
+    const secondPart = arr.slice(splitIdx);
+    let result = secondPart.concat(firstPart);
+    if (Math.random() < 0.5) {
+      result = result.reverse();
     }
-    return arr;
+    return result;
   }
 
   getSceneStateHtml() {
@@ -457,72 +443,105 @@ export class SceneBallsX extends SceneBase {
     this.renderRectBody(body);
   }
 
-  renderBall(body) {
+  renderBallDefault(body) {
     const ctx = this.ctx;
-
-    const meterPosition = body.getPosition();
-    const position = {
-      x: metersToPixels(meterPosition.x),
-      y: metersToPixels(meterPosition.y),
-    };
+    const { x, y } = body.getPosition();
     const angle = body.getAngle();
-
-    ctx.save();
-    ctx.translate(position.x, position.y);
-    ctx.rotate(angle);
-
-    let render = body.getUserData().render;
-
-    ctx.fillStyle = render.fillStyle;
-    ctx.strokeStyle = render.strokeStyle;
-    ctx.lineWidth = render.lineWidth;
-
-    let physicsRadius = render.radius;
+    const render = body.getUserData().render;
+    const radius = render.radius;
 
     const strokeWidth = ctx.lineWidth || 0;
-    const renderRadius = physicsRadius - strokeWidth / 2;
+    const renderRadius = radius - strokeWidth / 2;
+    if (renderRadius <= 0) return;
 
-    if (renderRadius > 0) {
-      // --- Begin Gradient to Black Center Effect ---
+    ctx.save();
+    ctx.translate(metersToPixels(x), metersToPixels(y));
+    ctx.rotate(angle);
+
+    // Draw gradient fill
+    ctx.save();
+    ctx.shadowColor = 'rgba(255,255,255,0.7)';
+    ctx.shadowBlur = 30;
+    const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, renderRadius);
+    gradient.addColorStop(0, '#000');
+    gradient.addColorStop(1, render.fillStyle);
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.arc(0, 0, renderRadius, 0, 2 * Math.PI);
+    ctx.fill();
+    ctx.restore();
+
+    // Draw stroke
+    if (render.strokeStyle && strokeWidth > 0) {
       ctx.save();
-      ctx.shadowColor = 'rgba(255,255,255,0.7)'; // Glow color
-      ctx.shadowBlur = 30; // Consistent blur
-      // Create radial gradient (black center, color edge)
-      const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, renderRadius);
-      gradient.addColorStop(0, '#000');
-      gradient.addColorStop(1, render.fillStyle);
-      ctx.fillStyle = gradient;
+      ctx.strokeStyle = render.strokeStyle;
+      ctx.lineWidth = strokeWidth;
       ctx.beginPath();
-      ctx.arc(0, 0, renderRadius, 0, 6.28);
-      ctx.fill();
+      ctx.arc(0, 0, renderRadius, 0, 2 * Math.PI);
+      ctx.stroke();
       ctx.restore();
-      // --- End Gradient to Black Center Effect ---
+    }
 
-      // Draw stroke as before
-      if (ctx.strokeStyle && strokeWidth > 0) {
-        ctx.stroke();
-      }
+    // Draw number
+    ctx.save();
+    const fontSize = Math.max(24, renderRadius * 0.8);
+    ctx.font = `bold ${fontSize}px Arial`;
+    ctx.fillStyle = '#fff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 2;
+    ctx.strokeText(render.size.toString(), 0, 0);
+    ctx.fillText(render.size.toString(), 0, 0);
+    ctx.restore();
 
-      if (render.showNumber) {
-        ctx.save();
+    ctx.restore();
+  }
 
-        const fontSize = Math.max(24, renderRadius * 0.8);
-        ctx.font = `bold ${fontSize}px Arial`;
-        ctx.fillStyle = '#ffffff'; // White text
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
+  renderBallXmasBauballs(body) {
+    const ctx = this.ctx;
+    const { x, y } = body.getPosition();
+    const angle = body.getAngle();
+    let render = body.getUserData().render;
+    let physicsRadius = render.radius;
+    const strokeWidth = ctx.lineWidth || 0;
+    const renderRadius = physicsRadius - strokeWidth / 2;
+    const imageNum = this.imagesIdx[render.size];
+    const imageKey = `xmas${imageNum.toString().padStart(2, '0')}`;
+    const imgObj = this.imageHandler.getImage(imageKey);
+    ctx.save();
+    ctx.translate(metersToPixels(x), metersToPixels(y));
+    ctx.rotate(angle);
 
-        ctx.strokeStyle = '#000000'; // Black outline for contrast
-        ctx.lineWidth = 2;
-        ctx.strokeText(render.size.toString(), 0, 0);
+    // Draw border circle
+    if (renderRadius > 0) {
+      ctx.save();
+      ctx.strokeStyle = '#85cee5';
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.arc(0, 0, renderRadius, 0, 2 * Math.PI);
+      ctx.stroke();
+      ctx.restore();
+    }
 
-        ctx.fillText(render.size.toString(), 0, 0);
-
-        ctx.restore();
-      }
+    // Draw image inside the border
+    if (imgObj instanceof HTMLImageElement && renderRadius > 0) {
+      ctx.drawImage(imgObj, -renderRadius, -renderRadius, renderRadius * 2, renderRadius * 2);
     }
 
     ctx.restore();
+  }
+
+  renderBall(body) {
+    switch (this.configManager.theme) {
+      case 'Xmas Bauballs':
+        this.renderBallXmasBauballs(body);
+        break;
+      case 'Default':
+      default:
+        this.renderBallDefault(body);
+        break;
+    }
   }
 
   updatePhysics(deltaTime) {
@@ -902,14 +921,56 @@ export class SceneBallsX extends SceneBase {
     ball.setZapZoneTimerId(TimerID);
   }
 
-  enter() {
-    this.objectManager.getById('AudioHandler').transitionMusic('GameMusic');
+  checkXmasImagesLoaded() {
+    const xmasImageKeys = Array.from({ length: 35 }, (_, i) => `xmas${(i + 1).toString().padStart(2, '0')}`);
+    return new Promise((resolve, reject) => {
+      const timeout = 10000; // 10 seconds
+      const start = Date.now();
+      const check = () => {
+        if (xmasImageKeys.every((key) => this.imageHandler.isLoaded(key))) {
+          resolve();
+        } else if (Date.now() - start > timeout) {
+          reject(new Error('Timeout waiting for Xmas images to load'));
+        } else {
+          setTimeout(check, 50);
+        }
+      };
+      check();
+    });
+  }
 
+  startScene(music) {
+    this.objectManager.getById('AudioHandler').transitionMusic(music);
     this.gameOver = false;
-
     this.canvasUIHandler.removeAllControls();
     this.canvasUIHandler.setBackgroundNone();
     this.ballManager.start();
+  }
+
+  enter() {
+    let music = '';
+    switch (this.configManager.theme) {
+      case 'Xmas Bauballs':
+        music = 'XmasMusic';
+        this.checkXmasImagesLoaded()
+          .then(() => this.startScene(music))
+          .catch((err) => {
+            alert('Failed to load Xmas images:', err);
+          });
+
+        // Create an array of numbers from 1 to 35 and randomize it
+        this.imagesIdx = Array.from({ length: 35 }, (_, i) => i + 1);
+        // Fisher-Yates shuffle
+        for (let i = this.imagesIdx.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [this.imagesIdx[i], this.imagesIdx[j]] = [this.imagesIdx[j], this.imagesIdx[i]];
+        }
+        break;
+      default:
+        music = 'GameMusic';
+        this.startScene(music);
+        break;
+    }
   }
 
   exit() {

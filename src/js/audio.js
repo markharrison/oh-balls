@@ -28,8 +28,6 @@ export class AudioHandler {
   async preloadAudio() {
     if (!this._preloadPromise) {
       const tasks = [
-        this.audioMark.preloadAudio('MenuMusic', 'audio/calm-background-pixabay.mp3'),
-        this.audioMark.preloadAudio('GameMusic', 'audio/BounceXJimHall.mp3'),
         this.audioMark.preloadAudio('Combine1', 'audio/combine1-pixabay.mp3'),
         this.audioMark.preloadAudio('Combine2', 'audio/combine2-pixabay.mp3'),
         this.audioMark.preloadAudio('Combine3', 'audio/combine3-pixabay.mp3'),
@@ -38,6 +36,9 @@ export class AudioHandler {
         this.audioMark.preloadAudio('Combine6', 'audio/combine6-pixabay.mp3'),
         this.audioMark.preloadAudio('Beep', 'audio/bleep-pixabay.mp3'),
         this.audioMark.preloadAudio('GameOver', 'audio/endgame-pixabay.mp3'),
+        this.audioMark.preloadAudio('MenuMusic', 'audio/calm-background-pixabay.mp3'),
+        this.audioMark.preloadAudio('GameMusic', 'audio/BounceXJimHall.mp3'),
+        this.audioMark.preloadAudio('XmasMusic', 'audio/christmas3-pixabay.mp3'),
       ];
 
       this._preloadPromise = Promise.all(tasks)

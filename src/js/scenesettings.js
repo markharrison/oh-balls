@@ -179,11 +179,19 @@ export class SceneSettingsGameplay extends SceneBase {
     this.canvasUIHandler.addPanel(300, 70, panelOptions);
 
     let carouselOptions = { width: 200, height: 60, orientation: 'horizontal' };
-    let carouselItems = ['Default', 'One', 'Two', 'Three'];
-    this.canvasUIHandler.addCarousel(320, 100, 'Theme:', carouselItems, 0, (index, value) => this.doTheme(value), carouselOptions);
+    let carouselItems = ['Default', 'Xmas Bauballs'];
+    this.canvasUIHandler.addCarousel(320, 100, 'Theme:', carouselItems, this.configManager.theme, (index, value) => this.doTheme(value), carouselOptions);
 
     carouselItems = ['Large', 'Medium', 'Small'];
-    this.canvasUIHandler.addCarousel(320, 170, 'Game Size:', carouselItems, 0, (index, value) => this.doGameSize(value), carouselOptions);
+    this.canvasUIHandler.addCarousel(
+      320,
+      170,
+      'Game Size:',
+      carouselItems,
+      this.configManager.gameSize,
+      (index, value) => this.doGameSize(value),
+      carouselOptions
+    );
 
     let menuItems = [{ label: 'Save', callback: () => this.doSave() }];
     this.menuEnter = this.canvasUIHandler.addMenu(320, 240, menuItems, { width: 100, height: 40 });
